@@ -1,0 +1,51 @@
+{
+  "name": "@shuangxunian/leafer-game-engine",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./lib/engine.js",
+  "types": "./lib/engine.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/engine.d.ts",
+      "import": "./lib/engine.js"
+    },
+    "./adapter": {
+      "types": "./lib/adapter/index.d.ts",
+      "import": "./lib/adapter/index.js"
+    },
+    "./core": {
+      "types": "./lib/core/index.d.ts",
+      "import": "./lib/core/index.js"
+    },
+    "./framework": {
+      "types": "./lib/framework/index.d.ts",
+      "import": "./lib/framework/index.js"
+    },
+    "./runtime": {
+      "types": "./lib/runtime/index.d.ts",
+      "import": "./lib/runtime/index.js"
+    }
+  },
+  "files": [
+    "lib",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:lib",
+    "build:lib": "tsc -p tsconfig.lib.json",
+    "build:example": "vite build",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "prepack": "npm run build:lib"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^8.0.3"
+  },
+  "dependencies": {
+    "leafer-ui": "^2.0.8"
+  }
+}
