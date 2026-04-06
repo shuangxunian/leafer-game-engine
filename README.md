@@ -4,17 +4,362 @@
 
 这个项目当前的目标，不是单纯做一个小游戏 demo，也不是把 Leafer 当成“直接写玩法”的画布库来用，而是尝试建立一套清晰、可成长、可复用的游戏运行时结构，让它未来可以逐步演进成真正可持续开发的游戏引擎或游戏框架。
 
-## npm 包名
+## 发布信息
 
-这个项目准备发布为：
+包名：
 
 `@shuangxunian/leafer-game-engine`
 
-未来安装方式会是：
+安装方式：
 
 ```bash
 npm install @shuangxunian/leafer-game-engine
 ```
+
+仓库地址：
+
+- GitHub: https://github.com/shuangxunian/leafer-game-engine
+
+包页面：
+
+- npm: https://www.npmjs.com/package/@shuangxunian/leafer-game-engine
+
+说明：
+
+- GitHub 仓库已创建并接入 CI
+- npm 包页面链接已经固定，发布后可直接通过上面的地址访问
+
+## 安装后最小使用示例
+
+下面这个例子演示的是：
+
+- 如何从包里导入引擎能力
+- 如何创建浏览器运行时
+- 如何定义一个最小场景
+- 如何在场景里放一个可见的节点
+
+```ts
+import {
+  Scene,
+  TransformComponent,
+  ViewComponent,
+  SizeComponent,
+  createBrowserRuntime
+} from "@shuangxunian/leafer-game-engine";
+
+class HelloScene extends Scene {
+  constructor(
+    private readonly renderAdapter: ReturnType<typeof createBrowserRuntime>["renderAdapter"],
+    private readonly renderScene: ReturnType<typeof createBrowserRuntime>["renderScene"]
+  ) {
+    super("HelloScene");
+  }
+
+  protected onStart(): void {
+    const labelNode = this.renderAdapter.createText("Hello leaferGame");
+    labelNode.x = 40;
+    labelNode.y = 40;
+    labelNode.fontSize = 28;
+    this.renderScene.root.addChild(labelNode);
+
+    const playerNode = this.renderAdapter.createSprite("player");
+    this.renderScene.root.addChild(playerNode);
+
+    const player = this.world.createEntity("Player");
+    const transform = player.addComponent(new TransformComponent());
+    transform.x = 120;
+    transform.y = 140;
+
+    player.addComponent(new SizeComponent(52, 52));
+    player.addComponent(new ViewComponent(playerNode));
+  }
+
+  override destroy(): void {
+    super.destroy();
+    this.renderScene.destroy();
+  }
+}
+
+const runtime = createBrowserRuntime({
+  mount: "game-root"
+});
+
+const scene = new HelloScene(runtime.renderAdapter, runtime.renderScene);
+runtime.start(scene);
+```
+
+配套的 HTML 挂载点可以像这样：
+
+```html
+<div id="game-root" style="width: 960px; height: 640px"></div>
+```
+
+如果你想看更完整的用法，可以直接参考仓库里的示例项目：
+
+- [examples/dodge-blocks](/Users/shuangxunian/code/leaferGame/examples/dodge-blocks)
+
+## 最小可运行项目目录示例
+
+如果你是第一次把它接进自己的项目，一个最小可运行目录可以长这样：
+
+```text
+my-game/
+├─ index.html
+├─ package.json
+├─ tsconfig.json
+└─ src/
+   ├─ main.ts
+   └─ scenes/
+      └─ hello-scene.ts
+```
+
+其中每个文件的职责可以这样理解：
+
+- `index.html`
+  - 提供浏览器挂载点，比如 `#game-root`
+
+- `src/main.ts`
+  - 负责创建运行时
+  - 负责装配并启动你的第一个场景
+
+- `src/scenes/hello-scene.ts`
+  - 放你的场景定义
+  - 在场景里创建实体、组件、视图节点和系统
+
+一个最小的 `index.html` 可以像这样：
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Game</title>
+  </head>
+  <body>
+    <div id="game-root" style="width: 960px; height: 640px"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
+```
+
+一个最小的 `src/main.ts` 可以像这样：
+
+```ts
+import { createBrowserRuntime } from "@shuangxunian/leafer-game-engine";
+import { HelloScene } from "./scenes/hello-scene";
+
+const runtime = createBrowserRuntime({
+  mount: "game-root"
+});
+
+runtime.start(new HelloScene(runtime.renderAdapter, runtime.renderScene));
+```
+
+如果你的项目里已经有自己的构建工具，比如 `Vite`、`Rspack`、`Webpack`，那通常只需要保证：
+
+- 能处理 TypeScript
+- 浏览器里有一个挂载容器
+- 入口文件里调用 `createBrowserRuntime(...)`
+
+就可以先把第一版跑起来。
+
+## 最小 HelloScene 完整示例
+
+如果你希望把上面的目录示例补成一个真正能运行的最小场景，可以先写一个 `src/scenes/hello-scene.ts`：
+
+```ts
+import {
+  Scene,
+  TransformComponent,
+  SizeComponent,
+  ViewComponent
+} from "@shuangxunian/leafer-game-engine";
+import type { RenderAdapter, RenderScene } from "@shuangxunian/leafer-game-engine";
+
+export class HelloScene extends Scene {
+  constructor(
+    private readonly renderAdapter: RenderAdapter,
+    private readonly renderScene: RenderScene
+  ) {
+    super("HelloScene");
+  }
+
+  protected onStart(): void {
+    const titleNode = this.renderAdapter.createText("Hello leaferGame");
+    titleNode.x = 40;
+    titleNode.y = 40;
+    titleNode.fontSize = 28;
+    this.renderScene.root.addChild(titleNode);
+
+    const playerNode = this.renderAdapter.createSprite("player");
+    this.renderScene.root.addChild(playerNode);
+
+    const player = this.world.createEntity("Player");
+    const transform = player.addComponent(new TransformComponent());
+    transform.x = 120;
+    transform.y = 140;
+
+    player.addComponent(new SizeComponent(52, 52));
+    player.addComponent(new ViewComponent(playerNode));
+  }
+
+  override destroy(): void {
+    super.destroy();
+    this.renderScene.destroy();
+  }
+}
+```
+
+配合前面的 `src/main.ts` 和 `index.html`，这就是一套最小可运行版本。
+
+## 推荐的初始化步骤
+
+如果你准备新建一个自己的游戏项目，比较顺手的起步方式是：
+
+1. 新建一个前端项目
+   - 可以用 `Vite`
+   - 也可以用你熟悉的其他浏览器打包工具
+
+2. 安装依赖
+
+```bash
+npm install @shuangxunian/leafer-game-engine
+```
+
+3. 准备一个页面挂载点
+   - 在 `index.html` 里放一个固定尺寸或自适应尺寸的 `#game-root`
+
+4. 建立入口文件
+   - 在 `src/main.ts` 里调用 `createBrowserRuntime(...)`
+   - 启动你的第一个场景
+
+5. 从一个最小场景开始
+   - 先只创建文本和一个可见节点
+   - 先确认渲染链路是通的
+
+6. 再逐步加玩法能力
+   - 输入
+   - 移动
+   - 碰撞
+   - 状态机
+   - 资源加载
+
+如果你是第一次接这个引擎，我建议不要一上来就做复杂玩法，而是先保证下面这三件事都成立：
+
+- 页面正常挂载
+- 场景能正常启动
+- 实体和视图同步能正常显示
+
+一旦这三件事稳定，再往上加输入和碰撞会顺很多。
+
+## 公开 API 速查表
+
+当前包的公开入口主要分成这几类：
+
+### 根入口
+
+```ts
+import {
+  Game,
+  Scene,
+  Entity,
+  Component,
+  System,
+  createBrowserRuntime
+} from "@shuangxunian/leafer-game-engine";
+```
+
+适合大多数默认使用场景。
+
+### Core
+
+```ts
+import {
+  Game,
+  Scene,
+  World,
+  Entity,
+  Component,
+  System,
+  Time
+} from "@shuangxunian/leafer-game-engine/core";
+```
+
+职责：
+
+- 主循环
+- 生命周期
+- 场景管理
+- 实体组件系统
+
+### Framework
+
+```ts
+import {
+  InputSystem,
+  BrowserKeyboardBridge,
+  TransformComponent,
+  SizeComponent,
+  ViewComponent,
+  VelocityComponent,
+  ColliderComponent,
+  CollisionSystem
+} from "@shuangxunian/leafer-game-engine/framework";
+```
+
+职责：
+
+- 输入桥接
+- 基础变换
+- 视图同步
+- 速度运动
+- 碰撞声明和碰撞检测
+
+### Adapter
+
+```ts
+import {
+  LeaferRenderAdapter
+} from "@shuangxunian/leafer-game-engine/adapter";
+```
+
+职责：
+
+- 渲染抽象
+- Leafer 运行时适配
+
+### Runtime
+
+```ts
+import {
+  createBrowserRuntime
+} from "@shuangxunian/leafer-game-engine/runtime";
+```
+
+职责：
+
+- 浏览器挂载
+- 主循环驱动
+- 运行时装配
+
+### 当前比较常用的第一批类
+
+如果你刚开始接入，最常用的通常是这些：
+
+- `Scene`
+- `Entity`
+- `Component`
+- `createBrowserRuntime`
+- `TransformComponent`
+- `SizeComponent`
+- `ViewComponent`
+- `InputSystem`
+- `BrowserKeyboardBridge`
+- `ColliderComponent`
+- `CollisionSystem`
+
+这批 API 已经足够搭出一个最小的 2D 游戏原型。
 
 ## 开源协议
 
@@ -286,3 +631,6 @@ npm pack
 - integration test sample
 
 而不应该等同于引擎本体。
+
+## PS
+此项目没有一行代码手写
