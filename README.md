@@ -16,6 +16,10 @@
 npm install @shuangxunian/leafer-game-engine
 ```
 
+## 开源协议
+
+当前项目使用 `MIT` 协议，见 [LICENSE](/Users/shuangxunian/code/leaferGame/LICENSE)。
+
 ## 项目定位
 
 我希望把 `leaferGame` 做成一套建立在 `Leafer` 之上的 2D 游戏层能力，核心思想是：

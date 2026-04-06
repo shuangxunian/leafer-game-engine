@@ -1,6 +1,7 @@
 {
   "name": "@shuangxunian/leafer-game-engine",
   "version": "0.1.0",
+  "license": "MIT",
   "type": "module",
   "main": "./lib/engine.js",
   "types": "./lib/engine.d.ts",
@@ -28,7 +29,8 @@
   },
   "files": [
     "lib",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "publishConfig": {
     "access": "public"
