@@ -68,6 +68,18 @@ test("scene starts systems added during onStart only once", () => {
   assert.equal(scene.system.started, true);
 });
 
+test("scene initializes systems added after start immediately and only once", () => {
+  const scene = new Scene("DynamicSystemScene");
+  const system = new CountingSystem(scene);
+
+  scene.start();
+  scene.addSystem(system);
+  scene.addSystem(system);
+
+  assert.equal(system.startCount, 1);
+  assert.equal(scene.systems.length, 1);
+});
+
 test("game tick runs update, fixedUpdate and lateUpdate in expected order", () => {
   const game = new Game(0.02);
   const scene = new Scene("TickScene");
@@ -113,6 +125,29 @@ test("world defers entity add and remove mutations until phase boundaries", () =
   assert.deepEqual(scene.log, ["player", "spawned"]);
 });
 
+test("entity deactivates immediately when destroy is requested mid-update", () => {
+  class DestroyMidUpdateScene extends Scene {
+    constructor() {
+      super("DestroyMidUpdateScene");
+      this.log = [];
+      const entity = this.world.createEntity("victim");
+      entity.addComponent(
+        new LoggingComponent(this.log, "first", (currentEntity) => {
+          this.world.destroyEntity(currentEntity);
+        })
+      );
+      entity.addComponent(new LoggingComponent(this.log, "second"));
+    }
+  }
+
+  const scene = new DestroyMidUpdateScene();
+  scene.start();
+  scene.update(1 / 60);
+
+  assert.deepEqual(scene.log, ["first"]);
+  assert.equal(scene.world.entities.length, 0);
+});
+
 test("replacing a scene destroys the previous scene once", () => {
   class DestroyTrackingScene extends Scene {
     constructor(name) {
@@ -135,4 +170,13 @@ test("replacing a scene destroys the previous scene once", () => {
 
   assert.equal(first.destroyCalls, 1);
   assert.equal(second.destroyCalls, 0);
+});
+
+test("destroyed scenes cannot be started again", () => {
+  const scene = new Scene("DestroyedScene");
+
+  scene.start();
+  scene.destroy();
+
+  assert.throws(() => scene.start(), /Cannot start destroyed scene/);
 });

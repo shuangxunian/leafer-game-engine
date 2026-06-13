@@ -16,6 +16,14 @@ export class Entity {
       throw new Error(`Cannot add component to destroyed entity "${this.name}".`);
     }
 
+    if (component.entity && component.entity !== this) {
+      throw new Error(`Cannot attach component to "${this.name}" because it already belongs to another entity.`);
+    }
+
+    if (this.components.includes(component)) {
+      return component;
+    }
+
     this.components.push(component);
     component.attach(this);
     component.initialize();
@@ -29,6 +37,7 @@ export class Entity {
   update(dt: number): void {
     if (!this.active) return;
     for (const component of this.components) {
+      if (!this.active) break;
       if (component.enabled) component.update(dt);
     }
   }
@@ -36,6 +45,7 @@ export class Entity {
   fixedUpdate(dt: number): void {
     if (!this.active) return;
     for (const component of this.components) {
+      if (!this.active) break;
       if (component.enabled) component.fixedUpdate(dt);
     }
   }
@@ -43,8 +53,14 @@ export class Entity {
   lateUpdate(dt: number): void {
     if (!this.active) return;
     for (const component of this.components) {
+      if (!this.active) break;
       if (component.enabled) component.lateUpdate(dt);
     }
+  }
+
+  deactivate(): void {
+    if (this.destroyed) return;
+    this.active = false;
   }
 
   destroy(): void {

@@ -640,3 +640,13 @@
 - world 安全增删
 - destroy 语义明确
 - 最小回归测试落地
+
+完成这一步之后，下一阶段建议进入：
+
+- [v0.2.0](/Users/shuangxunian/code/leaferGame/docs/v0.2.0.md)
+
+这个版本开始不再沿用 `v0.0.x` 的文档命名，而是用更接近阶段里程碑的 minor 版本：
+
+- `0.1.x` 对应稳定骨架
+- `0.2.x` 对应框架复用能力
+- `0.3.x` 对应 engine-facing 能力扩张

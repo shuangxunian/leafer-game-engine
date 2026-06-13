@@ -30,6 +30,7 @@ export class World {
     if (this.destroyed || entity.destroyed) return;
 
     if (this.phaseDepth > 0) {
+      entity.deactivate();
       this.pendingRemovals.add(entity);
       return;
     }

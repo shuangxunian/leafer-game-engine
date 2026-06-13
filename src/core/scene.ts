@@ -14,6 +14,14 @@ export abstract class Scene {
       throw new Error(`Cannot add system to destroyed scene "${this.name}".`);
     }
 
+    if (system.scene !== this) {
+      throw new Error(`Cannot add system from a different scene to "${this.name}".`);
+    }
+
+    if (this.systems.includes(system)) {
+      return system;
+    }
+
     this.systems.push(system);
     if (this.started) system.initialize();
     return system;
