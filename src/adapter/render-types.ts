@@ -33,6 +33,8 @@ export type RenderSceneLayers = {
 export interface RenderScene {
   readonly root: RenderContainer;
   readonly layers: RenderSceneLayers;
+  readonly width: number;
+  readonly height: number;
   mount(target: string | HTMLElement): void;
   destroy(): void;
 }

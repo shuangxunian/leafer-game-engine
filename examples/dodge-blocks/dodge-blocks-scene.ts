@@ -22,7 +22,7 @@ export class DodgeBlocksScene extends Scene {
 
   protected onStart(): void {
     this.addSystem(new InputSystem(this));
-    this.addSystem(new CameraSystem(this));
+    const camera = this.addSystem(new CameraSystem(this, this.renderScene));
     this.addSystem(new CollisionSystem(this));
 
     const titleNode = this.renderAdapter.createText("Dodge Blocks");
@@ -68,6 +68,7 @@ export class DodgeBlocksScene extends Scene {
     const transform = player.addComponent(new TransformComponent());
     transform.x = 120;
     transform.y = DODGE_GAME_CONFIG.height / 2 - DODGE_GAME_CONFIG.playerSize / 2;
+    camera.follow(player, DODGE_GAME_CONFIG.playerSize / 2, DODGE_GAME_CONFIG.playerSize / 2);
 
     let dodgeSystem!: DodgeGameSystem;
     player.addComponent(new SizeComponent(DODGE_GAME_CONFIG.playerSize, DODGE_GAME_CONFIG.playerSize));

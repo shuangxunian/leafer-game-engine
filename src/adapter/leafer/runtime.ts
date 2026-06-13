@@ -151,6 +151,8 @@ class LeaferTextWrapper extends LeaferNodeWrapper implements RenderText {
 
 class LeaferSceneWrapper implements RenderScene {
   private leafer?: Leafer;
+  private sceneWidth = 960;
+  private sceneHeight = 640;
   public readonly root: LeaferContainerWrapper;
   public readonly layers: RenderSceneLayers;
 
@@ -178,10 +180,13 @@ class LeaferSceneWrapper implements RenderScene {
       this.leafer.destroy();
     }
 
+    this.sceneWidth = element.clientWidth || 960;
+    this.sceneHeight = element.clientHeight || 640;
+
     const leafer = new Leafer({
       view: element,
-      width: element.clientWidth || 960,
-      height: element.clientHeight || 640,
+      width: this.sceneWidth,
+      height: this.sceneHeight,
       fill: "#0d2235"
     });
 
@@ -192,6 +197,14 @@ class LeaferSceneWrapper implements RenderScene {
   destroy(): void {
     this.leafer?.destroy();
     this.leafer = undefined;
+  }
+
+  get width(): number {
+    return this.sceneWidth;
+  }
+
+  get height(): number {
+    return this.sceneHeight;
   }
 }
 
