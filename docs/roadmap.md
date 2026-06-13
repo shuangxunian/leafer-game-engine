@@ -655,3 +655,11 @@
 
 - [v0.2.1](/Users/shuangxunian/code/leaferGame/docs/v0.2.1.md)
 - [v0.2.2](/Users/shuangxunian/code/leaferGame/docs/v0.2.2.md)
+
+下一阶段建议进入：
+
+- [v0.3.0](/Users/shuangxunian/code/leaferGame/docs/v0.3.0.md)
+
+其中第一批建议先做：
+
+- [v0.3.1](/Users/shuangxunian/code/leaferGame/docs/v0.3.1.md)
