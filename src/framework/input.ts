@@ -1,6 +1,7 @@
 import { System } from "../core/index.js";
 
 export class InputSystem extends System {
+  override priority = -200;
   private pressed = new Set<string>();
   private justPressed = new Set<string>();
 

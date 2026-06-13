@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { Component, Entity, Game, Scene, System } from "../lib/core/index.js";
+import { ColliderComponent, SizeComponent, TransformComponent, ViewComponent } from "../lib/framework/index.js";
 
 class CountingSystem extends System {
   constructor(scene) {
@@ -48,6 +49,9 @@ class LoggingComponent extends Component {
   }
 }
 
+class MarkerComponent extends Component {}
+class SecondaryMarkerComponent extends Component {}
+
 class LifecycleScene extends Scene {
   constructor() {
     super("LifecycleScene");
@@ -78,6 +82,34 @@ test("scene initializes systems added after start immediately and only once", ()
 
   assert.equal(system.startCount, 1);
   assert.equal(scene.systems.length, 1);
+});
+
+test("scene keeps system execution order stable by priority then registration order", () => {
+  class OrderedSystem extends System {
+    constructor(scene, label, priority, log) {
+      super(scene);
+      this.label = label;
+      this.priority = priority;
+      this.log = log;
+    }
+
+    update() {
+      this.log.push(this.label);
+    }
+  }
+
+  const scene = new Scene("OrderedScene");
+  const log = [];
+
+  scene.addSystem(new OrderedSystem(scene, "default-a", 0, log));
+  scene.addSystem(new OrderedSystem(scene, "first", -100, log));
+  scene.addSystem(new OrderedSystem(scene, "default-b", 0, log));
+  scene.addSystem(new OrderedSystem(scene, "last", 100, log));
+
+  scene.start();
+  scene.update(1 / 60);
+
+  assert.deepEqual(log, ["first", "default-a", "default-b", "last"]);
 });
 
 test("game tick runs update, fixedUpdate and lateUpdate in expected order", () => {
@@ -123,6 +155,55 @@ test("world defers entity add and remove mutations until phase boundaries", () =
 
   scene.update(1 / 60);
   assert.deepEqual(scene.log, ["player", "spawned"]);
+});
+
+test("world query helpers return only live entities with expected component filters", () => {
+  const scene = new Scene("QueryScene");
+  const player = scene.world.createEntity("player");
+  player.addComponent(new MarkerComponent());
+  player.addComponent(new SecondaryMarkerComponent());
+
+  const enemy = scene.world.createEntity("enemy");
+  enemy.addComponent(new MarkerComponent());
+
+  const ui = scene.world.createEntity("ui");
+  ui.addComponent(new SecondaryMarkerComponent());
+
+  scene.start();
+
+  const withMarker = scene.world.getEntitiesWith(MarkerComponent).map((entity) => entity.name);
+  const withAll = scene.world.getEntitiesWithAll(MarkerComponent, SecondaryMarkerComponent).map((entity) => entity.name);
+  const withAny = scene.world.getEntitiesWithAny(MarkerComponent, SecondaryMarkerComponent).map((entity) => entity.name);
+
+  assert.deepEqual(withMarker, ["player", "enemy"]);
+  assert.deepEqual(withAll, ["player"]);
+  assert.deepEqual(withAny, ["player", "enemy", "ui"]);
+});
+
+test("world queries exclude pending additions and deactivated pending removals during a phase", () => {
+  class QueryDuringMutationScene extends Scene {
+    constructor() {
+      super("QueryDuringMutationScene");
+      this.snapshots = [];
+      const actor = this.world.createEntity("actor");
+      actor.addComponent(new MarkerComponent());
+      actor.addComponent(
+        new LoggingComponent([], "mutator", (currentEntity) => {
+          const pending = this.world.createEntity("pending");
+          pending.addComponent(new MarkerComponent());
+          this.world.destroyEntity(currentEntity);
+          this.snapshots.push(this.world.getEntitiesWith(MarkerComponent).map((entity) => entity.name));
+        })
+      );
+    }
+  }
+
+  const scene = new QueryDuringMutationScene();
+  scene.start();
+  scene.update(1 / 60);
+
+  assert.deepEqual(scene.snapshots, [[]]);
+  assert.deepEqual(scene.world.getEntitiesWith(MarkerComponent).map((entity) => entity.name), ["pending"]);
 });
 
 test("entity deactivates immediately when destroy is requested mid-update", () => {
@@ -180,3 +261,48 @@ test("destroyed scenes cannot be started again", () => {
 
   assert.throws(() => scene.start(), /Cannot start destroyed scene/);
 });
+
+test("view component fails fast when transform dependency is missing", () => {
+  const scene = new Scene("ViewDependencyScene");
+  const entity = scene.world.createEntity("label");
+
+  assert.throws(() => entity.addComponent(new ViewComponent(createFakeRenderNode())), /requires: TransformComponent/);
+});
+
+test("collider component fails fast when transform dependency is missing", () => {
+  const scene = new Scene("ColliderDependencyScene");
+  const entity = scene.world.createEntity("hitbox");
+
+  assert.throws(() => entity.addComponent(new ColliderComponent("hazard", 10, 10)), /requires: TransformComponent/);
+});
+
+test("collider component requires explicit dimensions or size component", () => {
+  const scene = new Scene("ColliderSizeScene");
+  const entity = scene.world.createEntity("hitbox");
+  entity.addComponent(new TransformComponent());
+
+  assert.throws(
+    () => entity.addComponent(new ColliderComponent("hazard")),
+    /without explicit width\/height or SizeComponent/
+  );
+
+  const sizedEntity = scene.world.createEntity("sized-hitbox");
+  sizedEntity.addComponent(new TransformComponent());
+  sizedEntity.addComponent(new SizeComponent(20, 30));
+
+  assert.doesNotThrow(() => sizedEntity.addComponent(new ColliderComponent("hazard")));
+});
+
+function createFakeRenderNode() {
+  return {
+    x: 0,
+    y: 0,
+    width: undefined,
+    height: undefined,
+    rotation: 0,
+    scaleX: 1,
+    scaleY: 1,
+    visible: true,
+    destroy() {}
+  };
+}

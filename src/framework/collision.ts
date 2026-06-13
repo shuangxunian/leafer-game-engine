@@ -32,6 +32,21 @@ export class ColliderComponent extends Component {
     super();
   }
 
+  protected override getRequiredComponents() {
+    return [TransformComponent];
+  }
+
+  protected override validateSetup(): void {
+    const size = this.entity?.getComponent(SizeComponent);
+    const hasDimensions = this.width !== undefined && this.height !== undefined;
+    if (hasDimensions || size) return;
+
+    const entityName = this.entity?.name ?? "UnknownEntity";
+    throw new Error(
+      `Cannot initialize ColliderComponent on entity "${entityName}" without explicit width/height or SizeComponent.`
+    );
+  }
+
   getRect(): Rect | undefined {
     const transform = this.entity?.getComponent(TransformComponent);
     if (!transform) return undefined;
@@ -51,12 +66,14 @@ export class ColliderComponent extends Component {
 }
 
 export class CollisionSystem extends System {
+  override priority = 100;
   private readonly collisions = new Map<Entity, Set<Entity>>();
 
   override lateUpdate(): void {
     this.collisions.clear();
 
-    const colliders = this.scene.world.entities
+    const colliders = this.scene.world
+      .getEntitiesWith(ColliderComponent)
       .map((entity) => ({ entity, collider: entity.getComponent(ColliderComponent) }))
       .filter((entry): entry is { entity: Entity; collider: ColliderComponent } => Boolean(entry.collider));
 

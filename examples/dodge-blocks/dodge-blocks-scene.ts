@@ -56,13 +56,13 @@ export class DodgeBlocksScene extends Scene {
     overlayActionNode.fontSize = 24;
 
     const playerNode = this.renderAdapter.createSprite("player");
-    this.renderScene.root.addChild(titleNode);
-    this.renderScene.root.addChild(scoreNode);
-    this.renderScene.root.addChild(statusNode);
-    this.renderScene.root.addChild(overlayTitleNode);
-    this.renderScene.root.addChild(overlayBodyNode);
-    this.renderScene.root.addChild(overlayActionNode);
-    this.renderScene.root.addChild(playerNode);
+    this.renderScene.layers.ui.addChild(titleNode);
+    this.renderScene.layers.ui.addChild(scoreNode);
+    this.renderScene.layers.ui.addChild(statusNode);
+    this.renderScene.layers.overlay.addChild(overlayTitleNode);
+    this.renderScene.layers.overlay.addChild(overlayBodyNode);
+    this.renderScene.layers.overlay.addChild(overlayActionNode);
+    this.renderScene.layers.world.addChild(playerNode);
 
     const player = this.world.createEntity("Player");
     const transform = player.addComponent(new TransformComponent());

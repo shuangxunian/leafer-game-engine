@@ -23,8 +23,16 @@ export interface RenderContainer extends RenderNode {
   addChild(node: RenderNode): void;
 }
 
+export type RenderSceneLayers = {
+  background: RenderContainer;
+  world: RenderContainer;
+  ui: RenderContainer;
+  overlay: RenderContainer;
+};
+
 export interface RenderScene {
   readonly root: RenderContainer;
+  readonly layers: RenderSceneLayers;
   mount(target: string | HTMLElement): void;
   destroy(): void;
 }

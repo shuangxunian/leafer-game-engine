@@ -2,6 +2,8 @@ import type { Entity } from "./entity.js";
 import type { Scene } from "./scene.js";
 import type { Destroyable, Updatable } from "./types.js";
 
+export type ComponentType<T extends Component = Component> = new (...args: never[]) => T;
+
 export abstract class Component implements Updatable, Destroyable {
   public entity?: Entity;
   public enabled = true;
@@ -28,6 +30,9 @@ export abstract class Component implements Updatable, Destroyable {
 
   initialize(): void {
     if (this.started || this.destroyed) return;
+
+    this.validateDependencies();
+    this.validateSetup();
     this.started = true;
     this.start();
   }
@@ -49,4 +54,25 @@ export abstract class Component implements Updatable, Destroyable {
   lateUpdate(_dt: number): void {}
 
   destroy(): void {}
+
+  protected getRequiredComponents(): ComponentType[] {
+    return [];
+  }
+
+  protected validateSetup(): void {}
+
+  private validateDependencies(): void {
+    const entity = this.entity;
+    if (!entity) {
+      throw new Error(`Cannot initialize ${this.constructor.name} before it is attached to an entity.`);
+    }
+
+    const missing = this.getRequiredComponents().filter((type) => !entity.getComponent(type));
+    if (!missing.length) return;
+
+    const names = missing.map((type) => type.name).join(", ");
+    throw new Error(
+      `Cannot initialize ${this.constructor.name} on entity "${entity.name}" because it requires: ${names}.`
+    );
+  }
 }

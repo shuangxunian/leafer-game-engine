@@ -1,5 +1,13 @@
 import { Group, Leafer, Rect, Text } from "leafer-ui";
-import type { RenderAdapter, RenderContainer, RenderNode, RenderScene, RenderSprite, RenderText } from "../render-types.js";
+import type {
+  RenderAdapter,
+  RenderContainer,
+  RenderNode,
+  RenderScene,
+  RenderSceneLayers,
+  RenderSprite,
+  RenderText
+} from "../render-types.js";
 
 type LeaferLikeNode = {
   x?: number;
@@ -144,10 +152,22 @@ class LeaferTextWrapper extends LeaferNodeWrapper implements RenderText {
 class LeaferSceneWrapper implements RenderScene {
   private leafer?: Leafer;
   public readonly root: LeaferContainerWrapper;
+  public readonly layers: RenderSceneLayers;
 
   constructor() {
     const bootstrapRoot = new Group();
     this.root = new LeaferContainerWrapper(bootstrapRoot);
+    this.layers = {
+      background: new LeaferContainerWrapper(new Group()),
+      world: new LeaferContainerWrapper(new Group()),
+      ui: new LeaferContainerWrapper(new Group()),
+      overlay: new LeaferContainerWrapper(new Group())
+    };
+
+    this.root.addChild(this.layers.background);
+    this.root.addChild(this.layers.world);
+    this.root.addChild(this.layers.ui);
+    this.root.addChild(this.layers.overlay);
   }
 
   mount(target: string | HTMLElement): void {

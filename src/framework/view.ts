@@ -8,6 +8,10 @@ export class ViewComponent extends Component {
     super();
   }
 
+  protected override getRequiredComponents() {
+    return [TransformComponent];
+  }
+
   lateUpdate(): void {
     const transform = this.entity?.getComponent(TransformComponent);
     if (!transform) return;

@@ -6,6 +6,7 @@ import {
   CollisionSystem,
   InputSystem,
   SizeComponent,
+  StateMachine,
   TransformComponent,
   VelocityComponent,
   ViewComponent
@@ -32,11 +33,12 @@ type Hud = {
 };
 
 export class DodgeGameSystem extends System {
+  override priority = 200;
   private spawnTimer = 0;
   private survivalTime = 0;
   private bestScore = 0;
-  private phase: Phase = "start";
   private readonly hazards = new Set<Entity>();
+  private readonly flow: StateMachine<Phase>;
 
   constructor(
     scene: Scene,
@@ -46,6 +48,9 @@ export class DodgeGameSystem extends System {
     private readonly hud: Hud
   ) {
     super(scene);
+    this.flow = new StateMachine<Phase>("start", {
+      onTransition: () => this.updateHud()
+    });
   }
 
   override start(): void {
@@ -58,22 +63,21 @@ export class DodgeGameSystem extends System {
     if (!input) return;
 
     if (input.wasPressed("p") || input.wasPressed("escape")) {
-      if (this.phase === "running") this.phase = "paused";
-      else if (this.phase === "paused") this.phase = "running";
-      this.updateHud();
+      if (this.flow.is("running")) this.flow.transition("paused");
+      else if (this.flow.is("paused")) this.flow.transition("running");
     }
 
-    if (this.phase === "start" && (input.wasPressed(" ") || input.wasPressed("enter"))) {
+    if (this.flow.is("start") && (input.wasPressed(" ") || input.wasPressed("enter"))) {
       this.startRun();
       return;
     }
 
-    if (this.phase === "gameover" && (input.wasPressed(" ") || input.wasPressed("enter"))) {
+    if (this.flow.is("gameover") && (input.wasPressed(" ") || input.wasPressed("enter"))) {
       this.startRun();
       return;
     }
 
-    if (this.phase !== "running") return;
+    if (!this.flow.is("running")) return;
 
     this.survivalTime += dt;
     this.spawnTimer += dt;
@@ -98,27 +102,25 @@ export class DodgeGameSystem extends System {
   }
 
   override lateUpdate(): void {
-    if (this.phase !== "running") return;
+    if (!this.flow.is("running")) return;
 
     const collisions = this.scene.getSystem(CollisionSystem);
     if (!collisions) return;
 
     if (collisions.hasCollision(this.player, "hazard")) {
-      this.phase = "gameover";
       this.bestScore = Math.max(this.bestScore, this.getScore());
-      this.updateHud();
+      this.flow.transition("gameover");
     }
   }
 
   isGameplayActive(): boolean {
-    return this.phase === "running";
+    return this.flow.is("running");
   }
 
   private startRun(): void {
     this.clearHazards();
     this.resetRunState();
-    this.phase = "running";
-    this.updateHud();
+    this.flow.transition("running");
   }
 
   private resetRunState(): void {
@@ -135,7 +137,7 @@ export class DodgeGameSystem extends System {
   private spawnHazard(): void {
     const size = randomBetween(HAZARD_MIN_SIZE, HAZARD_MAX_SIZE);
     const hazardNode = this.renderAdapter.createSprite("hazard");
-    this.renderScene.root.addChild(hazardNode);
+    this.renderScene.layers.world.addChild(hazardNode);
 
     const hazard = this.scene.world.createEntity(`Hazard-${this.hazards.size + 1}`);
     const transform = hazard.addComponent(new TransformComponent());
@@ -176,7 +178,7 @@ export class DodgeGameSystem extends System {
     const score = this.getScore();
     this.hud.score.setText(`Score ${score}   Best ${this.bestScore}`);
 
-    if (this.phase === "start") {
+    if (this.flow.is("start")) {
       this.hud.status.setText("Move with WASD or arrow keys. Pause with P or Esc.");
       this.hud.overlayTitle.visible = true;
       this.hud.overlayBody.visible = true;
@@ -187,7 +189,7 @@ export class DodgeGameSystem extends System {
       return;
     }
 
-    if (this.phase === "paused") {
+    if (this.flow.is("paused")) {
       this.hud.status.setText("Paused");
       this.hud.overlayTitle.visible = true;
       this.hud.overlayBody.visible = true;
@@ -198,7 +200,7 @@ export class DodgeGameSystem extends System {
       return;
     }
 
-    if (this.phase === "gameover") {
+    if (this.flow.is("gameover")) {
       this.hud.status.setText("Run ended");
       this.hud.overlayTitle.visible = true;
       this.hud.overlayBody.visible = true;

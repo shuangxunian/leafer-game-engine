@@ -6,6 +6,7 @@ export abstract class Scene {
   public readonly systems: System[] = [];
   public started = false;
   public destroyed = false;
+  private nextSystemOrder = 0;
 
   constructor(public readonly name: string) {}
 
@@ -22,7 +23,10 @@ export abstract class Scene {
       return system;
     }
 
+    system.register(this.nextSystemOrder);
+    this.nextSystemOrder += 1;
     this.systems.push(system);
+    this.sortSystems();
     if (this.started) system.initialize();
     return system;
   }
@@ -83,9 +87,20 @@ export abstract class Scene {
 
     this.destroyed = true;
     this.started = false;
+    this.nextSystemOrder = 0;
 
     for (const system of this.systems) system.dispose();
     this.systems.length = 0;
     this.world.destroy();
+  }
+
+  private sortSystems(): void {
+    this.systems.sort((left, right) => {
+      if (left.priority !== right.priority) {
+        return left.priority - right.priority;
+      }
+
+      return left.order - right.order;
+    });
   }
 }

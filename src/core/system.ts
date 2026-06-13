@@ -5,8 +5,19 @@ export abstract class System implements Updatable, Destroyable {
   public enabled = true;
   public started = false;
   public destroyed = false;
+  public priority = 0;
+  private registrationOrder = -1;
 
   constructor(public readonly scene: Scene) {}
+
+  get order(): number {
+    return this.registrationOrder;
+  }
+
+  register(order: number): void {
+    if (this.registrationOrder >= 0) return;
+    this.registrationOrder = order;
+  }
 
   initialize(): void {
     if (this.started || this.destroyed) return;

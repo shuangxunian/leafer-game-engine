@@ -1,3 +1,4 @@
+import { Component, type ComponentType } from "./component.js";
 import { Entity } from "./entity.js";
 import type { Scene } from "./scene.js";
 
@@ -97,6 +98,26 @@ export class World {
     }
   }
 
+  getEntities(): Entity[] {
+    return this.getLiveEntities();
+  }
+
+  getEntitiesWith<T extends Component>(type: ComponentType<T>): Entity[] {
+    return this.getLiveEntities().filter((entity) => Boolean(entity.getComponent(type)));
+  }
+
+  getEntitiesWithAll(...types: ComponentType[]): Entity[] {
+    if (types.length === 0) return this.getLiveEntities();
+
+    return this.getLiveEntities().filter((entity) => types.every((type) => Boolean(entity.getComponent(type))));
+  }
+
+  getEntitiesWithAny(...types: ComponentType[]): Entity[] {
+    if (types.length === 0) return [];
+
+    return this.getLiveEntities().filter((entity) => types.some((type) => Boolean(entity.getComponent(type))));
+  }
+
   private flushPending(): void {
     if (this.destroyed) return;
 
@@ -130,5 +151,9 @@ export class World {
     }
 
     entity.destroy();
+  }
+
+  private getLiveEntities(): Entity[] {
+    return this.entities.filter((entity) => entity.active && !entity.destroyed);
   }
 }

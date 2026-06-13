@@ -650,3 +650,8 @@
 - `0.1.x` 对应稳定骨架
 - `0.2.x` 对应框架复用能力
 - `0.3.x` 对应 engine-facing 能力扩张
+
+其中 `0.2.x` 当前建议拆成两个 patch 批次：
+
+- [v0.2.1](/Users/shuangxunian/code/leaferGame/docs/v0.2.1.md)
+- [v0.2.2](/Users/shuangxunian/code/leaferGame/docs/v0.2.2.md)

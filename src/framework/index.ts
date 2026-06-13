@@ -6,5 +6,6 @@ export * from "./input.js";
 export * from "./keyboard.js";
 export * from "./movement.js";
 export * from "./size.js";
+export * from "./state.js";
 export * from "./transform.js";
 export * from "./view.js";
