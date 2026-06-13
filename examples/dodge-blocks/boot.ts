@@ -13,5 +13,11 @@ export function bootDodgeBlocksExample(runtime: BrowserRuntime): void {
   const keyboard = new BrowserKeyboardBridge(input);
   keyboard.attach();
 
+  const destroyScene = scene.destroy.bind(scene);
+  scene.destroy = (): void => {
+    keyboard.detach();
+    destroyScene();
+  };
+
   console.log("Example bootstrapped:", createDebugSnapshot(scene));
 }

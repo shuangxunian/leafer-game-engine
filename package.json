@@ -41,6 +41,7 @@
     "build:lib": "tsc -p tsconfig.lib.json",
     "build:example": "vite build",
     "check": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test tests/*.test.mjs",
     "prepack": "npm run build:lib"
   },
   "devDependencies": {

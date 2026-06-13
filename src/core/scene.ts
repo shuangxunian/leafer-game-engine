@@ -5,12 +5,17 @@ export abstract class Scene {
   public readonly world = new World(this);
   public readonly systems: System[] = [];
   public started = false;
+  public destroyed = false;
 
   constructor(public readonly name: string) {}
 
   addSystem<T extends System>(system: T): T {
+    if (this.destroyed) {
+      throw new Error(`Cannot add system to destroyed scene "${this.name}".`);
+    }
+
     this.systems.push(system);
-    if (this.started) system.start();
+    if (this.started) system.initialize();
     return system;
   }
 
@@ -19,36 +24,59 @@ export abstract class Scene {
   }
 
   start(): void {
-    this.started = true;
+    if (this.destroyed) {
+      throw new Error(`Cannot start destroyed scene "${this.name}".`);
+    }
+
+    if (this.started) return;
+
     this.onStart();
-    for (const system of this.systems) system.start();
+    this.started = true;
+    for (const system of this.systems) system.initialize();
   }
 
   protected onStart(): void {}
 
   update(dt: number): void {
+    if (!this.started || this.destroyed) return;
+
+    this.world.beginPhase();
     for (const system of this.systems) {
       if (system.enabled) system.update(dt);
     }
     this.world.update(dt);
+    this.world.endPhase();
   }
 
   fixedUpdate(dt: number): void {
+    if (!this.started || this.destroyed) return;
+
+    this.world.beginPhase();
     for (const system of this.systems) {
       if (system.enabled) system.fixedUpdate(dt);
     }
     this.world.fixedUpdate(dt);
+    this.world.endPhase();
   }
 
   lateUpdate(dt: number): void {
+    if (!this.started || this.destroyed) return;
+
+    this.world.beginPhase();
     this.world.lateUpdate(dt);
     for (const system of this.systems) {
       if (system.enabled) system.lateUpdate(dt);
     }
+    this.world.endPhase();
   }
 
   destroy(): void {
-    for (const system of this.systems) system.destroy();
+    if (this.destroyed) return;
+
+    this.destroyed = true;
+    this.started = false;
+
+    for (const system of this.systems) system.dispose();
     this.systems.length = 0;
     this.world.destroy();
   }

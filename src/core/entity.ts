@@ -7,13 +7,18 @@ export class Entity {
   public readonly id = nextEntityId++;
   public readonly components: Component[] = [];
   public active = true;
+  public destroyed = false;
 
   constructor(public readonly scene: Scene, public name = `Entity-${nextEntityId}`) {}
 
   addComponent<T extends Component>(component: T): T {
+    if (this.destroyed) {
+      throw new Error(`Cannot add component to destroyed entity "${this.name}".`);
+    }
+
     this.components.push(component);
     component.attach(this);
-    component.start();
+    component.initialize();
     return component;
   }
 
@@ -43,11 +48,15 @@ export class Entity {
   }
 
   destroy(): void {
-    for (const component of this.components) {
-      component.destroy();
-      component.detach();
-    }
-    this.components.length = 0;
+    if (this.destroyed) return;
+
+    this.destroyed = true;
     this.active = false;
+
+    for (const component of this.components) {
+      component.dispose();
+    }
+
+    this.components.length = 0;
   }
 }

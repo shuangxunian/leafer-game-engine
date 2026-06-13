@@ -11,8 +11,14 @@ export class Game {
   }
 
   setScene(scene: Scene): void {
+    if (this.activeScene === scene) {
+      if (!scene.started) scene.start();
+      return;
+    }
+
     this.activeScene?.destroy();
     this.activeScene = scene;
+    this.accumulator = 0;
     scene.start();
   }
 

@@ -1,5 +1,6 @@
 import { Game, type Scene } from "../core/index.js";
 import { LeaferRenderAdapter, type RenderAdapter, type RenderScene } from "../adapter/index.js";
+import { createAnimationFrameLoop } from "./frame-loop.js";
 
 export type BrowserRuntimeOptions = {
   mount: string | HTMLElement;
@@ -23,15 +24,10 @@ export function createBrowserRuntime(options: BrowserRuntimeOptions): BrowserRun
   renderScene.mount(options.mount);
 
   const maxDeltaSeconds = options.maxDeltaSeconds ?? 1 / 20;
-  let previousTime = performance.now();
-  let animationFrameId = 0;
-
-  const frame = (now: number): void => {
-    const deltaSeconds = Math.min((now - previousTime) / 1000, maxDeltaSeconds);
-    previousTime = now;
+  const loop = createAnimationFrameLoop((_now, deltaMilliseconds) => {
+    const deltaSeconds = Math.min(deltaMilliseconds / 1000, maxDeltaSeconds);
     game.tick(deltaSeconds);
-    animationFrameId = requestAnimationFrame(frame);
-  };
+  });
 
   return {
     game,
@@ -39,11 +35,11 @@ export function createBrowserRuntime(options: BrowserRuntimeOptions): BrowserRun
     renderScene,
     start(scene: Scene) {
       game.setScene(scene);
-      previousTime = performance.now();
-      animationFrameId = requestAnimationFrame(frame);
+      loop.reset();
+      loop.start();
     },
     stop() {
-      cancelAnimationFrame(animationFrameId);
+      loop.stop();
     }
   };
 }

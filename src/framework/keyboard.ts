@@ -2,19 +2,27 @@ import { InputSystem } from "./input.js";
 
 export class BrowserKeyboardBridge {
   private readonly pressedKeys = new Set<string>();
+  private attached = false;
 
   constructor(private readonly input: InputSystem) {}
 
   attach(): void {
+    if (this.attached) return;
+
+    this.attached = true;
     window.addEventListener("keydown", this.onKeyDown);
     window.addEventListener("keyup", this.onKeyUp);
     window.addEventListener("blur", this.onBlur);
   }
 
   detach(): void {
+    if (!this.attached) return;
+
+    this.attached = false;
     window.removeEventListener("keydown", this.onKeyDown);
     window.removeEventListener("keyup", this.onKeyUp);
     window.removeEventListener("blur", this.onBlur);
+    this.onBlur();
   }
 
   private onKeyDown = (event: KeyboardEvent): void => {
