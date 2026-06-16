@@ -7,7 +7,9 @@ import {
   createDebugSnapshot,
   createSceneInspectorSnapshot,
   createToolingSnapshot,
-  formatDebugSnapshot
+  formatDebugSnapshot,
+  formatSceneInspectorSnapshot,
+  formatToolingSnapshot
 } from "../lib/tooling/index.js";
 
 class DebugSystem extends System {
@@ -168,6 +170,48 @@ test("tooling snapshot aggregates debug data and optional inspector data", () =>
     withInspector.inspector?.entities.map((entity) => entity.name),
     ["player"]
   );
+});
+
+test("scene inspector snapshot formatting is stable and readable", () => {
+  const scene = new Scene("InspectorFormatScene");
+  const entity = scene.world.createEntity("player");
+  entity.addComponent(new InspectorFixtureComponent());
+
+  const lines = formatSceneInspectorSnapshot(createSceneInspectorSnapshot(scene));
+
+  assert.deepEqual(lines, [
+    "Inspector InspectorFormatScene",
+    "Entities 1/1",
+    `- #${entity.id} player [active] components=1`,
+    "  - InspectorFixtureComponent enabled=true started=true data=label:hero,speed:12,visible:true,empty:null"
+  ]);
+});
+
+test("tooling snapshot formatting appends inspector data when present", () => {
+  const scene = new Scene("ToolingFormatScene");
+  scene.world.createEntity("player");
+
+  const lines = formatToolingSnapshot(createToolingSnapshot(scene, { inspector: true }));
+
+  assert.deepEqual(lines, [
+    "Scene ToolingFormatScene",
+    "Entities 1/1",
+    "Systems 0",
+    "",
+    "Inspector ToolingFormatScene",
+    "Entities 1/1",
+    `- #${scene.world.entities[0].id} player [active] components=0`
+  ]);
+});
+
+test("tooling snapshot formatting keeps debug-only output compact", () => {
+  const scene = new Scene("DebugOnlyToolingScene");
+
+  assert.deepEqual(formatToolingSnapshot(createToolingSnapshot(scene)), [
+    "Scene DebugOnlyToolingScene",
+    "Entities 0/0",
+    "Systems 0"
+  ]);
 });
 
 function createFakeRenderScene() {

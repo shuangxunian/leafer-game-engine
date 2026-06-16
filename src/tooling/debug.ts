@@ -160,6 +160,35 @@ export function formatDebugSnapshot(snapshot: DebugSnapshot): string[] {
   return lines;
 }
 
+export function formatSceneInspectorSnapshot(snapshot: SceneInspectorSnapshot): string[] {
+  const lines = [
+    `Inspector ${snapshot.sceneName}`,
+    `Entities ${snapshot.activeEntityCount}/${snapshot.entityCount}`
+  ];
+
+  for (const entity of snapshot.entities) {
+    const state = entity.destroyed ? "destroyed" : entity.active ? "active" : "inactive";
+    lines.push(`- #${entity.id} ${entity.name} [${state}] components=${entity.componentCount}`);
+
+    for (const component of entity.components) {
+      const data = formatInspectorData(component.data);
+      lines.push(`  - ${component.name} enabled=${component.enabled} started=${component.started}${data}`);
+    }
+  }
+
+  return lines;
+}
+
+export function formatToolingSnapshot(snapshot: ToolingSnapshot): string[] {
+  const lines = formatDebugSnapshot(snapshot.debug);
+
+  if (snapshot.inspector) {
+    lines.push("", ...formatSceneInspectorSnapshot(snapshot.inspector));
+  }
+
+  return lines;
+}
+
 function createTimeSnapshot(game: Game): DebugTimeSnapshot {
   const delta = game.time.delta;
   return {
@@ -213,4 +242,11 @@ function extractInspectableComponentData(component: Component): Record<string, I
 
 function isInspectorPrimitive(value: unknown): value is InspectorPrimitive {
   return value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean";
+}
+
+function formatInspectorData(data: Record<string, InspectorPrimitive>): string {
+  const entries = Object.entries(data);
+  if (!entries.length) return "";
+
+  return ` data=${entries.map(([key, value]) => `${key}:${String(value)}`).join(",")}`;
 }
