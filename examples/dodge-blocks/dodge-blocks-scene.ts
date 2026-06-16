@@ -16,6 +16,10 @@ import { playerFactory } from "./factories.js";
 export class DodgeBlocksScene extends Scene {
   private readonly assets = createDodgeBlocksAssets();
 
+  get assetRegistry(): AssetRegistry {
+    return this.assets;
+  }
+
   constructor(
     private readonly renderAdapter: RenderAdapter,
     private readonly renderScene: RenderScene

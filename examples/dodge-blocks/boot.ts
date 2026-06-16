@@ -19,5 +19,12 @@ export function bootDodgeBlocksExample(runtime: BrowserRuntime): void {
     destroyScene();
   };
 
-  console.log("Example bootstrapped:", createDebugSnapshot(scene));
+  console.log(
+    "Example bootstrapped:",
+    createDebugSnapshot(scene, {
+      assets: scene.assetRegistry,
+      game: runtime.game,
+      renderScene: runtime.renderScene
+    })
+  );
 }
