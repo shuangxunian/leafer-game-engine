@@ -343,6 +343,26 @@ import {
 - 主循环驱动
 - 运行时装配
 
+### Tooling
+
+```ts
+import {
+  BrowserDebugOverlay,
+  ColliderDebugSystem,
+  createDebugSnapshot,
+  createSceneInspectorSnapshot,
+  createToolingSnapshot
+} from "@shuangxunian/leafer-game-engine/tooling";
+```
+
+职责：
+
+- 浏览器调试 overlay
+- 碰撞盒可视化
+- runtime debug snapshot
+- scene/entity inspector snapshot
+- 面向工具面板的聚合 snapshot
+
 ### 当前比较常用的第一批类
 
 如果你刚开始接入，最常用的通常是这些：
@@ -358,6 +378,8 @@ import {
 - `BrowserKeyboardBridge`
 - `ColliderComponent`
 - `CollisionSystem`
+- `BrowserDebugOverlay`
+- `createToolingSnapshot`
 
 这批 API 已经足够搭出一个最小的 2D 游戏原型。
 

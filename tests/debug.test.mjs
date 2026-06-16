@@ -3,7 +3,12 @@ import assert from "node:assert/strict";
 
 import { Component, Game, Scene, System } from "../lib/core/index.js";
 import { AssetRegistry } from "../lib/framework/index.js";
-import { createDebugSnapshot, createSceneInspectorSnapshot, formatDebugSnapshot } from "../lib/tooling/index.js";
+import {
+  createDebugSnapshot,
+  createSceneInspectorSnapshot,
+  createToolingSnapshot,
+  formatDebugSnapshot
+} from "../lib/tooling/index.js";
 
 class DebugSystem extends System {
   priority = 42;
@@ -133,6 +138,36 @@ test("scene inspector snapshot includes entity and component details", () => {
       }
     }
   ]);
+});
+
+test("tooling snapshot aggregates debug data and optional inspector data", () => {
+  const game = new Game();
+  const scene = new Scene("ToolingScene");
+  const assets = new AssetRegistry();
+  scene.world.createEntity("player");
+  assets.registerSprite({ id: "player", fill: "#ffcf7a" });
+  game.setScene(scene);
+  game.tick(0.5);
+
+  const debugOnly = createToolingSnapshot(scene, {
+    assets,
+    game,
+    renderScene: createFakeRenderScene()
+  });
+
+  assert.equal(debugOnly.debug.sceneName, "ToolingScene");
+  assert.equal(debugOnly.debug.time?.fps, 2);
+  assert.deepEqual(debugOnly.debug.assets?.sprites, ["player"]);
+  assert.equal(debugOnly.inspector, undefined);
+
+  const withInspector = createToolingSnapshot(scene, { inspector: true });
+
+  assert.equal(withInspector.debug.sceneName, "ToolingScene");
+  assert.equal(withInspector.inspector?.sceneName, "ToolingScene");
+  assert.deepEqual(
+    withInspector.inspector?.entities.map((entity) => entity.name),
+    ["player"]
+  );
 });
 
 function createFakeRenderScene() {

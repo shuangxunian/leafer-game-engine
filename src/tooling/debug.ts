@@ -47,6 +47,10 @@ export type DebugSnapshotOptions = {
   renderScene?: RenderScene;
 };
 
+export type ToolingSnapshotOptions = DebugSnapshotOptions & {
+  inspector?: boolean;
+};
+
 export type InspectorPrimitive = string | number | boolean | null;
 
 export type SceneInspectorSnapshot = {
@@ -72,6 +76,11 @@ export type InspectorComponentSnapshot = {
   started: boolean;
   destroyed: boolean;
   data: Record<string, InspectorPrimitive>;
+};
+
+export type ToolingSnapshot = {
+  debug: DebugSnapshot;
+  inspector?: SceneInspectorSnapshot;
 };
 
 const COMPONENT_LIFECYCLE_FIELDS = new Set(["entity", "enabled", "started", "destroyed"]);
@@ -115,6 +124,13 @@ export function createSceneInspectorSnapshot(scene: Scene): SceneInspectorSnapsh
       componentCount: entity.components.length,
       components: entity.components.map(createComponentInspectorSnapshot)
     }))
+  };
+}
+
+export function createToolingSnapshot(scene: Scene, options: ToolingSnapshotOptions = {}): ToolingSnapshot {
+  return {
+    debug: createDebugSnapshot(scene, options),
+    inspector: options.inspector ? createSceneInspectorSnapshot(scene) : undefined
   };
 }
 
