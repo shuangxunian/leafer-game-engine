@@ -10,7 +10,7 @@ import {
 } from "../../src/framework/index.js";
 import type { RenderAdapter, RenderScene } from "../../src/adapter/index.js";
 import { DODGE_GAME_CONFIG, DodgeGameSystem } from "./dodge-game-system.js";
-import { PlayerControllerComponent } from "./player-controller.js";
+import { playerFactory } from "./factories.js";
 
 export class DodgeBlocksScene extends Scene {
   constructor(
@@ -55,36 +55,32 @@ export class DodgeBlocksScene extends Scene {
     overlayActionNode.y = 350;
     overlayActionNode.fontSize = 24;
 
-    const playerNode = this.renderAdapter.createSprite("player");
     this.renderScene.layers.ui.addChild(titleNode);
     this.renderScene.layers.ui.addChild(scoreNode);
     this.renderScene.layers.ui.addChild(statusNode);
     this.renderScene.layers.overlay.addChild(overlayTitleNode);
     this.renderScene.layers.overlay.addChild(overlayBodyNode);
     this.renderScene.layers.overlay.addChild(overlayActionNode);
-    this.renderScene.layers.world.addChild(playerNode);
-
-    const player = this.world.createEntity("Player");
-    const transform = player.addComponent(new TransformComponent());
-    transform.x = 120;
-    transform.y = DODGE_GAME_CONFIG.height / 2 - DODGE_GAME_CONFIG.playerSize / 2;
-    camera.follow(player, DODGE_GAME_CONFIG.playerSize / 2, DODGE_GAME_CONFIG.playerSize / 2);
 
     let dodgeSystem!: DodgeGameSystem;
-    player.addComponent(new SizeComponent(DODGE_GAME_CONFIG.playerSize, DODGE_GAME_CONFIG.playerSize));
-    player.addComponent(new ColliderComponent("player"));
-    player.addComponent(
-      new PlayerControllerComponent(
-        260,
-        {
-          width: DODGE_GAME_CONFIG.width,
-          height: DODGE_GAME_CONFIG.height,
-          padding: 18
-        },
-        () => dodgeSystem.isGameplayActive()
-      )
+    const player = playerFactory.create(
+      {
+        scene: this,
+        renderAdapter: this.renderAdapter,
+        renderScene: this.renderScene
+      },
+      {
+        canMove: () => dodgeSystem.isGameplayActive(),
+        height: DODGE_GAME_CONFIG.height,
+        padding: 18,
+        playerSize: DODGE_GAME_CONFIG.playerSize,
+        speed: 260,
+        width: DODGE_GAME_CONFIG.width,
+        x: 120,
+        y: DODGE_GAME_CONFIG.height / 2 - DODGE_GAME_CONFIG.playerSize / 2
+      }
     );
-    player.addComponent(new ViewComponent(playerNode));
+    camera.follow(player, DODGE_GAME_CONFIG.playerSize / 2, DODGE_GAME_CONFIG.playerSize / 2);
 
     dodgeSystem = this.addSystem(
       new DodgeGameSystem(this, this.renderAdapter, this.renderScene, player, {

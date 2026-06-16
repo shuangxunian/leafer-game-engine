@@ -2,15 +2,13 @@ import type { Entity, Scene } from "../../src/core/index.js";
 import { System } from "../../src/core/index.js";
 import type { RenderAdapter, RenderScene, RenderText } from "../../src/adapter/index.js";
 import {
-  ColliderComponent,
   CollisionSystem,
   InputSystem,
-  SizeComponent,
   StateMachine,
+  ColliderComponent,
   TransformComponent,
-  VelocityComponent,
-  ViewComponent
 } from "../../src/framework/index.js";
+import { hazardFactory } from "./factories.js";
 
 const PLAYFIELD_WIDTH = 960;
 const PLAYFIELD_HEIGHT = 640;
@@ -136,20 +134,21 @@ export class DodgeGameSystem extends System {
 
   private spawnHazard(): void {
     const size = randomBetween(HAZARD_MIN_SIZE, HAZARD_MAX_SIZE);
-    const hazardNode = this.renderAdapter.createSprite("hazard");
-    this.renderScene.layers.world.addChild(hazardNode);
-
-    const hazard = this.scene.world.createEntity(`Hazard-${this.hazards.size + 1}`);
-    const transform = hazard.addComponent(new TransformComponent());
-    transform.x = randomBetween(24, PLAYFIELD_WIDTH - size - 24);
-    transform.y = -size - randomBetween(20, 120);
-
-    hazard.addComponent(new SizeComponent(size, size));
-    hazard.addComponent(new ColliderComponent("hazard"));
-    hazard.addComponent(
-      new VelocityComponent(0, randomBetween(HAZARD_MIN_SPEED, HAZARD_MAX_SPEED), () => this.isGameplayActive())
+    const hazard = hazardFactory.create(
+      {
+        scene: this.scene,
+        renderAdapter: this.renderAdapter,
+        renderScene: this.renderScene
+      },
+      {
+        canMove: () => this.isGameplayActive(),
+        name: `Hazard-${this.hazards.size + 1}`,
+        size,
+        speedY: randomBetween(HAZARD_MIN_SPEED, HAZARD_MAX_SPEED),
+        x: randomBetween(24, PLAYFIELD_WIDTH - size - 24),
+        y: -size - randomBetween(20, 120)
+      }
     );
-    hazard.addComponent(new ViewComponent(hazardNode));
 
     this.hazards.add(hazard);
   }

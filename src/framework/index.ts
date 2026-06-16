@@ -2,6 +2,7 @@ export * from "./animation.js";
 export * from "./assets.js";
 export * from "./camera.js";
 export * from "./collision.js";
+export * from "./factory.js";
 export * from "./input.js";
 export * from "./keyboard.js";
 export * from "./movement.js";

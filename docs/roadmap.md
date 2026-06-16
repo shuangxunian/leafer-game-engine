@@ -667,3 +667,7 @@
 接着建议进入：
 
 - [v0.3.2](/Users/shuangxunian/code/leaferGame/docs/v0.3.2.md)
+
+再下一步建议进入：
+
+- [v0.3.3](/Users/shuangxunian/code/leaferGame/docs/v0.3.3.md)
