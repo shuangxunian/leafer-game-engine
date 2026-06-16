@@ -679,3 +679,11 @@
 最后补齐：
 
 - [v0.3.5](/Users/shuangxunian/code/leaferGame/docs/v0.3.5.md)
+
+完成 `0.3.x` 后，下一阶段建议进入：
+
+- [v0.4.0](/Users/shuangxunian/code/leaferGame/docs/v0.4.0.md)
+
+第一批建议先做：
+
+- [v0.4.1](/Users/shuangxunian/code/leaferGame/docs/v0.4.1.md)

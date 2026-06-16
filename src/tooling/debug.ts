@@ -69,6 +69,32 @@ export function createDebugSnapshot(scene: Scene, options: DebugSnapshotOptions 
   };
 }
 
+export function formatDebugSnapshot(snapshot: DebugSnapshot): string[] {
+  const lines = [
+    `Scene ${snapshot.sceneName}`,
+    `Entities ${snapshot.activeEntityCount}/${snapshot.entityCount}`,
+    `Systems ${snapshot.systemCount}`
+  ];
+
+  if (snapshot.time) {
+    lines.push(`FPS ${snapshot.time.fps}`, `DT ${snapshot.time.delta.toFixed(3)}s`);
+  }
+
+  if (snapshot.render) {
+    lines.push(`Viewport ${snapshot.render.width}x${snapshot.render.height}`);
+  }
+
+  if (snapshot.assets) {
+    lines.push(`Sprites ${snapshot.assets.spriteCount}`);
+  }
+
+  if (snapshot.systems.length > 0) {
+    lines.push(`Order ${snapshot.systems.map((system) => `${system.name}:${system.priority}`).join(" > ")}`);
+  }
+
+  return lines;
+}
+
 function createTimeSnapshot(game: Game): DebugTimeSnapshot {
   const delta = game.time.delta;
   return {

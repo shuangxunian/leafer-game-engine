@@ -25,6 +25,10 @@
     "./runtime": {
       "types": "./lib/runtime/index.d.ts",
       "import": "./lib/runtime/index.js"
+    },
+    "./tooling": {
+      "types": "./lib/tooling/index.d.ts",
+      "import": "./lib/tooling/index.js"
     }
   },
   "files": [

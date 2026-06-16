@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 import { Game, Scene, System } from "../lib/core/index.js";
 import { AssetRegistry } from "../lib/framework/index.js";
-import { createDebugSnapshot } from "../lib/tooling/debug.js";
+import { createDebugSnapshot, formatDebugSnapshot } from "../lib/tooling/index.js";
 
 class DebugSystem extends System {
   priority = 42;
@@ -52,6 +52,30 @@ test("debug snapshot can include time, render and asset details", () => {
   assert.equal(snapshot.render?.width, 800);
   assert.deepEqual(snapshot.render?.layers, ["background", "world", "ui", "overlay"]);
   assert.deepEqual(snapshot.assets?.sprites, ["player"]);
+});
+
+test("debug snapshot formatting is stable and compact", () => {
+  const scene = new Scene("FormatScene");
+  const game = new Game();
+
+  game.setScene(scene);
+  game.tick(0.25);
+
+  const lines = formatDebugSnapshot(
+    createDebugSnapshot(scene, {
+      game,
+      renderScene: createFakeRenderScene()
+    })
+  );
+
+  assert.deepEqual(lines.slice(0, 6), [
+    "Scene FormatScene",
+    "Entities 0/0",
+    "Systems 0",
+    "FPS 4",
+    "DT 0.250s",
+    "Viewport 800x600"
+  ]);
 });
 
 function createFakeRenderScene() {
