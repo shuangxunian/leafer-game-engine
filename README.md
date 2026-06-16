@@ -4,6 +4,21 @@
 
 这个项目当前的目标，不是单纯做一个小游戏 demo，也不是把 Leafer 当成“直接写玩法”的画布库来用，而是尝试建立一套清晰、可成长、可复用的游戏运行时结构，让它未来可以逐步演进成真正可持续开发的游戏引擎或游戏框架。
 
+## 当前进度
+
+当前项目已经完成到 `0.4.x` 工具化阶段收口。
+
+更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
+
+- `core` 已具备主循环、场景、实体、组件、系统、时间步进和生命周期管理。
+- `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、相机、资源注册和实体工厂等基础能力。
+- `adapter` 已经通过渲染抽象接入 Leafer，并把显示层和游戏规则层分开。
+- `runtime` 已经可以在浏览器里装配渲染、场景和动画帧循环。
+- `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot 和聚合 tooling snapshot。
+- `examples/dodge-blocks` 作为集成样例，用来验证引擎分层和运行时能力。
+
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 初步工具链”的第一轮产品化整理。
+
 ## 发布信息
 
 包名：
@@ -304,7 +319,11 @@ import {
   ViewComponent,
   VelocityComponent,
   ColliderComponent,
-  CollisionSystem
+  CollisionSystem,
+  CameraSystem,
+  AssetRegistry,
+  StateMachine,
+  defineEntityFactory
 } from "@shuangxunian/leafer-game-engine/framework";
 ```
 
@@ -315,6 +334,10 @@ import {
 - 视图同步
 - 速度运动
 - 碰撞声明和碰撞检测
+- 相机控制
+- 资源注册
+- 状态机
+- 实体工厂
 
 ### Adapter
 
@@ -378,6 +401,10 @@ import {
 - `BrowserKeyboardBridge`
 - `ColliderComponent`
 - `CollisionSystem`
+- `CameraSystem`
+- `AssetRegistry`
+- `StateMachine`
+- `defineEntityFactory`
 - `BrowserDebugOverlay`
 - `createToolingSnapshot`
 
@@ -468,13 +495,14 @@ import {
   - 这一层的意义是把“引擎怎么跑起来”和“具体游戏是什么”分开
 
 - `src/engine.ts`
-  - 当前的聚合导出入口
-  - 它代表未来发布到 npm 时更接近包入口的形态
-  - 后续可以继续细化成正式的 `exports`
+  - 当前的根聚合导出入口
+  - 会重新导出 `adapter`、`core`、`framework`、`runtime`、`tooling`
+  - 配合 `package.json` 里的 subpath exports 使用
 
 - `src/tooling`
   - 调试和开发辅助能力
-  - 当前内容还很少，但未来这里应该逐步增加调试面板、运行时信息、可视化检查能力
+  - 当前已经包含 debug snapshot、browser overlay、collider visualization、scene inspector snapshot 和聚合 tooling snapshot
+  - 这一层是后续编辑器、调试面板、场景检查器的基础
 
 - `examples`
   - 示例项目层
@@ -483,43 +511,40 @@ import {
 
 ## 当前已经实现了什么
 
-虽然现在仓库还只是第一阶段，但已经具备了一些明确的“引擎骨架”能力：
+当前已经完成了 `0.1.x` 到 `0.4.x` 的连续整理，重点从“能跑起来”推进到了“可复用、可检查、可继续扩展”。
 
-- 基础主循环
-  - 已有 `Game` 和 `Time`，可以驱动 `update / fixedUpdate / lateUpdate`
+- Core 稳定性
+  - `Game`、`Time`、`Scene`、`World`、`Entity`、`Component`、`System` 已经形成基础骨架。
+  - 支持 `update / fixedUpdate / lateUpdate`。
+  - 支持系统优先级和稳定执行顺序。
+  - 支持场景替换、销毁保护、实体安全增删和 world 查询。
 
-- 运行时解耦
-  - 当前已经把浏览器运行时和示例游戏入口拆开
-  - 引擎入口保留在 `src/runtime`
-  - 页面运行入口改到了 `examples/`
-  - 这一步是未来把引擎作为 npm 依赖发布的前置整理
+- Framework 复用能力
+  - 已有输入系统和浏览器键盘桥接。
+  - 已有 `TransformComponent`、`SizeComponent`、`ViewComponent`、`VelocityComponent`。
+  - 已有 `ColliderComponent` 和 `CollisionSystem`，支持 `enter / stay / exit` 语义和 layer 过滤。
+  - 已有 `StateMachine`，可以把示例里的状态流沉淀成通用能力。
+  - 已有 `CameraSystem`，能驱动 world layer 位移、缩放和跟随实体。
+  - 已有 `AssetRegistry`，支持 typed sprite asset 注册、查找和缺失时报错。
+  - 已有 `defineEntityFactory`，支持把实体创建逻辑从 sample 中抽出来复用。
 
-- 场景系统
-  - 已有 `Scene` 和 `World`
-  - 支持场景初始化、系统注册、实体更新
+- Adapter 和 Runtime
+  - 引擎层通过 `RenderAdapter / RenderScene / RenderNode` 隔离渲染实现。
+  - 当前底层已经接入真实 `Leafer`。
+  - `createBrowserRuntime(...)` 可以完成浏览器挂载、渲染场景创建和动画帧循环。
+  - 示例入口已经和引擎入口拆开，`examples/*` 是消费者而不是引擎本体。
 
-- 实体组件模型
-  - 已有 `Entity + Component + System`
-  - 目前是轻量组件式设计，不是重 ECS
-  - 这样更直观，也更适合先快速演进
+- Tooling 初步成型
+  - 已有 `createDebugSnapshot(...)` 和 `formatDebugSnapshot(...)`。
+  - 已有 `BrowserDebugOverlay`，可以在浏览器中显示运行时调试信息。
+  - 已有 `ColliderDebugSystem`，可以在 world layer 可视化碰撞盒。
+  - 已有 `createSceneInspectorSnapshot(...)`，可以导出 scene/entity/component 结构化检查数据。
+  - 已有 `createToolingSnapshot(...)`，作为面向工具面板的聚合入口。
 
-- 渲染适配层
-  - 引擎层并不直接依赖具体玩法里的渲染细节
-  - 已经通过 `RenderAdapter / RenderScene / RenderNode` 做了边界抽象
-  - 当前底层实现接到了真实 `Leafer`
-
-- 输入系统
-  - 已有浏览器键盘桥接
-  - 支持持续按下和边沿触发
-  - 这对开始、暂停、重开一类状态切换很重要
-
-- 基础玩法能力
-  - 位置、尺寸、速度、碰撞、视图同步等已经有了最小实现
-
-- 示例游戏状态流
-  - 当前示例已经不是静态样板
-  - 它有开始、运行、暂停、结算这些基本状态
-  - 但请注意，这部分的意义主要是“验证引擎分层是否合理”，不是为了把 demo 打磨成最终产品
+- 工程验证
+  - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
+  - 当前测试数为 31 个。
+  - `npm run check`、`npm test`、`npm run build:example` 是当前主要验证入口。
 
 ## 当前 demo 的意义
 
@@ -575,54 +600,56 @@ npm pack
 
 ## 这个项目接下来更应该做什么
 
-如果我们把目标定义为“做游戏引擎”，那接下来的重点确实不应该是继续打磨 demo 外观，而应该逐步补齐真正属于引擎的能力。
+如果我们把目标定义为“做游戏引擎”，那接下来的重点不应该是继续打磨 demo 外观，而应该继续把当前已经有的 runtime、framework、tooling 往产品化方向推进。
 
-我认为下一阶段更值得优先投入的是这些方向：
+`0.4.x` 已经把第一轮工具化收口了。下一阶段更值得优先投入的是这些方向：
 
-1. 资源系统
+1. 更正式的资源加载
    - 图片加载
    - 资源缓存
-   - 精灵帧和动画资源管理
+   - 加载状态和错误处理
+   - 精灵帧、图集和动画资源管理
 
-2. 更稳定的碰撞与物体系统
-   - `ColliderComponent`
-   - 统一碰撞检测入口
-   - 可视化调试碰撞盒
-
-3. 数据驱动能力
+2. 数据驱动能力
    - 场景配置
    - 实体模板
    - 组件配置
+   - 配置校验和默认值
    - 为未来编辑器打基础
 
-4. 更明确的游戏状态管理
-   - 把当前 demo 里的状态流经验沉淀成框架级能力
-   - 比如通用 `StateMachine`、`GameFlow`、`UIScreen` 模型
+3. 更完整的 runtime tooling
+   - 可交互的 scene/entity inspector
+   - 系统开关和运行时状态查看
+   - 输入状态可视化
+   - 更清晰的调试面板装配方式
 
-5. 工具链
-   - 调试信息面板
-   - 场景树检查
-   - 运行时实体查看
-   - 碰撞区域开关显示
+4. 更完整的游戏流和 UI 状态
+   - 在 `StateMachine` 之上沉淀 `GameFlow`
+   - 暂停、重开、结算、菜单等通用状态模型
+   - UI 层和玩法层的关系约束
 
-6. 地图和关卡能力
+5. 地图和关卡能力
    - TileMap
    - 触发器
    - 出生点和区域管理
+   - 关卡数据加载和切换
 
-7. 编辑器友好结构
+6. 编辑器友好结构
+   - 组件 schema
+   - 实体选择和层级信息
+   - 资源引用检查
    - 让运行时结构天然适合未来做编辑器桥接
 
 ## 当前阶段的一个重要判断
 
-现在这个仓库更准确地说，还是：
+现在这个仓库更准确地说，是：
 
 - 一个 `Leafer` 上的 2D 游戏引擎雏形
 - 一个轻量游戏框架原型
-- 一个引擎架构试验田
+- 一个已经具备初步工具链的互动内容运行时底座
 
-它还不是成熟引擎，但方向已经明确了。  
-最重要的事情不是继续堆玩法，而是持续把“可复用能力”从示例中提炼出来，慢慢让 `examples/*` 依赖 `src/framework`，再让 `src/framework` 依赖 `src/core` 和 `src/adapter`，而不是反过来。
+它还不是成熟引擎，但已经不只是一次性 demo。  
+最重要的事情仍然不是继续堆玩法，而是持续把“可复用能力”从示例中提炼出来，让 `examples/*` 依赖 `src/framework`，让 `src/framework` 依赖 `src/core` 和 `src/adapter`，再让 `src/tooling` 服务调试、检查和未来编辑器。
 
 如果这条路走顺了，后面你做第二个、第三个小游戏时，就不再是在“重写一个 demo”，而是在真正使用你自己的引擎。
 
@@ -637,6 +664,7 @@ npm pack
   - `framework`
   - `adapter`
   - `runtime`
+  - `tooling`
 
 - 具体游戏项目只依赖引擎包
   - 自己定义场景
