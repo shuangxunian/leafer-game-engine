@@ -1,12 +1,21 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { Game, Scene, System } from "../lib/core/index.js";
+import { Component, Game, Scene, System } from "../lib/core/index.js";
 import { AssetRegistry } from "../lib/framework/index.js";
-import { createDebugSnapshot, formatDebugSnapshot } from "../lib/tooling/index.js";
+import { createDebugSnapshot, createSceneInspectorSnapshot, formatDebugSnapshot } from "../lib/tooling/index.js";
 
 class DebugSystem extends System {
   priority = 42;
+}
+
+class InspectorFixtureComponent extends Component {
+  label = "hero";
+  speed = 12;
+  visible = true;
+  empty = null;
+  reference = { skip: true };
+  callback = () => {};
 }
 
 test("debug snapshot includes scene, entity and system details", () => {
@@ -75,6 +84,54 @@ test("debug snapshot formatting is stable and compact", () => {
     "FPS 4",
     "DT 0.250s",
     "Viewport 800x600"
+  ]);
+});
+
+test("scene inspector snapshot includes entity and component details", () => {
+  const scene = new Scene("InspectorScene");
+  const player = scene.world.createEntity("player");
+  const component = player.addComponent(new InspectorFixtureComponent());
+  component.enabled = false;
+  const prop = scene.world.createEntity("prop");
+  prop.active = false;
+
+  const snapshot = createSceneInspectorSnapshot(scene);
+
+  assert.equal(snapshot.sceneName, "InspectorScene");
+  assert.equal(snapshot.entityCount, 2);
+  assert.equal(snapshot.activeEntityCount, 1);
+  assert.equal(snapshot.destroyedEntityCount, 0);
+  assert.deepEqual(
+    snapshot.entities.map((entity) => entity.name),
+    ["player", "prop"]
+  );
+
+  assert.equal(snapshot.entities[0].id, player.id);
+  assert.equal(snapshot.entities[0].active, true);
+  assert.equal(snapshot.entities[0].destroyed, false);
+  assert.equal(snapshot.entities[0].componentCount, 1);
+  assert.deepEqual(snapshot.entities[1], {
+    id: prop.id,
+    name: "prop",
+    active: false,
+    destroyed: false,
+    componentCount: 0,
+    components: []
+  });
+
+  assert.deepEqual(snapshot.entities[0].components, [
+    {
+      name: "InspectorFixtureComponent",
+      enabled: false,
+      started: true,
+      destroyed: false,
+      data: {
+        label: "hero",
+        speed: 12,
+        visible: true,
+        empty: null
+      }
+    }
   ]);
 });
 

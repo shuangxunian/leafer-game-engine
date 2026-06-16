@@ -1,5 +1,5 @@
 import type { RenderScene } from "../adapter/index.js";
-import type { Game, Scene } from "../core/index.js";
+import type { Component, Game, Scene } from "../core/index.js";
 import type { AssetRegistry } from "../framework/index.js";
 
 export type DebugSnapshot = {
@@ -47,6 +47,35 @@ export type DebugSnapshotOptions = {
   renderScene?: RenderScene;
 };
 
+export type InspectorPrimitive = string | number | boolean | null;
+
+export type SceneInspectorSnapshot = {
+  sceneName: string;
+  entityCount: number;
+  activeEntityCount: number;
+  destroyedEntityCount: number;
+  entities: InspectorEntitySnapshot[];
+};
+
+export type InspectorEntitySnapshot = {
+  id: number;
+  name: string;
+  active: boolean;
+  destroyed: boolean;
+  componentCount: number;
+  components: InspectorComponentSnapshot[];
+};
+
+export type InspectorComponentSnapshot = {
+  name: string;
+  enabled: boolean;
+  started: boolean;
+  destroyed: boolean;
+  data: Record<string, InspectorPrimitive>;
+};
+
+const COMPONENT_LIFECYCLE_FIELDS = new Set(["entity", "enabled", "started", "destroyed"]);
+
 export function createDebugSnapshot(scene: Scene, options: DebugSnapshotOptions = {}): DebugSnapshot {
   const activeEntities = scene.world.entities.filter((entity) => entity.active && !entity.destroyed);
   const destroyedEntities = scene.world.entities.filter((entity) => entity.destroyed);
@@ -66,6 +95,26 @@ export function createDebugSnapshot(scene: Scene, options: DebugSnapshotOptions 
     time: options.game ? createTimeSnapshot(options.game) : undefined,
     render: options.renderScene ? createRenderSnapshot(options.renderScene) : undefined,
     assets: options.assets ? createAssetSnapshot(options.assets) : undefined
+  };
+}
+
+export function createSceneInspectorSnapshot(scene: Scene): SceneInspectorSnapshot {
+  const activeEntities = scene.world.entities.filter((entity) => entity.active && !entity.destroyed);
+  const destroyedEntities = scene.world.entities.filter((entity) => entity.destroyed);
+
+  return {
+    sceneName: scene.name,
+    entityCount: scene.world.entities.length,
+    activeEntityCount: activeEntities.length,
+    destroyedEntityCount: destroyedEntities.length,
+    entities: scene.world.entities.map((entity) => ({
+      id: entity.id,
+      name: entity.name,
+      active: entity.active,
+      destroyed: entity.destroyed,
+      componentCount: entity.components.length,
+      components: entity.components.map(createComponentInspectorSnapshot)
+    }))
   };
 }
 
@@ -121,4 +170,31 @@ function createAssetSnapshot(assets: AssetRegistry): DebugAssetSnapshot {
     spriteCount: sprites.length,
     sprites
   };
+}
+
+function createComponentInspectorSnapshot(component: Component): InspectorComponentSnapshot {
+  return {
+    name: component.constructor.name,
+    enabled: component.enabled,
+    started: component.started,
+    destroyed: component.destroyed,
+    data: extractInspectableComponentData(component)
+  };
+}
+
+function extractInspectableComponentData(component: Component): Record<string, InspectorPrimitive> {
+  const data: Record<string, InspectorPrimitive> = {};
+
+  for (const [key, value] of Object.entries(component)) {
+    if (COMPONENT_LIFECYCLE_FIELDS.has(key)) continue;
+    if (!isInspectorPrimitive(value)) continue;
+
+    data[key] = value;
+  }
+
+  return data;
+}
+
+function isInspectorPrimitive(value: unknown): value is InspectorPrimitive {
+  return value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean";
 }
