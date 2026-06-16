@@ -5,7 +5,10 @@ import { Component, Game, Scene, System } from "../lib/core/index.js";
 import { AssetRegistry } from "../lib/framework/index.js";
 import {
   createDebugSnapshot,
+  createEntityInspectorPanelSection,
+  createRuntimeDebugPanelSection,
   createSceneInspectorSnapshot,
+  createToolingPanelSections,
   createToolingSnapshot,
   formatDebugSnapshot,
   formatSceneInspectorSnapshot,
@@ -211,6 +214,51 @@ test("tooling snapshot formatting keeps debug-only output compact", () => {
     "Scene DebugOnlyToolingScene",
     "Entities 0/0",
     "Systems 0"
+  ]);
+});
+
+test("tooling panel sections expose runtime debug output", () => {
+  const scene = new Scene("RuntimePanelScene");
+
+  assert.deepEqual(createRuntimeDebugPanelSection(createDebugSnapshot(scene)), {
+    title: "Runtime Debug",
+    lines: ["Scene RuntimePanelScene", "Entities 0/0", "Systems 0"]
+  });
+});
+
+test("entity inspector panel section exposes entity rows without repeating the section title", () => {
+  const scene = new Scene("EntityPanelScene");
+  const entity = scene.world.createEntity("player");
+  entity.addComponent(new InspectorFixtureComponent());
+
+  assert.deepEqual(createEntityInspectorPanelSection(createSceneInspectorSnapshot(scene)), {
+    title: "Entity Inspector",
+    lines: [
+      "Scene EntityPanelScene",
+      "Entities 1/1",
+      `- #${entity.id} player [active] components=1`,
+      "  - InspectorFixtureComponent enabled=true started=true data=label:hero,speed:12,visible:true,empty:null"
+    ]
+  });
+});
+
+test("tooling panel sections include inspector data when requested", () => {
+  const scene = new Scene("PanelSectionsScene");
+  scene.world.createEntity("player");
+
+  assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { inspector: true })), [
+    {
+      title: "Runtime Debug",
+      lines: ["Scene PanelSectionsScene", "Entities 1/1", "Systems 0"]
+    },
+    {
+      title: "Entity Inspector",
+      lines: [
+        "Scene PanelSectionsScene",
+        "Entities 1/1",
+        `- #${scene.world.entities[0].id} player [active] components=0`
+      ]
+    }
   ]);
 });
 

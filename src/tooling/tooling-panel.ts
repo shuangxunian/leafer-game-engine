@@ -1,5 +1,34 @@
-import type { ToolingSnapshot } from "./debug.js";
-import { formatToolingSnapshot } from "./debug.js";
+import type { DebugSnapshot, SceneInspectorSnapshot, ToolingSnapshot } from "./debug.js";
+import { formatDebugSnapshot, formatSceneInspectorSnapshot } from "./debug.js";
+
+export type ToolingPanelSection = {
+  title: string;
+  lines: string[];
+};
+
+export function createRuntimeDebugPanelSection(snapshot: DebugSnapshot): ToolingPanelSection {
+  return {
+    title: "Runtime Debug",
+    lines: formatDebugSnapshot(snapshot)
+  };
+}
+
+export function createEntityInspectorPanelSection(snapshot: SceneInspectorSnapshot): ToolingPanelSection {
+  return {
+    title: "Entity Inspector",
+    lines: [`Scene ${snapshot.sceneName}`, ...formatSceneInspectorSnapshot(snapshot).slice(1)]
+  };
+}
+
+export function createToolingPanelSections(snapshot: ToolingSnapshot): ToolingPanelSection[] {
+  const sections = [createRuntimeDebugPanelSection(snapshot.debug)];
+
+  if (snapshot.inspector) {
+    sections.push(createEntityInspectorPanelSection(snapshot.inspector));
+  }
+
+  return sections;
+}
 
 export class BrowserToolingPanel {
   private element?: HTMLDivElement;
@@ -29,7 +58,7 @@ export class BrowserToolingPanel {
       fontSize: "12px",
       lineHeight: "1.5",
       pointerEvents: "none",
-      whiteSpace: "pre-wrap"
+      whiteSpace: "normal"
     });
 
     this.target.appendChild(element);
@@ -40,11 +69,46 @@ export class BrowserToolingPanel {
     this.mount();
     if (!this.element) return;
 
-    this.element.textContent = formatToolingSnapshot(snapshot).join("\n");
+    this.renderSections(createToolingPanelSections(snapshot));
   }
 
   detach(): void {
     this.element?.remove();
     this.element = undefined;
+  }
+
+  private renderSections(sections: ToolingPanelSection[]): void {
+    if (!this.element) return;
+
+    this.element.replaceChildren(
+      ...sections.map((section) => {
+        const sectionElement = document.createElement("section");
+        Object.assign(sectionElement.style, {
+          margin: "0 0 12px"
+        });
+
+        const titleElement = document.createElement("div");
+        titleElement.textContent = section.title;
+        Object.assign(titleElement.style, {
+          margin: "0 0 6px",
+          color: "#f7cf68",
+          fontWeight: "700",
+          letterSpacing: "0.04em",
+          textTransform: "uppercase"
+        });
+
+        const bodyElement = document.createElement("pre");
+        bodyElement.textContent = section.lines.join("\n");
+        Object.assign(bodyElement.style, {
+          margin: "0",
+          color: "#f6f3ea",
+          font: "inherit",
+          whiteSpace: "pre-wrap"
+        });
+
+        sectionElement.append(titleElement, bodyElement);
+        return sectionElement;
+      })
+    );
   }
 }
