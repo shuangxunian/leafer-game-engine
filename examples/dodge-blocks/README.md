@@ -14,7 +14,7 @@
 - collision 是否能判断玩家和障碍物接触
 - state machine 是否能管理 start / running / paused / gameover
 - 玩家是否能被限制在当前 viewport 内移动
-- tooling 是否能显示 debug overlay
+- tooling panel 是否能显示 debug + inspector 数据
 
 ## How To Run
 
@@ -42,8 +42,8 @@ npm run dev
 - `boot.ts`
   - 启动 `DodgeBlocksScene`
   - 挂载 keyboard bridge
-  - 挂载 browser debug overlay
-  - 在 scene destroy 时清理输入和 overlay
+  - 挂载 browser tooling panel
+  - 在 scene destroy 时清理输入和 panel
 
 - `dodge-blocks-scene.ts`
   - 注册 input、collision、gameplay system
@@ -85,7 +85,7 @@ const runtime = createBrowserRuntime({
 bootDodgeBlocksExample(runtime);
 ```
 
-`bootDodgeBlocksExample(...)` 里会创建 scene、启动 runtime、绑定键盘输入，并把 debug snapshot 显示到浏览器 overlay。
+`bootDodgeBlocksExample(...)` 里会创建 scene、启动 runtime、绑定键盘输入，并把 tooling snapshot 显示到浏览器 panel。
 
 ## What This Example Proves
 
@@ -97,7 +97,7 @@ browser runtime
   -> systems
   -> entities/components
   -> render adapter
-  -> tooling/debug overlay
+  -> tooling panel
 ```
 
 ## Data-Driven Split

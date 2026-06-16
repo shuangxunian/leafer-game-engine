@@ -1,7 +1,7 @@
 import type { BrowserRuntime } from "../../src/runtime/index.js";
 import { BrowserKeyboardBridge, InputSystem } from "../../src/framework/index.js";
 import { DodgeBlocksScene } from "./dodge-blocks-scene.js";
-import { BrowserDebugOverlay, createDebugSnapshot } from "../../src/tooling/index.js";
+import { BrowserToolingPanel, createToolingSnapshot } from "../../src/tooling/index.js";
 
 export function bootDodgeBlocksExample(runtime: BrowserRuntime): void {
   const scene = new DodgeBlocksScene(runtime.renderAdapter, runtime.renderScene);
@@ -12,22 +12,23 @@ export function bootDodgeBlocksExample(runtime: BrowserRuntime): void {
 
   const keyboard = new BrowserKeyboardBridge(input);
   keyboard.attach();
-  const debugOverlay = new BrowserDebugOverlay();
+  const toolingPanel = new BrowserToolingPanel();
   const createSnapshot = () =>
-    createDebugSnapshot(scene, {
+    createToolingSnapshot(scene, {
       assets: scene.assetRegistry,
       game: runtime.game,
+      inspector: true,
       renderScene: runtime.renderScene
     });
-  debugOverlay.update(createSnapshot());
-  const debugTimer = window.setInterval(() => {
-    debugOverlay.update(createSnapshot());
+  toolingPanel.update(createSnapshot());
+  const toolingTimer = window.setInterval(() => {
+    toolingPanel.update(createSnapshot());
   }, 250);
 
   const destroyScene = scene.destroy.bind(scene);
   scene.destroy = (): void => {
-    window.clearInterval(debugTimer);
-    debugOverlay.detach();
+    window.clearInterval(toolingTimer);
+    toolingPanel.detach();
     keyboard.detach();
     destroyScene();
   };
