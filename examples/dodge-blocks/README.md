@@ -7,6 +7,8 @@
 - browser runtime 是否能启动场景
 - scene 是否能装配 systems
 - entity factory 是否能创建可复用实体
+- asset manifest 是否能声明示例资源
+- entity template 是否能创建玩家基础数据组件
 - transform / size / view 是否能同步到渲染层
 - input 是否能驱动玩家移动
 - collision 是否能判断玩家和障碍物接触
@@ -46,8 +48,9 @@ npm run dev
 - `dodge-blocks-scene.ts`
   - 注册 input、collision、gameplay system
   - 创建 UI 文本节点
-  - 注册 sprite assets
-  - 通过 entity factory 创建 player
+  - 通过 asset manifest 注册 sprite assets
+  - 通过 entity template 创建 player 的 transform / size / collider
+  - 在代码里补充 player controller 和 render view
 
 - `dodge-game-system.ts`
   - 管理玩法状态
@@ -56,8 +59,8 @@ npm run dev
   - 检测碰撞并切换 gameover
 
 - `factories.ts`
-  - 定义 player / hazard 的实体工厂
-  - 把 transform、size、collider、velocity、view 等组件组合成实体
+  - 定义 hazard 的实体工厂
+  - 保留运行时随机障碍物生成逻辑
 
 - `player-controller.ts`
   - 读取 `InputSystem`
@@ -96,5 +99,14 @@ browser runtime
   -> render adapter
   -> tooling/debug overlay
 ```
+
+## Data-Driven Split
+
+当前示例已经有一部分内容走数据驱动：
+
+- `DODGE_BLOCKS_ASSET_MANIFEST` 声明 player / hazard sprite assets
+- player 的 `transform`、`size`、`collider` 来自 `EntityTemplate`
+- player 的 `ViewComponent` 和 `PlayerControllerComponent` 仍在代码中装配
+- hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度
 
 后续新增资源加载、数据驱动场景、关卡配置、编辑器桥接时，这个示例可以继续作为集成验证样例。

@@ -8,18 +8,6 @@ import {
   ViewComponent
 } from "../../src/framework/index.js";
 import type { EntityFactoryContext } from "../../src/framework/index.js";
-import { PlayerControllerComponent } from "./player-controller.js";
-
-type PlayerFactoryOptions = {
-  canMove: () => boolean;
-  height: number;
-  padding: number;
-  playerSize: number;
-  speed: number;
-  width: number;
-  x: number;
-  y: number;
-};
 
 type HazardFactoryOptions = {
   canMove: () => boolean;
@@ -29,36 +17,6 @@ type HazardFactoryOptions = {
   x: number;
   y: number;
 };
-
-export const playerFactory = defineEntityFactory<PlayerFactoryOptions>(
-  ({ assets, scene, renderAdapter, renderScene }: EntityFactoryContext, options): Entity => {
-    const playerNode = renderAdapter.createSprite("player");
-    playerNode.setAsset(assets?.getSprite("player") ?? "player");
-    renderScene.layers.world.addChild(playerNode);
-
-    const player = scene.world.createEntity("Player");
-    const transform = player.addComponent(new TransformComponent());
-    transform.x = options.x;
-    transform.y = options.y;
-
-    player.addComponent(new SizeComponent(options.playerSize, options.playerSize));
-    player.addComponent(new ColliderComponent("player"));
-    player.addComponent(
-      new PlayerControllerComponent(
-        options.speed,
-        {
-          width: options.width,
-          height: options.height,
-          padding: options.padding
-        },
-        options.canMove
-      )
-    );
-    player.addComponent(new ViewComponent(playerNode));
-
-    return player;
-  }
-);
 
 export const hazardFactory = defineEntityFactory<HazardFactoryOptions>(
   ({ assets, scene, renderAdapter, renderScene }: EntityFactoryContext, options): Entity => {

@@ -1,8 +1,55 @@
 import { Scene } from "../../src/core/index.js";
-import { AssetRegistry, CollisionSystem, InputSystem } from "../../src/framework/index.js";
+import type { EntityTemplate } from "../../src/framework/index.js";
+import {
+  AssetRegistry,
+  CollisionSystem,
+  InputSystem,
+  ViewComponent,
+  instantiateEntityTemplate
+} from "../../src/framework/index.js";
 import type { RenderAdapter, RenderScene } from "../../src/adapter/index.js";
 import { DODGE_GAME_CONFIG, DodgeGameSystem } from "./dodge-game-system.js";
-import { playerFactory } from "./factories.js";
+import { PlayerControllerComponent } from "./player-controller.js";
+
+const DODGE_BLOCKS_ASSET_MANIFEST = {
+  sprites: [
+    {
+      id: "player",
+      fill: "#ffcf7a",
+      width: DODGE_GAME_CONFIG.playerSize,
+      height: DODGE_GAME_CONFIG.playerSize,
+      cornerRadius: 14
+    },
+    {
+      id: "hazard",
+      fill: "#6cb7ff",
+      cornerRadius: 10
+    }
+  ]
+};
+
+function createPlayerTemplate(x: number, y: number): EntityTemplate {
+  return {
+    name: "Player",
+    components: [
+      {
+        type: "transform",
+        data: { x, y }
+      },
+      {
+        type: "size",
+        data: {
+          width: DODGE_GAME_CONFIG.playerSize,
+          height: DODGE_GAME_CONFIG.playerSize
+        }
+      },
+      {
+        type: "collider",
+        data: { layer: "player" }
+      }
+    ]
+  };
+}
 
 export class DodgeBlocksScene extends Scene {
   private readonly assets = createDodgeBlocksAssets();
@@ -19,6 +66,13 @@ export class DodgeBlocksScene extends Scene {
   }
 
   protected onStart(): void {
+    const assetResult = this.assets.loadManifest(DODGE_BLOCKS_ASSET_MANIFEST);
+    if (!assetResult.ok) {
+      throw new Error(
+        `Failed to load dodge-blocks assets: ${assetResult.errors.map((error) => error.message).join("; ")}`
+      );
+    }
+
     this.addSystem(new InputSystem(this));
     this.addSystem(new CollisionSystem(this));
     const viewportWidth = this.renderScene.width;
@@ -62,28 +116,32 @@ export class DodgeBlocksScene extends Scene {
     this.renderScene.layers.overlay.addChild(overlayActionNode);
 
     let dodgeSystem!: DodgeGameSystem;
-    const player = playerFactory.create(
-      {
-        scene: this,
-        assets: this.assets,
-        renderAdapter: this.renderAdapter,
-        renderScene: this.renderScene
-      },
-      {
-        canMove: () => dodgeSystem.isGameplayActive(),
-        height: viewportHeight,
-        padding: 18,
-        playerSize: DODGE_GAME_CONFIG.playerSize,
-        speed: 260,
-        width: viewportWidth,
-        x: 120,
-        y: clamp(
+    const player = instantiateEntityTemplate(
+      this,
+      createPlayerTemplate(
+        120,
+        clamp(
           viewportHeight / 2 - DODGE_GAME_CONFIG.playerSize / 2,
           18,
           viewportHeight - DODGE_GAME_CONFIG.playerSize - 18
         )
-      }
+      )
     );
+    const playerNode = this.renderAdapter.createSprite("player");
+    playerNode.setAsset(this.assets.requireSprite("player"));
+    this.renderScene.layers.world.addChild(playerNode);
+    player.addComponent(
+      new PlayerControllerComponent(
+        260,
+        {
+          width: viewportWidth,
+          height: viewportHeight,
+          padding: 18
+        },
+        () => dodgeSystem.isGameplayActive()
+      )
+    );
+    player.addComponent(new ViewComponent(playerNode));
 
     dodgeSystem = this.addSystem(
       new DodgeGameSystem(
@@ -110,20 +168,7 @@ export class DodgeBlocksScene extends Scene {
 }
 
 function createDodgeBlocksAssets(): AssetRegistry {
-  const assets = new AssetRegistry();
-  assets.registerSprite({
-    id: "player",
-    fill: "#ffcf7a",
-    width: DODGE_GAME_CONFIG.playerSize,
-    height: DODGE_GAME_CONFIG.playerSize,
-    cornerRadius: 14
-  });
-  assets.registerSprite({
-    id: "hazard",
-    fill: "#6cb7ff",
-    cornerRadius: 10
-  });
-  return assets;
+  return new AssetRegistry();
 }
 
 function clamp(value: number, min: number, max: number): number {
