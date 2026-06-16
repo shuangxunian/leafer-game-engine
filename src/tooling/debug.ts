@@ -1,6 +1,6 @@
 import type { RenderScene } from "../adapter/index.js";
 import type { Component, Game, Scene } from "../core/index.js";
-import type { AssetRegistry } from "../framework/index.js";
+import type { AssetRegistry, ComponentSchema, ComponentSchemaRegistry } from "../framework/index.js";
 
 export type DebugSnapshot = {
   sceneName: string;
@@ -49,6 +49,7 @@ export type DebugSnapshotOptions = {
 
 export type ToolingSnapshotOptions = DebugSnapshotOptions & {
   inspector?: boolean;
+  schemas?: ComponentSchemaRegistry;
 };
 
 export type InspectorPrimitive = string | number | boolean | null;
@@ -81,6 +82,12 @@ export type InspectorComponentSnapshot = {
 export type ToolingSnapshot = {
   debug: DebugSnapshot;
   inspector?: SceneInspectorSnapshot;
+  schemas?: ComponentSchemaSnapshot;
+};
+
+export type ComponentSchemaSnapshot = {
+  count: number;
+  schemas: ComponentSchema[];
 };
 
 const COMPONENT_LIFECYCLE_FIELDS = new Set(["entity", "enabled", "started", "destroyed"]);
@@ -130,7 +137,8 @@ export function createSceneInspectorSnapshot(scene: Scene): SceneInspectorSnapsh
 export function createToolingSnapshot(scene: Scene, options: ToolingSnapshotOptions = {}): ToolingSnapshot {
   return {
     debug: createDebugSnapshot(scene, options),
-    inspector: options.inspector ? createSceneInspectorSnapshot(scene) : undefined
+    inspector: options.inspector ? createSceneInspectorSnapshot(scene) : undefined,
+    schemas: options.schemas ? createComponentSchemaSnapshot(options.schemas) : undefined
   };
 }
 
@@ -184,6 +192,40 @@ export function formatToolingSnapshot(snapshot: ToolingSnapshot): string[] {
 
   if (snapshot.inspector) {
     lines.push("", ...formatSceneInspectorSnapshot(snapshot.inspector));
+  }
+
+  if (snapshot.schemas) {
+    lines.push("", ...formatComponentSchemaSnapshot(snapshot.schemas));
+  }
+
+  return lines;
+}
+
+export function createComponentSchemaSnapshot(registry: ComponentSchemaRegistry): ComponentSchemaSnapshot {
+  const schemas = registry.list().map((schema) => ({
+    ...schema,
+    fields: schema.fields.map((field) => ({ ...field }))
+  }));
+
+  return {
+    count: schemas.length,
+    schemas
+  };
+}
+
+export function formatComponentSchemaSnapshot(snapshot: ComponentSchemaSnapshot): string[] {
+  const lines = [`Component Schemas ${snapshot.count}`];
+
+  for (const schema of snapshot.schemas) {
+    const label = schema.label ? ` (${schema.label})` : "";
+    lines.push(`- ${schema.id}: ${schema.component}${label} fields=${schema.fields.length}`);
+
+    for (const field of schema.fields) {
+      const required = field.required ? " required" : "";
+      const defaultValue = field.default === undefined ? "" : ` default=${String(field.default)}`;
+      const description = field.description ? ` - ${field.description}` : "";
+      lines.push(`  - ${field.name}: ${field.type}${required}${defaultValue}${description}`);
+    }
   }
 
   return lines;

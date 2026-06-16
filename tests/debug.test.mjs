@@ -2,14 +2,17 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { Component, Game, Scene, System } from "../lib/core/index.js";
-import { AssetRegistry } from "../lib/framework/index.js";
+import { AssetRegistry, ComponentSchemaRegistry, createDefaultComponentSchemaRegistry } from "../lib/framework/index.js";
 import {
+  createComponentSchemasPanelSection,
+  createComponentSchemaSnapshot,
   createDebugSnapshot,
   createEntityInspectorPanelSection,
   createRuntimeDebugPanelSection,
   createSceneInspectorSnapshot,
   createToolingPanelSections,
   createToolingSnapshot,
+  formatComponentSchemaSnapshot,
   formatDebugSnapshot,
   formatSceneInspectorSnapshot,
   formatToolingSnapshot
@@ -175,6 +178,52 @@ test("tooling snapshot aggregates debug data and optional inspector data", () =>
   );
 });
 
+test("tooling snapshot can include copied component schema metadata", () => {
+  const scene = new Scene("SchemaToolingScene");
+  const registry = new ComponentSchemaRegistry();
+  registry.register({
+    id: "custom",
+    component: "CustomComponent",
+    label: "Custom",
+    fields: [{ name: "enabled", type: "boolean", default: true }]
+  });
+
+  const snapshot = createToolingSnapshot(scene, { schemas: registry });
+  registry.require("custom").fields.push({ name: "late", type: "string" });
+
+  assert.deepEqual(snapshot.schemas, {
+    count: 1,
+    schemas: [
+      {
+        id: "custom",
+        component: "CustomComponent",
+        label: "Custom",
+        fields: [{ name: "enabled", type: "boolean", default: true }]
+      }
+    ]
+  });
+});
+
+test("component schema snapshot formatting is stable and readable", () => {
+  const registry = new ComponentSchemaRegistry();
+  registry.register({
+    id: "movement",
+    component: "MovementComponent",
+    label: "Movement",
+    fields: [
+      { name: "speed", type: "number", required: true, description: "Move speed." },
+      { name: "mode", type: "string", default: "walk" }
+    ]
+  });
+
+  assert.deepEqual(formatComponentSchemaSnapshot(createComponentSchemaSnapshot(registry)), [
+    "Component Schemas 1",
+    "- movement: MovementComponent (Movement) fields=2",
+    "  - speed: number required - Move speed.",
+    "  - mode: string default=walk"
+  ]);
+});
+
 test("scene inspector snapshot formatting is stable and readable", () => {
   const scene = new Scene("InspectorFormatScene");
   const entity = scene.world.createEntity("player");
@@ -204,6 +253,21 @@ test("tooling snapshot formatting appends inspector data when present", () => {
     "Inspector ToolingFormatScene",
     "Entities 1/1",
     `- #${scene.world.entities[0].id} player [active] components=0`
+  ]);
+});
+
+test("tooling snapshot formatting appends schema data when present", () => {
+  const scene = new Scene("ToolingSchemaFormatScene");
+
+  assert.deepEqual(formatToolingSnapshot(createToolingSnapshot(scene, { schemas: createDefaultComponentSchemaRegistry() })).slice(0, 8), [
+    "Scene ToolingSchemaFormatScene",
+    "Entities 0/0",
+    "Systems 0",
+    "",
+    "Component Schemas 4",
+    "- transform: TransformComponent (Transform) fields=5",
+    "  - x: number default=0 - World x position.",
+    "  - y: number default=0 - World y position."
   ]);
 });
 
@@ -260,6 +324,48 @@ test("tooling panel sections include inspector data when requested", () => {
       ]
     }
   ]);
+});
+
+test("tooling panel sections include schema data when requested", () => {
+  const scene = new Scene("PanelSchemaScene");
+
+  assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { schemas: createDefaultComponentSchemaRegistry() })).slice(0, 2), [
+    {
+      title: "Runtime Debug",
+      lines: ["Scene PanelSchemaScene", "Entities 0/0", "Systems 0"]
+    },
+    {
+      title: "Component Schemas",
+      lines: [
+        "Component Schemas 4",
+        "- transform: TransformComponent (Transform) fields=5",
+        "  - x: number default=0 - World x position.",
+        "  - y: number default=0 - World y position.",
+        "  - rotation: number default=0 - Rotation in degrees.",
+        "  - scaleX: number default=1 - Horizontal scale.",
+        "  - scaleY: number default=1 - Vertical scale.",
+        "- size: SizeComponent (Size) fields=2",
+        "  - width: number required - Width in world units.",
+        "  - height: number required - Height in world units.",
+        "- collider: ColliderComponent (Collider) fields=5",
+        "  - layer: string default=default - Collision layer id.",
+        "  - width: number - Optional collider width override.",
+        "  - height: number - Optional collider height override.",
+        "  - offsetX: number default=0 - Collider x offset.",
+        "  - offsetY: number default=0 - Collider y offset.",
+        "- velocity: VelocityComponent (Velocity) fields=2",
+        "  - vx: number default=0 - Horizontal velocity.",
+        "  - vy: number default=0 - Vertical velocity."
+      ]
+    }
+  ]);
+});
+
+test("component schemas panel section exposes formatted schema rows", () => {
+  const snapshot = createComponentSchemaSnapshot(createDefaultComponentSchemaRegistry());
+
+  assert.equal(createComponentSchemasPanelSection(snapshot).title, "Component Schemas");
+  assert.equal(createComponentSchemasPanelSection(snapshot).lines[0], "Component Schemas 4");
 });
 
 function createFakeRenderScene() {

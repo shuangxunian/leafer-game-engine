@@ -1,5 +1,5 @@
-import type { DebugSnapshot, SceneInspectorSnapshot, ToolingSnapshot } from "./debug.js";
-import { formatDebugSnapshot, formatSceneInspectorSnapshot } from "./debug.js";
+import type { ComponentSchemaSnapshot, DebugSnapshot, SceneInspectorSnapshot, ToolingSnapshot } from "./debug.js";
+import { formatComponentSchemaSnapshot, formatDebugSnapshot, formatSceneInspectorSnapshot } from "./debug.js";
 
 export type ToolingPanelSection = {
   title: string;
@@ -20,11 +20,22 @@ export function createEntityInspectorPanelSection(snapshot: SceneInspectorSnapsh
   };
 }
 
+export function createComponentSchemasPanelSection(snapshot: ComponentSchemaSnapshot): ToolingPanelSection {
+  return {
+    title: "Component Schemas",
+    lines: formatComponentSchemaSnapshot(snapshot)
+  };
+}
+
 export function createToolingPanelSections(snapshot: ToolingSnapshot): ToolingPanelSection[] {
   const sections = [createRuntimeDebugPanelSection(snapshot.debug)];
 
   if (snapshot.inspector) {
     sections.push(createEntityInspectorPanelSection(snapshot.inspector));
+  }
+
+  if (snapshot.schemas) {
+    sections.push(createComponentSchemasPanelSection(snapshot.schemas));
   }
 
   return sections;

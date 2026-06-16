@@ -1,5 +1,5 @@
 import type { BrowserRuntime } from "../../src/runtime/index.js";
-import { BrowserKeyboardBridge, InputSystem } from "../../src/framework/index.js";
+import { BrowserKeyboardBridge, InputSystem, createDefaultComponentSchemaRegistry } from "../../src/framework/index.js";
 import { DodgeBlocksScene } from "./dodge-blocks-scene.js";
 import { BrowserToolingPanel, createToolingSnapshot } from "../../src/tooling/index.js";
 
@@ -13,12 +13,14 @@ export function bootDodgeBlocksExample(runtime: BrowserRuntime): void {
   const keyboard = new BrowserKeyboardBridge(input);
   keyboard.attach();
   const toolingPanel = new BrowserToolingPanel();
+  const schemas = createDefaultComponentSchemaRegistry();
   const createSnapshot = () =>
     createToolingSnapshot(scene, {
       assets: scene.assetRegistry,
       game: runtime.game,
       inspector: true,
-      renderScene: runtime.renderScene
+      renderScene: runtime.renderScene,
+      schemas
     });
   toolingPanel.update(createSnapshot());
   const toolingTimer = window.setInterval(() => {

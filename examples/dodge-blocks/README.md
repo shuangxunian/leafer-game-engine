@@ -14,7 +14,7 @@
 - collision 是否能判断玩家和障碍物接触
 - state machine 是否能管理 start / running / paused / gameover
 - 玩家是否能被限制在当前 viewport 内移动
-- tooling panel 是否能分区显示 runtime debug + entity inspector 数据
+- tooling panel 是否能分区显示 runtime debug + entity inspector + component schema 数据
 
 ## How To Run
 
@@ -43,7 +43,7 @@ npm run dev
   - 启动 `DodgeBlocksScene`
   - 挂载 keyboard bridge
   - 挂载 browser tooling panel
-  - 分区显示 runtime debug 和 entity inspector 信息
+  - 分区显示 runtime debug、entity inspector 和 component schema 信息
   - 在 scene destroy 时清理输入和 panel
 
 - `dodge-blocks-scene.ts`
@@ -86,7 +86,7 @@ const runtime = createBrowserRuntime({
 bootDodgeBlocksExample(runtime);
 ```
 
-`bootDodgeBlocksExample(...)` 里会创建 scene、启动 runtime、绑定键盘输入，并把 tooling snapshot 以分区 panel 的形式显示到浏览器。
+`bootDodgeBlocksExample(...)` 里会创建 scene、启动 runtime、绑定键盘输入，并把包含 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
 
 ## What This Example Proves
 
