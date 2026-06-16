@@ -687,3 +687,11 @@
 第一批建议先做：
 
 - [v0.4.1](/Users/shuangxunian/code/leaferGame/docs/v0.4.1.md)
+
+接着建议进入：
+
+- [v0.4.2](/Users/shuangxunian/code/leaferGame/docs/v0.4.2.md)
+
+再下一步建议进入：
+
+- `v0.4.3`
