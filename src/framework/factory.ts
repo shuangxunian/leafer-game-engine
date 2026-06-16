@@ -1,7 +1,9 @@
 import type { RenderAdapter, RenderScene } from "../adapter/index.js";
 import type { Entity, Scene } from "../core/index.js";
+import type { AssetRegistry } from "./assets.js";
 
 export type EntityFactoryContext = {
+  assets?: AssetRegistry;
   scene: Scene;
   renderAdapter: RenderAdapter;
   renderScene: RenderScene;

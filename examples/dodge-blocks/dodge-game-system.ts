@@ -2,6 +2,7 @@ import type { Entity, Scene } from "../../src/core/index.js";
 import { System } from "../../src/core/index.js";
 import type { RenderAdapter, RenderScene, RenderText } from "../../src/adapter/index.js";
 import {
+  AssetRegistry,
   CollisionSystem,
   InputSystem,
   StateMachine,
@@ -43,7 +44,8 @@ export class DodgeGameSystem extends System {
     private readonly renderAdapter: RenderAdapter,
     private readonly renderScene: RenderScene,
     private readonly player: Entity,
-    private readonly hud: Hud
+    private readonly hud: Hud,
+    private readonly assets?: AssetRegistry
   ) {
     super(scene);
     this.flow = new StateMachine<Phase>("start", {
@@ -137,6 +139,7 @@ export class DodgeGameSystem extends System {
     const hazard = hazardFactory.create(
       {
         scene: this.scene,
+        assets: this.assets,
         renderAdapter: this.renderAdapter,
         renderScene: this.renderScene
       },

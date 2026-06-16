@@ -1,5 +1,6 @@
 import { Scene } from "../../src/core/index.js";
 import {
+  AssetRegistry,
   CameraSystem,
   ColliderComponent,
   CollisionSystem,
@@ -13,6 +14,8 @@ import { DODGE_GAME_CONFIG, DodgeGameSystem } from "./dodge-game-system.js";
 import { playerFactory } from "./factories.js";
 
 export class DodgeBlocksScene extends Scene {
+  private readonly assets = createDodgeBlocksAssets();
+
   constructor(
     private readonly renderAdapter: RenderAdapter,
     private readonly renderScene: RenderScene
@@ -66,6 +69,7 @@ export class DodgeBlocksScene extends Scene {
     const player = playerFactory.create(
       {
         scene: this,
+        assets: this.assets,
         renderAdapter: this.renderAdapter,
         renderScene: this.renderScene
       },
@@ -83,13 +87,20 @@ export class DodgeBlocksScene extends Scene {
     camera.follow(player, DODGE_GAME_CONFIG.playerSize / 2, DODGE_GAME_CONFIG.playerSize / 2);
 
     dodgeSystem = this.addSystem(
-      new DodgeGameSystem(this, this.renderAdapter, this.renderScene, player, {
-        score: scoreNode,
-        status: statusNode,
-        overlayTitle: overlayTitleNode,
-        overlayBody: overlayBodyNode,
-        overlayAction: overlayActionNode
-      })
+      new DodgeGameSystem(
+        this,
+        this.renderAdapter,
+        this.renderScene,
+        player,
+        {
+          score: scoreNode,
+          status: statusNode,
+          overlayTitle: overlayTitleNode,
+          overlayBody: overlayBodyNode,
+          overlayAction: overlayActionNode
+        },
+        this.assets
+      )
     );
   }
 
@@ -97,4 +108,21 @@ export class DodgeBlocksScene extends Scene {
     super.destroy();
     this.renderScene.destroy();
   }
+}
+
+function createDodgeBlocksAssets(): AssetRegistry {
+  const assets = new AssetRegistry();
+  assets.registerSprite({
+    id: "player",
+    fill: "#ffcf7a",
+    width: DODGE_GAME_CONFIG.playerSize,
+    height: DODGE_GAME_CONFIG.playerSize,
+    cornerRadius: 14
+  });
+  assets.registerSprite({
+    id: "hazard",
+    fill: "#6cb7ff",
+    cornerRadius: 10
+  });
+  return assets;
 }

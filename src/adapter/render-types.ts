@@ -10,8 +10,17 @@ export interface RenderNode {
   destroy(): void;
 }
 
+export type RenderSpriteAsset = {
+  id: string;
+  fill?: string;
+  source?: string;
+  width?: number;
+  height?: number;
+  cornerRadius?: number;
+};
+
 export interface RenderSprite extends RenderNode {
-  setAsset(assetId: string): void;
+  setAsset(asset: string | RenderSpriteAsset): void;
 }
 
 export interface RenderText extends RenderNode {

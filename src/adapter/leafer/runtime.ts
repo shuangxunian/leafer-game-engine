@@ -5,6 +5,7 @@ import type {
   RenderNode,
   RenderScene,
   RenderSceneLayers,
+  RenderSpriteAsset,
   RenderSprite,
   RenderText
 } from "../render-types.js";
@@ -124,8 +125,16 @@ class LeaferSpriteWrapper extends LeaferNodeWrapper implements RenderSprite {
     this.rect.cornerRadius = 14;
   }
 
-  setAsset(assetId: string): void {
-    this.rect.fill = assetId === "player" ? "#ffcf7a" : "#6cb7ff";
+  setAsset(asset: string | RenderSpriteAsset): void {
+    if (typeof asset === "string") {
+      this.rect.fill = asset === "player" ? "#ffcf7a" : "#6cb7ff";
+      return;
+    }
+
+    this.rect.fill = asset.fill ?? "#6cb7ff";
+    this.rect.width = asset.width ?? this.rect.width;
+    this.rect.height = asset.height ?? this.rect.height;
+    this.rect.cornerRadius = asset.cornerRadius ?? this.rect.cornerRadius;
   }
 }
 

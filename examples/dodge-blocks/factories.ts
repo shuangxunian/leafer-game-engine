@@ -31,8 +31,9 @@ type HazardFactoryOptions = {
 };
 
 export const playerFactory = defineEntityFactory<PlayerFactoryOptions>(
-  ({ scene, renderAdapter, renderScene }: EntityFactoryContext, options): Entity => {
+  ({ assets, scene, renderAdapter, renderScene }: EntityFactoryContext, options): Entity => {
     const playerNode = renderAdapter.createSprite("player");
+    playerNode.setAsset(assets?.getSprite("player") ?? "player");
     renderScene.layers.world.addChild(playerNode);
 
     const player = scene.world.createEntity("Player");
@@ -60,8 +61,9 @@ export const playerFactory = defineEntityFactory<PlayerFactoryOptions>(
 );
 
 export const hazardFactory = defineEntityFactory<HazardFactoryOptions>(
-  ({ scene, renderAdapter, renderScene }: EntityFactoryContext, options): Entity => {
+  ({ assets, scene, renderAdapter, renderScene }: EntityFactoryContext, options): Entity => {
     const hazardNode = renderAdapter.createSprite("hazard");
+    hazardNode.setAsset(assets?.getSprite("hazard") ?? "hazard");
     renderScene.layers.world.addChild(hazardNode);
 
     const hazard = scene.world.createEntity(options.name);
