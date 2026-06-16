@@ -7,6 +7,7 @@ export * from "./input.js";
 export * from "./keyboard.js";
 export * from "./movement.js";
 export * from "./scene-config.js";
+export * from "./schema.js";
 export * from "./size.js";
 export * from "./state.js";
 export * from "./transform.js";
