@@ -7,12 +7,10 @@ import {
   InputSystem,
   StateMachine,
   ColliderComponent,
-  TransformComponent,
+  TransformComponent
 } from "../../src/framework/index.js";
 import { hazardFactory } from "./factories.js";
 
-const PLAYFIELD_WIDTH = 960;
-const PLAYFIELD_HEIGHT = 640;
 const PLAYER_SIZE = 52;
 const HAZARD_MIN_SIZE = 28;
 const HAZARD_MAX_SIZE = 74;
@@ -91,7 +89,7 @@ export class DodgeGameSystem extends System {
       const hazardRect = hazard.getComponent(ColliderComponent)?.getRect();
       if (!hazardRect) continue;
 
-      if (hazardRect.y > PLAYFIELD_HEIGHT + 100) {
+      if (hazardRect.y > this.renderScene.height + 100) {
         this.removeHazard(hazard);
         continue;
       }
@@ -129,13 +127,19 @@ export class DodgeGameSystem extends System {
 
     const transform = this.player.getComponent(TransformComponent);
     if (transform) {
-      transform.x = 120;
-      transform.y = PLAYFIELD_HEIGHT / 2 - PLAYER_SIZE / 2;
+      transform.x = clamp(120, 18, this.renderScene.width - PLAYER_SIZE - 18);
+      transform.y = clamp(
+        this.renderScene.height / 2 - PLAYER_SIZE / 2,
+        18,
+        this.renderScene.height - PLAYER_SIZE - 18
+      );
     }
   }
 
   private spawnHazard(): void {
     const size = randomBetween(HAZARD_MIN_SIZE, HAZARD_MAX_SIZE);
+    const minX = 24;
+    const maxX = Math.max(minX, this.renderScene.width - size - 24);
     const hazard = hazardFactory.create(
       {
         scene: this.scene,
@@ -148,7 +152,7 @@ export class DodgeGameSystem extends System {
         name: `Hazard-${this.hazards.size + 1}`,
         size,
         speedY: randomBetween(HAZARD_MIN_SPEED, HAZARD_MAX_SPEED),
-        x: randomBetween(24, PLAYFIELD_WIDTH - size - 24),
+        x: randomBetween(minX, maxX),
         y: -size - randomBetween(20, 120)
       }
     );
@@ -224,8 +228,10 @@ function randomBetween(min: number, max: number): number {
   return min + Math.random() * (max - min);
 }
 
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
 export const DODGE_GAME_CONFIG = {
-  height: PLAYFIELD_HEIGHT,
-  playerSize: PLAYER_SIZE,
-  width: PLAYFIELD_WIDTH
+  playerSize: PLAYER_SIZE
 };

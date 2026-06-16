@@ -1,0 +1,100 @@
+# Dodge Blocks Example
+
+`dodge-blocks` 是 `leaferGame` 当前的集成示例。
+
+它不是一个要单独打磨成品的小游戏，而是用来验证引擎分层是否真正可用：
+
+- browser runtime 是否能启动场景
+- scene 是否能装配 systems
+- entity factory 是否能创建可复用实体
+- transform / size / view 是否能同步到渲染层
+- input 是否能驱动玩家移动
+- collision 是否能判断玩家和障碍物接触
+- state machine 是否能管理 start / running / paused / gameover
+- 玩家是否能被限制在当前 viewport 内移动
+- tooling 是否能显示 debug overlay
+
+## How To Run
+
+在仓库根目录执行：
+
+```bash
+npm install
+npm run dev
+```
+
+打开 Vite 输出的本地地址后，页面会启动这个示例。
+
+## Controls
+
+- `WASD` 或方向键移动玩家
+- `Space` 或 `Enter` 开始/重新开始
+- `P` 或 `Esc` 暂停/继续
+
+## File Map
+
+- `main.ts`
+  - 创建 browser runtime
+  - 调用 `bootDodgeBlocksExample(...)`
+
+- `boot.ts`
+  - 启动 `DodgeBlocksScene`
+  - 挂载 keyboard bridge
+  - 挂载 browser debug overlay
+  - 在 scene destroy 时清理输入和 overlay
+
+- `dodge-blocks-scene.ts`
+  - 注册 input、collision、gameplay system
+  - 创建 UI 文本节点
+  - 注册 sprite assets
+  - 通过 entity factory 创建 player
+
+- `dodge-game-system.ts`
+  - 管理玩法状态
+  - 生成障碍物
+  - 维护 score / best score
+  - 检测碰撞并切换 gameover
+
+- `factories.ts`
+  - 定义 player / hazard 的实体工厂
+  - 把 transform、size、collider、velocity、view 等组件组合成实体
+
+- `player-controller.ts`
+  - 读取 `InputSystem`
+  - 更新玩家位置
+  - 把玩家限制在 playfield 内
+
+- `styles.css`
+  - 示例页面的基础外观
+
+## Minimal Boot Shape
+
+这个示例的启动形态可以简化理解成：
+
+```ts
+import { createBrowserRuntime } from "../../src/runtime/index.js";
+import { bootDodgeBlocksExample } from "./boot.js";
+
+const runtime = createBrowserRuntime({
+  mount: "game-root"
+});
+
+bootDodgeBlocksExample(runtime);
+```
+
+`bootDodgeBlocksExample(...)` 里会创建 scene、启动 runtime、绑定键盘输入，并把 debug snapshot 显示到浏览器 overlay。
+
+## What This Example Proves
+
+这个示例证明当前 `leaferGame` 已经不只是静态渲染封装，而是具备了一个轻量游戏 runtime 的基本闭环：
+
+```text
+browser runtime
+  -> scene
+  -> systems
+  -> entities/components
+  -> render adapter
+  -> tooling/debug overlay
+```
+
+后续新增资源加载、数据驱动场景、关卡配置、编辑器桥接时，这个示例可以继续作为集成验证样例。

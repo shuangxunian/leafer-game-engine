@@ -631,7 +631,7 @@
 
 如果要把当前阶段收敛成一个明确版本，建议先执行：
 
-- [v0.0.2](/Users/shuangxunian/code/leaferGame/docs/v0.0.2.md)
+- [v0.0.2](v0.0.2.md)
 
 这个版本的重点不是扩玩法，而是先完成一轮稳定性冲刺：
 
@@ -643,7 +643,7 @@
 
 完成这一步之后，下一阶段建议进入：
 
-- [v0.2.0](/Users/shuangxunian/code/leaferGame/docs/v0.2.0.md)
+- [v0.2.0](v0.2.0.md)
 
 这个版本开始不再沿用 `v0.0.x` 的文档命名，而是用更接近阶段里程碑的 minor 版本：
 
@@ -653,49 +653,49 @@
 
 其中 `0.2.x` 当前建议拆成两个 patch 批次：
 
-- [v0.2.1](/Users/shuangxunian/code/leaferGame/docs/v0.2.1.md)
-- [v0.2.2](/Users/shuangxunian/code/leaferGame/docs/v0.2.2.md)
+- [v0.2.1](v0.2.1.md)
+- [v0.2.2](v0.2.2.md)
 
 下一阶段建议进入：
 
-- [v0.3.0](/Users/shuangxunian/code/leaferGame/docs/v0.3.0.md)
+- [v0.3.0](v0.3.0.md)
 
 其中第一批建议先做：
 
-- [v0.3.1](/Users/shuangxunian/code/leaferGame/docs/v0.3.1.md)
+- [v0.3.1](v0.3.1.md)
 
 接着建议进入：
 
-- [v0.3.2](/Users/shuangxunian/code/leaferGame/docs/v0.3.2.md)
+- [v0.3.2](v0.3.2.md)
 
 再下一步建议进入：
 
-- [v0.3.3](/Users/shuangxunian/code/leaferGame/docs/v0.3.3.md)
+- [v0.3.3](v0.3.3.md)
 
 随后建议进入：
 
-- [v0.3.4](/Users/shuangxunian/code/leaferGame/docs/v0.3.4.md)
+- [v0.3.4](v0.3.4.md)
 
 最后补齐：
 
-- [v0.3.5](/Users/shuangxunian/code/leaferGame/docs/v0.3.5.md)
+- [v0.3.5](v0.3.5.md)
 
 完成 `0.3.x` 后，下一阶段建议进入：
 
-- [v0.4.0](/Users/shuangxunian/code/leaferGame/docs/v0.4.0.md)
+- [v0.4.0](v0.4.0.md)
 
 第一批建议先做：
 
-- [v0.4.1](/Users/shuangxunian/code/leaferGame/docs/v0.4.1.md)
+- [v0.4.1](v0.4.1.md)
 
 接着建议进入：
 
-- [v0.4.2](/Users/shuangxunian/code/leaferGame/docs/v0.4.2.md)
+- [v0.4.2](v0.4.2.md)
 
 再下一步建议进入：
 
-- [v0.4.3](/Users/shuangxunian/code/leaferGame/docs/v0.4.3.md)
+- [v0.4.3](v0.4.3.md)
 
 最后收口：
 
-- [v0.4.4](/Users/shuangxunian/code/leaferGame/docs/v0.4.4.md)
+- [v0.4.4](v0.4.4.md)

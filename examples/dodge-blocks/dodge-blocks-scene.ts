@@ -1,14 +1,5 @@
 import { Scene } from "../../src/core/index.js";
-import {
-  AssetRegistry,
-  CameraSystem,
-  ColliderComponent,
-  CollisionSystem,
-  InputSystem,
-  SizeComponent,
-  TransformComponent,
-  ViewComponent
-} from "../../src/framework/index.js";
+import { AssetRegistry, CollisionSystem, InputSystem } from "../../src/framework/index.js";
 import type { RenderAdapter, RenderScene } from "../../src/adapter/index.js";
 import { DODGE_GAME_CONFIG, DodgeGameSystem } from "./dodge-game-system.js";
 import { playerFactory } from "./factories.js";
@@ -29,8 +20,9 @@ export class DodgeBlocksScene extends Scene {
 
   protected onStart(): void {
     this.addSystem(new InputSystem(this));
-    const camera = this.addSystem(new CameraSystem(this, this.renderScene));
     this.addSystem(new CollisionSystem(this));
+    const viewportWidth = this.renderScene.width;
+    const viewportHeight = this.renderScene.height;
 
     const titleNode = this.renderAdapter.createText("Dodge Blocks");
     titleNode.x = 24;
@@ -79,16 +71,19 @@ export class DodgeBlocksScene extends Scene {
       },
       {
         canMove: () => dodgeSystem.isGameplayActive(),
-        height: DODGE_GAME_CONFIG.height,
+        height: viewportHeight,
         padding: 18,
         playerSize: DODGE_GAME_CONFIG.playerSize,
         speed: 260,
-        width: DODGE_GAME_CONFIG.width,
+        width: viewportWidth,
         x: 120,
-        y: DODGE_GAME_CONFIG.height / 2 - DODGE_GAME_CONFIG.playerSize / 2
+        y: clamp(
+          viewportHeight / 2 - DODGE_GAME_CONFIG.playerSize / 2,
+          18,
+          viewportHeight - DODGE_GAME_CONFIG.playerSize - 18
+        )
       }
     );
-    camera.follow(player, DODGE_GAME_CONFIG.playerSize / 2, DODGE_GAME_CONFIG.playerSize / 2);
 
     dodgeSystem = this.addSystem(
       new DodgeGameSystem(
@@ -129,4 +124,8 @@ function createDodgeBlocksAssets(): AssetRegistry {
     cornerRadius: 10
   });
   return assets;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
 }

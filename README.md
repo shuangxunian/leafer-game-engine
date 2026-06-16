@@ -111,7 +111,7 @@ runtime.start(scene);
 
 如果你想看更完整的用法，可以直接参考仓库里的示例项目：
 
-- [examples/dodge-blocks](/Users/shuangxunian/code/leaferGame/examples/dodge-blocks)
+- [examples/dodge-blocks](examples/dodge-blocks)
 
 ## 最小可运行项目目录示例
 
@@ -412,7 +412,7 @@ import {
 
 ## 开源协议
 
-当前项目使用 `MIT` 协议，见 [LICENSE](/Users/shuangxunian/code/leaferGame/LICENSE)。
+当前项目使用 `MIT` 协议，见 [LICENSE](LICENSE)。
 
 ## 项目定位
 
@@ -465,7 +465,7 @@ import {
 
 更完整的架构说明可以看：
 
-- [架构设计文档](/Users/shuangxunian/code/leaferGame/docs/architecture.md)
+- [架构设计文档](docs/architecture.md)
 
 ## 当前项目结构
 
