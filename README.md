@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.9.1` Framework GameFlow Primitive，`0.8.x` resource loading baseline 已经收口。
+当前项目已经推进到 `v0.9.2` Dodge Blocks Consumes GameFlow，`0.8.x` resource loading baseline 已经收口。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 

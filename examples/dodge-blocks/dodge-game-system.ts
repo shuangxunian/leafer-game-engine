@@ -4,8 +4,8 @@ import type { RenderAdapter, RenderScene, RenderText } from "../../src/adapter/i
 import {
   AssetRegistry,
   CollisionSystem,
+  GameFlow,
   InputSystem,
-  StateMachine,
   ColliderComponent,
   TransformComponent
 } from "../../src/framework/index.js";
@@ -18,8 +18,6 @@ const HAZARD_MIN_SPEED = 170;
 const HAZARD_MAX_SPEED = 320;
 const BASE_SPAWN_INTERVAL = 0.55;
 const MIN_SPAWN_INTERVAL = 0.22;
-
-type Phase = "start" | "running" | "paused" | "gameover";
 
 type Hud = {
   score: RenderText;
@@ -35,7 +33,7 @@ export class DodgeGameSystem extends System {
   private survivalTime = 0;
   private bestScore = 0;
   private readonly hazards = new Set<Entity>();
-  private readonly flow: StateMachine<Phase>;
+  private readonly flow: GameFlow;
 
   constructor(
     scene: Scene,
@@ -46,7 +44,8 @@ export class DodgeGameSystem extends System {
     private readonly assets?: AssetRegistry
   ) {
     super(scene);
-    this.flow = new StateMachine<Phase>("start", {
+    this.flow = new GameFlow({
+      initialPhase: "ready",
       onTransition: () => this.updateHud()
     });
   }
@@ -61,21 +60,21 @@ export class DodgeGameSystem extends System {
     if (!input) return;
 
     if (input.wasPressed("p") || input.wasPressed("escape")) {
-      if (this.flow.is("running")) this.flow.transition("paused");
-      else if (this.flow.is("paused")) this.flow.transition("running");
+      if (this.flow.is("running")) this.flow.pause();
+      else if (this.flow.is("paused")) this.flow.resume();
     }
 
-    if (this.flow.is("start") && (input.wasPressed(" ") || input.wasPressed("enter"))) {
+    if (this.flow.is("ready") && (input.wasPressed(" ") || input.wasPressed("enter"))) {
       this.startRun();
       return;
     }
 
-    if (this.flow.is("gameover") && (input.wasPressed(" ") || input.wasPressed("enter"))) {
+    if (this.flow.is("ended") && (input.wasPressed(" ") || input.wasPressed("enter"))) {
       this.startRun();
       return;
     }
 
-    if (!this.flow.is("running")) return;
+    if (!this.flow.canUpdateGameplay()) return;
 
     this.survivalTime += dt;
     this.spawnTimer += dt;
@@ -100,25 +99,25 @@ export class DodgeGameSystem extends System {
   }
 
   override lateUpdate(): void {
-    if (!this.flow.is("running")) return;
+    if (!this.flow.canUpdateGameplay()) return;
 
     const collisions = this.scene.getSystem(CollisionSystem);
     if (!collisions) return;
 
     if (collisions.hasCollision(this.player, "hazard")) {
       this.bestScore = Math.max(this.bestScore, this.getScore());
-      this.flow.transition("gameover");
+      this.flow.end();
     }
   }
 
   isGameplayActive(): boolean {
-    return this.flow.is("running");
+    return this.flow.canUpdateGameplay();
   }
 
   private startRun(): void {
     this.clearHazards();
     this.resetRunState();
-    this.flow.transition("running");
+    this.flow.start();
   }
 
   private resetRunState(): void {
@@ -184,7 +183,7 @@ export class DodgeGameSystem extends System {
     const score = this.getScore();
     this.hud.score.setText(`Score ${score}   Best ${this.bestScore}`);
 
-    if (this.flow.is("start")) {
+    if (this.flow.is("ready")) {
       this.hud.status.setText("Move with WASD or arrow keys. Pause with P or Esc.");
       this.hud.overlayTitle.visible = true;
       this.hud.overlayBody.visible = true;
@@ -206,7 +205,7 @@ export class DodgeGameSystem extends System {
       return;
     }
 
-    if (this.flow.is("gameover")) {
+    if (this.flow.is("ended")) {
       this.hud.status.setText("Run ended");
       this.hud.overlayTitle.visible = true;
       this.hud.overlayBody.visible = true;

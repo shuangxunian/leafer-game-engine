@@ -14,7 +14,7 @@
 - transform / size / view 是否能同步到渲染层
 - input 是否能驱动玩家移动
 - collision 是否能判断玩家和障碍物接触
-- state machine 是否能管理 start / running / paused / gameover
+- `GameFlow` 是否能管理 ready / running / paused / ended
 - 玩家是否能被限制在当前 viewport 内移动
 - tooling panel 是否能分区显示 runtime debug + assets + entity inspector + component schema 数据
 - tooling panel 是否能点击 entity 行并显示选中状态
@@ -64,10 +64,10 @@ npm run dev
   - 在代码里补充 player controller 和 render view
 
 - `dodge-game-system.ts`
-  - 管理玩法状态
+  - 通过 framework `GameFlow` 管理玩法状态
   - 生成障碍物
   - 维护 score / best score
-  - 检测碰撞并切换 gameover
+  - 检测碰撞并切换 ended
 
 - `factories.ts`
   - 定义 hazard 的实体工厂
@@ -122,6 +122,7 @@ browser runtime
 - tooling panel 的 `Assets` section 可以显示 player / hazard 的 loaded 状态
 - player 的 `transform`、`size`、`collider` 来自 `EntityTemplate`
 - player 的 `ViewComponent` 和 `PlayerControllerComponent` 仍在代码中装配
+- gameplay phase 使用 framework `GameFlow`，而不是示例内的本地 phase state machine
 - hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度
 
 后续新增资源加载、数据驱动场景、关卡配置和 runtime tooling 能力时，这个示例可以继续作为集成验证样例。
