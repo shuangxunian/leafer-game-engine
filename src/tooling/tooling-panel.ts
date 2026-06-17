@@ -1,12 +1,13 @@
 import type {
   ComponentSchemaSnapshot,
+  DebugAssetSnapshot,
   DebugSnapshot,
   InspectorComponentSnapshot,
   InspectorPrimitive,
   SceneInspectorSnapshot,
   ToolingSnapshot
 } from "./debug.js";
-import { formatComponentSchemaSnapshot, formatDebugSnapshot, formatSceneInspectorSnapshot } from "./debug.js";
+import { formatComponentSchemaSnapshot, formatDebugAssetSnapshot, formatDebugSnapshot, formatSceneInspectorSnapshot } from "./debug.js";
 
 export type ToolingPanelSection = {
   title: string;
@@ -58,6 +59,13 @@ export function createComponentSchemasPanelSection(snapshot: ComponentSchemaSnap
   };
 }
 
+export function createAssetsPanelSection(snapshot: DebugAssetSnapshot): ToolingPanelSection {
+  return {
+    title: "Assets",
+    lines: formatDebugAssetSnapshot(snapshot)
+  };
+}
+
 export function createSelectedEntityDetailPanelSection(
   snapshot: SceneInspectorSnapshot,
   selection: Required<ToolingPanelSelection>,
@@ -98,6 +106,10 @@ export function parseToolingPanelEntityRowId(line: string): number | undefined {
 
 export function createToolingPanelSections(snapshot: ToolingSnapshot, selection: ToolingPanelSelection = {}): ToolingPanelSection[] {
   const sections = [createRuntimeDebugPanelSection(snapshot.debug)];
+
+  if (snapshot.debug.assets) {
+    sections.push(createAssetsPanelSection(snapshot.debug.assets));
+  }
 
   if (snapshot.inspector) {
     sections.push(createEntityInspectorPanelSection(snapshot.inspector, selection));

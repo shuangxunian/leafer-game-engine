@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.8.3` Browser Image Sprite Loader Adapter，`0.7.x` interactive runtime inspector 已经收口。
+当前项目已经推进到 `v0.8.4` Asset Load State Snapshot And Tooling Visibility，`0.7.x` interactive runtime inspector 已经收口。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -14,7 +14,7 @@
 - `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、相机、资源注册、异步资源加载状态、实体工厂、场景配置和组件 schema 等基础能力。
 - `adapter` 已经通过渲染抽象接入 Leafer，并把显示层和游戏规则层分开。
 - `runtime` 已经可以在浏览器里装配渲染、场景和动画帧循环。
-- `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail 和 schema-assisted component detail 展示。
+- `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、asset load state snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail、assets panel section 和 schema-assisted component detail 展示。
 - `examples/dodge-blocks` 作为集成样例，用来验证引擎分层和运行时能力。
 
 当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，并开始补齐更正式的资源加载管线。
@@ -564,14 +564,15 @@ import {
   - 已有 `ColliderDebugSystem`，可以在 world layer 可视化碰撞盒。
   - 已有 `createSceneInspectorSnapshot(...)`，可以导出 scene/entity/component 结构化检查数据。
   - 已有 `createToolingSnapshot(...)`，作为面向工具面板的聚合入口。
-  - 已有 `BrowserToolingPanel`，可以分区展示 runtime debug、entity inspector 和 component schema metadata。
+  - 已有 asset load state snapshot 和 `Assets` panel section，可以展示 registered/loading/loaded/failed 状态。
+  - 已有 `BrowserToolingPanel`，可以分区展示 runtime debug、assets、entity inspector 和 component schema metadata。
   - 已有 entity row selection，可以在浏览器 tooling panel 中选择 entity。
   - 已有 selected entity detail section，可以显示选中实体的状态、组件和 primitive data。
   - 已有 schema-assisted selected component detail，可以结合 component schema 展示字段类型、默认值和当前值。
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
-  - 当前测试数为 82 个。
+  - 当前测试数为 86 个。
   - `npm run check`、`npm test`、`npm run build:example` 是当前主要验证入口。
 
 ## 当前 demo 的意义

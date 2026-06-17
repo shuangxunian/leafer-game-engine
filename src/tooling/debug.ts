@@ -1,6 +1,6 @@
 import type { RenderScene } from "../adapter/index.js";
 import type { Component, Game, Scene } from "../core/index.js";
-import type { AssetRegistry, ComponentSchema, ComponentSchemaRegistry } from "../framework/index.js";
+import type { AssetLoadStatus, AssetRegistry, ComponentSchema, ComponentSchemaRegistry } from "../framework/index.js";
 
 export type DebugSnapshot = {
   sceneName: string;
@@ -39,6 +39,17 @@ export type DebugRenderSnapshot = {
 export type DebugAssetSnapshot = {
   spriteCount: number;
   sprites: string[];
+  statusCounts: DebugAssetStatusCounts;
+  spriteStates: DebugAssetSpriteSnapshot[];
+};
+
+export type DebugAssetStatusCounts = Record<AssetLoadStatus, number>;
+
+export type DebugAssetSpriteSnapshot = {
+  id: string;
+  status: AssetLoadStatus;
+  error?: string;
+  loadedAt?: number;
 };
 
 export type DebugSnapshotOptions = {
@@ -158,7 +169,10 @@ export function formatDebugSnapshot(snapshot: DebugSnapshot): string[] {
   }
 
   if (snapshot.assets) {
-    lines.push(`Sprites ${snapshot.assets.spriteCount}`);
+    const { statusCounts } = snapshot.assets;
+    lines.push(
+      `Sprites ${snapshot.assets.spriteCount} registered=${statusCounts.registered} loading=${statusCounts.loading} loaded=${statusCounts.loaded} failed=${statusCounts.failed}`
+    );
   }
 
   if (snapshot.systems.length > 0) {
@@ -196,6 +210,20 @@ export function formatToolingSnapshot(snapshot: ToolingSnapshot): string[] {
 
   if (snapshot.schemas) {
     lines.push("", ...formatComponentSchemaSnapshot(snapshot.schemas));
+  }
+
+  return lines;
+}
+
+export function formatDebugAssetSnapshot(snapshot: DebugAssetSnapshot): string[] {
+  const { statusCounts } = snapshot;
+  const lines = [
+    `Assets sprites=${snapshot.spriteCount} registered=${statusCounts.registered} loading=${statusCounts.loading} loaded=${statusCounts.loaded} failed=${statusCounts.failed}`
+  ];
+
+  for (const sprite of snapshot.spriteStates) {
+    const error = sprite.error ? ` error=${sprite.error}` : "";
+    lines.push(`- ${sprite.id} ${sprite.status}${error}`);
   }
 
   return lines;
@@ -252,11 +280,42 @@ function createRenderSnapshot(renderScene: RenderScene): DebugRenderSnapshot {
 }
 
 function createAssetSnapshot(assets: AssetRegistry): DebugAssetSnapshot {
-  const sprites = assets.listSprites().map((asset) => asset.id);
+  const spriteStates = assets.listSprites().map((asset): DebugAssetSpriteSnapshot => {
+    const state = assets.getSpriteLoadState(asset.id) ?? {
+      id: asset.id,
+      status: "registered" as const
+    };
+
+    return {
+      id: asset.id,
+      status: state.status,
+      ...(state.error ? { error: state.error } : {}),
+      ...(state.loadedAt !== undefined ? { loadedAt: state.loadedAt } : {})
+    };
+  });
+  const statusCounts = createAssetStatusCounts(spriteStates);
+
   return {
-    spriteCount: sprites.length,
-    sprites
+    spriteCount: spriteStates.length,
+    sprites: spriteStates.map((asset) => asset.id),
+    statusCounts,
+    spriteStates
   };
+}
+
+function createAssetStatusCounts(spriteStates: DebugAssetSpriteSnapshot[]): DebugAssetStatusCounts {
+  const counts: DebugAssetStatusCounts = {
+    registered: 0,
+    loading: 0,
+    loaded: 0,
+    failed: 0
+  };
+
+  for (const sprite of spriteStates) {
+    counts[sprite.status] += 1;
+  }
+
+  return counts;
 }
 
 function createComponentInspectorSnapshot(component: Component): InspectorComponentSnapshot {

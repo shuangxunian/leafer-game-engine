@@ -801,4 +801,4 @@
 
 随后建议进入：
 
-- `v0.8.4` asset loading snapshot/tooling visibility
+- [v0.8.4](version/v0.8.4.md)

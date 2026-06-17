@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { Component, Game, Scene, System } from "../lib/core/index.js";
 import { AssetRegistry, ComponentSchemaRegistry, TransformComponent, createDefaultComponentSchemaRegistry } from "../lib/framework/index.js";
 import {
+  createAssetsPanelSection,
   createComponentSchemasPanelSection,
   createComponentSchemaSnapshot,
   createDebugSnapshot,
@@ -14,6 +15,7 @@ import {
   createToolingPanelSections,
   createToolingSnapshot,
   formatComponentSchemaSnapshot,
+  formatDebugAssetSnapshot,
   formatDebugSnapshot,
   formatSceneInspectorSnapshot,
   formatToolingSnapshot,
@@ -76,6 +78,58 @@ test("debug snapshot can include time, render and asset details", () => {
   assert.equal(snapshot.render?.width, 800);
   assert.deepEqual(snapshot.render?.layers, ["background", "world", "ui", "overlay"]);
   assert.deepEqual(snapshot.assets?.sprites, ["player"]);
+  assert.deepEqual(snapshot.assets?.statusCounts, {
+    registered: 1,
+    loading: 0,
+    loaded: 0,
+    failed: 0
+  });
+  assert.deepEqual(snapshot.assets?.spriteStates, [
+    {
+      id: "player",
+      status: "registered"
+    }
+  ]);
+});
+
+test("debug asset snapshot includes copied load states", async () => {
+  const scene = new Scene("AssetStateDebugScene");
+  const assets = new AssetRegistry();
+  assets.registerSprite({ id: "player", source: "/assets/player.png" });
+  assets.registerSprite({ id: "broken", source: "/assets/broken.png" });
+  assets.registerSprite({ id: "ui", fill: "#ffffff" });
+
+  await assets.loadSprite("player", async () => {});
+  await assets.loadSprite("broken", async () => {
+    throw new Error("Missing image");
+  });
+
+  const snapshot = createDebugSnapshot(scene, { assets }).assets;
+
+  assert.deepEqual(snapshot?.statusCounts, {
+    registered: 1,
+    loading: 0,
+    loaded: 1,
+    failed: 1
+  });
+  assert.equal(snapshot?.spriteStates[0].id, "player");
+  assert.equal(snapshot?.spriteStates[0].status, "loaded");
+  assert.equal(typeof snapshot?.spriteStates[0].loadedAt, "number");
+  assert.deepEqual(snapshot?.spriteStates.slice(1), [
+    {
+      id: "broken",
+      status: "failed",
+      error: "Missing image"
+    },
+    {
+      id: "ui",
+      status: "registered"
+    }
+  ]);
+
+  assets.registerSprite({ id: "late", source: "/assets/late.png" });
+  assert.equal(snapshot?.spriteStates[1].error, "Missing image");
+  assert.equal(snapshot?.spriteStates.some((state) => state.id === "late"), false);
 });
 
 test("debug snapshot formatting is stable and compact", () => {
@@ -99,6 +153,25 @@ test("debug snapshot formatting is stable and compact", () => {
     "FPS 4",
     "DT 0.250s",
     "Viewport 800x600"
+  ]);
+});
+
+test("debug asset snapshot formatting is stable and readable", async () => {
+  const assets = new AssetRegistry();
+  assets.registerSprite({ id: "player", source: "/assets/player.png" });
+  assets.registerSprite({ id: "broken", source: "/assets/broken.png" });
+
+  await assets.loadSprite("player", async () => {});
+  await assets.loadSprite("broken", async () => {
+    throw new Error("Network failed");
+  });
+
+  const snapshot = createDebugSnapshot(new Scene("AssetFormatScene"), { assets }).assets;
+
+  assert.deepEqual(formatDebugAssetSnapshot(snapshot), [
+    "Assets sprites=2 registered=0 loading=0 loaded=1 failed=1",
+    "- player loaded",
+    "- broken failed error=Network failed"
   ]);
 });
 
@@ -292,6 +365,21 @@ test("tooling panel sections expose runtime debug output", () => {
   });
 });
 
+test("asset panel section exposes asset load states", async () => {
+  const assets = new AssetRegistry();
+  assets.registerSprite({ id: "player", source: "/assets/player.png" });
+  await assets.loadSprite("player", async () => {});
+  const snapshot = createDebugSnapshot(new Scene("AssetPanelScene"), { assets }).assets;
+
+  assert.deepEqual(createAssetsPanelSection(snapshot), {
+    title: "Assets",
+    lines: [
+      "Assets sprites=1 registered=0 loading=0 loaded=1 failed=0",
+      "- player loaded"
+    ]
+  });
+});
+
 test("entity inspector panel section exposes entity rows without repeating the section title", () => {
   const scene = new Scene("EntityPanelScene");
   const entity = scene.world.createEntity("player");
@@ -355,6 +443,31 @@ test("tooling panel sections include inspector data when requested", () => {
         "Scene PanelSectionsScene",
         "Entities 1/1",
         `- #${scene.world.entities[0].id} player [active] components=0`
+      ]
+    }
+  ]);
+});
+
+test("tooling panel sections include asset data when requested", () => {
+  const scene = new Scene("AssetSectionsScene");
+  const assets = new AssetRegistry();
+  assets.registerSprite({ id: "player", fill: "#ffcf7a" });
+
+  assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { assets })), [
+    {
+      title: "Runtime Debug",
+      lines: [
+        "Scene AssetSectionsScene",
+        "Entities 0/0",
+        "Systems 0",
+        "Sprites 1 registered=1 loading=0 loaded=0 failed=0"
+      ]
+    },
+    {
+      title: "Assets",
+      lines: [
+        "Assets sprites=1 registered=1 loading=0 loaded=0 failed=0",
+        "- player registered"
       ]
     }
   ]);
