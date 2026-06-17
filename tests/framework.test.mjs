@@ -31,7 +31,9 @@ import {
   normalizeKeyboardKey,
   pauseSpriteAnimationPlayback,
   resumeSpriteAnimationPlayback,
-  stopSpriteAnimationPlayback
+  stopSpriteAnimationPlayback,
+  createTileMap,
+  defineTileMap
 } from "../lib/framework/index.js";
 
 test("state machine transitions call exit, enter and transition hooks in order", () => {
@@ -230,6 +232,110 @@ test("input action map queries pressed and just-pressed input state", () => {
   input.release("space");
 
   assert.equal(actions.isPressed(input, "jump"), false);
+});
+
+test("tile map data contract copies layers and supports tile lookup", () => {
+  const sourceTiles = ["floor", "wall", null, "water"];
+  const definition = defineTileMap({
+    id: "level-1",
+    width: 2,
+    height: 2,
+    tileWidth: 16,
+    tileHeight: 12,
+    layers: [
+      {
+        id: "terrain",
+        tiles: sourceTiles
+      }
+    ]
+  });
+
+  sourceTiles[0] = "mutated";
+  const map = createTileMap(definition);
+  definition.layers[0].tiles[1] = "mutated";
+
+  assert.equal(map.id, "level-1");
+  assert.equal(map.width, 2);
+  assert.equal(map.height, 2);
+  assert.equal(map.tileWidth, 16);
+  assert.equal(map.tileHeight, 12);
+  assert.equal(map.getTile("terrain", 0, 0), "floor");
+  assert.equal(map.getTile("terrain", 1, 0), "wall");
+  assert.equal(map.getTile("terrain", 0, 1), null);
+  assert.equal(map.getTile("missing", 0, 0), undefined);
+  assert.equal(map.getTile("terrain", 2, 0), undefined);
+
+  const layer = map.getLayer("terrain");
+  layer.tiles[0] = "outside";
+
+  assert.equal(map.getTile("terrain", 0, 0), "floor");
+});
+
+test("tile map converts between world and tile coordinates", () => {
+  const map = createTileMap({
+    id: "grid",
+    width: 4,
+    height: 3,
+    tileWidth: 32,
+    tileHeight: 16,
+    layers: [
+      {
+        id: "terrain",
+        tiles: new Array(12).fill(null)
+      }
+    ]
+  });
+
+  assert.deepEqual(map.worldToTile(0, 0), { x: 0, y: 0 });
+  assert.deepEqual(map.worldToTile(31.9, 15.9), { x: 0, y: 0 });
+  assert.deepEqual(map.worldToTile(32, 16), { x: 1, y: 1 });
+  assert.deepEqual(map.worldToTile(-1, -1), { x: -1, y: -1 });
+  assert.deepEqual(map.tileToWorld(2, 1), { x: 64, y: 16 });
+  assert.deepEqual(map.getTileBounds(2, 1), { x: 64, y: 16, width: 32, height: 16 });
+  assert.equal(map.containsTile(3, 2), true);
+  assert.equal(map.containsTile(4, 2), false);
+  assert.equal(map.containsTile(0.5, 1), false);
+});
+
+test("tile map validation reports invalid definitions clearly", () => {
+  assert.throws(() => defineTileMap({
+    id: "",
+    width: 1,
+    height: 1,
+    tileWidth: 16,
+    tileHeight: 16,
+    layers: [{ id: "terrain", tiles: [null] }]
+  }), /Tile map id must be a non-empty string/);
+
+  assert.throws(() => defineTileMap({
+    id: "bad-size",
+    width: 1.5,
+    height: 1,
+    tileWidth: 16,
+    tileHeight: 16,
+    layers: [{ id: "terrain", tiles: [null] }]
+  }), /Tile map width must be a positive integer/);
+
+  assert.throws(() => defineTileMap({
+    id: "bad-layer",
+    width: 2,
+    height: 2,
+    tileWidth: 16,
+    tileHeight: 16,
+    layers: [{ id: "terrain", tiles: [null] }]
+  }), /must contain 4 tiles, received 1/);
+
+  assert.throws(() => defineTileMap({
+    id: "duplicate-layer",
+    width: 1,
+    height: 1,
+    tileWidth: 16,
+    tileHeight: 16,
+    layers: [
+      { id: "terrain", tiles: [null] },
+      { id: "terrain", tiles: [null] }
+    ]
+  }), /Duplicate tile map layer id "terrain"/);
 });
 
 test("input action map can bind and unbind keyboard inputs", () => {

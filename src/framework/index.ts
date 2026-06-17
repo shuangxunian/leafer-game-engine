@@ -14,5 +14,6 @@ export * from "./scheduler.js";
 export * from "./schema.js";
 export * from "./size.js";
 export * from "./state.js";
+export * from "./tile-map.js";
 export * from "./transform.js";
 export * from "./view.js";

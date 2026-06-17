@@ -34,6 +34,8 @@ For the render/view boundary across render nodes, view synchronization, sprite-c
 
 For the runtime ownership boundary across `Game`, `Scene`, browser runtime, render scene lifecycle, tooling, and downstream error policy, see [Runtime Ownership Boundary](runtime-ownership.md).
 
+`0.18.x` starts level/map runtime primitives. The Node-safe `framework` entrypoint now exposes `TileMap`, `defineTileMap(...)`, and `createTileMap(...)` for validated tile map data, defensive copying, tile lookup, and tile/world coordinate conversion.
+
 ---
 
 ## Package Entrypoints
@@ -67,10 +69,13 @@ import {
   RuntimeServicesSystem,
   SpriteAnimationComponent,
   SpriteAnimationSystem,
+  TileMap,
   addRuntimeServices,
   bootstrapSceneFromConfig,
+  createTileMap,
   createRuntimeServices,
   createSpriteAnimationPlayback,
+  defineTileMap,
   defineKeyboardBinding,
   getRuntimeServices,
   isSpriteCapableRenderNode,
@@ -110,10 +115,13 @@ import {
   RuntimeServicesSystem,
   SpriteAnimationComponent,
   SpriteAnimationSystem,
+  TileMap,
   addRuntimeServices,
   bootstrapSceneFromConfig,
+  createTileMap,
   createRuntimeServices,
   createSpriteAnimationPlayback,
+  defineTileMap,
   defineKeyboardBinding,
   getRuntimeServices,
   isSpriteCapableRenderNode,
@@ -164,7 +172,7 @@ They should be verified through browser/example builds until the package is spli
 ## Current Boundary Notes
 
 - `core` should stay independent from browser and rendering implementations, and should preserve scene/world phase cleanup invariants even when runtime hooks throw.
-- `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, opt-in scene runtime service integration, data-driven scene config validation, safe scene config bootstrap, render/view synchronization, and render-node capability checks.
+- `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, opt-in scene runtime service integration, data-driven scene config validation, safe scene config bootstrap, render/view synchronization, render-node capability checks, and tile map data contracts.
 - `tooling` can expose structured snapshots and formatters in Node, including read-only system lifecycle state, sprite animation state, runtime services state, and input action state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer. It owns render scene layer naming/order helpers.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
