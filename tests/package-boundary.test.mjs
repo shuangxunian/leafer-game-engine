@@ -238,7 +238,8 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   assert.equal(systemPatch.includes("scene/runtime ownership"), true);
   assert.equal(publicApi.includes("`0.21.x` starts audio runtime primitives"), true);
   assert.equal(publicApi.includes("AudioRuntimeState"), true);
-  assert.equal(readme.includes("`v0.21.1` Audio Data Contract Baseline"), true);
+  assert.equal(publicApi.includes("AudioRuntimeSystem"), true);
+  assert.equal(readme.includes("`v0.21.2` Audio Runtime Service Integration"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -259,6 +260,7 @@ test("framework package subpath can be imported by package name in Node", async 
 
   assertExports(framework, [
     "AudioRuntimeState",
+    "AudioRuntimeSystem",
     "AssetRegistry",
     "BrowserPointerButtonBridge",
     "CameraSystem",
@@ -277,6 +279,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "TileMap",
     "TransformComponent",
     "ViewComponent",
+    "addAudioRuntime",
     "advanceSpriteAnimationPlayback",
     "addRuntimeServices",
     "bootstrapSceneFromConfig",
@@ -296,6 +299,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "definePointerButtonBinding",
     "defineSpriteAnimationClip",
     "defineSpriteFrame",
+    "getAudioRuntime",
     "getPointerButtonInputId",
     "getSpriteAnimationPlaybackFrameId",
     "getSpriteAnimationPlaybackFrameIndex",
@@ -312,6 +316,9 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.CollisionSystem.prototype.getCollisionExitPairs, "function");
   assert.equal(typeof framework.AudioRuntimeState.prototype.playCue, "function");
   assert.equal(typeof framework.AudioRuntimeState.prototype.setChannelVolume, "function");
+  assert.equal(typeof framework.AudioRuntimeSystem.prototype.destroy, "function");
+  assert.equal(typeof framework.addAudioRuntime, "function");
+  assert.equal(typeof framework.getAudioRuntime, "function");
 });
 
 test("tooling package subpath can be imported by package name in Node", async () => {

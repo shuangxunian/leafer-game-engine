@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { Scene } from "../lib/core/index.js";
 import {
   AudioRuntimeState,
+  AudioRuntimeSystem,
   AssetRegistry,
   BrowserPointerButtonBridge,
   CameraSystem,
@@ -19,6 +20,7 @@ import {
   SpriteAnimationSystem,
   TransformComponent,
   ViewComponent,
+  addAudioRuntime,
   addRuntimeServices,
   advanceSpriteAnimationPlayback,
   createAudioRuntimeState,
@@ -32,6 +34,7 @@ import {
   definePointerButtonBinding,
   defineSpriteAnimationClip,
   defineSpriteFrame,
+  getAudioRuntime,
   getPointerButtonInputId,
   getSpriteAnimationPlaybackFrameId,
   getSpriteAnimationPlaybackFrameIndex,
@@ -274,6 +277,75 @@ test("audio runtime state returns defensive manifest, channel and operation copi
   assert.deepEqual(audio.manifest.assets[0].metadata, { kind: "sfx" });
   assert.equal(audio.getChannel("master")?.volume, 1);
   assert.equal(audio.getLastOperation()?.sequence, 1);
+});
+
+test("audio runtime system installs scene-owned audio state", () => {
+  const scene = new Scene("AudioRuntimeScene");
+  const system = addAudioRuntime(scene, {
+    priority: -123,
+    manifest: {
+      assets: [{ id: "hit" }],
+      channels: [{ id: "sfx", volume: 0.75 }],
+      cues: [{ id: "hit:play", assetId: "hit", channelId: "sfx" }]
+    }
+  });
+
+  assert.equal(system.priority, -123);
+  assert.equal(system.clearsOperationsOnDestroy, true);
+  assert.equal(getAudioRuntime(scene), system.audio);
+
+  scene.start();
+  assert.deepEqual(system.audio.playCue("hit:play"), {
+    sequence: 1,
+    type: "play",
+    cueId: "hit:play",
+    assetId: "hit",
+    channelId: "sfx",
+    volume: 1,
+    loop: false
+  });
+});
+
+test("audio runtime system clears operation records on destroy by default", () => {
+  const scene = new Scene("AudioRuntimeCleanupScene");
+  const system = scene.addSystem(new AudioRuntimeSystem(scene, {
+    manifest: {
+      assets: [{ id: "theme" }],
+      cues: [{ id: "theme:start", assetId: "theme" }]
+    }
+  }));
+
+  system.audio.playCue("theme:start");
+  assert.equal(system.audio.listOperations().length, 1);
+
+  scene.destroy();
+
+  assert.deepEqual(system.audio.listOperations(), []);
+});
+
+test("audio runtime system can use injected state and preserve operations", () => {
+  const scene = new Scene("InjectedAudioRuntimeScene");
+  const audio = createAudioRuntimeState({
+    assets: [{ id: "confirm" }],
+    cues: [{ id: "confirm:play", assetId: "confirm" }]
+  });
+
+  audio.playCue("confirm:play");
+
+  const system = addAudioRuntime(scene, {
+    audio,
+    clearOperationsOnDestroy: false
+  });
+
+  assert.equal(system.audio, audio);
+  assert.equal(system.priority, -240);
+  assert.equal(system.clearsOperationsOnDestroy, false);
+  assert.equal(getAudioRuntime(scene), audio);
+
+  scene.destroy();
+
+  assert.equal(audio.listOperations().length, 1);
+  assert.equal(getAudioRuntime(new Scene("NoAudioRuntimeScene")), undefined);
 });
 
 test("state machine transitions call exit, enter and transition hooks in order", () => {

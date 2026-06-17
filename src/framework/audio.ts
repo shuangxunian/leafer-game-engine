@@ -1,3 +1,6 @@
+import type { Scene } from "../core/index.js";
+import { System } from "../core/index.js";
+
 export type AudioMetadata = Record<string, unknown>;
 
 export type AudioAssetDefinition = {
@@ -90,7 +93,15 @@ export type AudioRuntimeStopOptions = {
   channelId?: string;
 };
 
+export type AudioRuntimeSystemOptions = {
+  manifest?: AudioManifestDefinition;
+  audio?: AudioRuntimeState;
+  clearOperationsOnDestroy?: boolean;
+  priority?: number;
+};
+
 export const DEFAULT_AUDIO_CHANNEL_ID = "master";
+export const DEFAULT_AUDIO_RUNTIME_SYSTEM_PRIORITY = -240;
 
 export class AudioRuntimeState {
   private readonly definition: DefinedAudioManifest;
@@ -290,6 +301,43 @@ export class AudioRuntimeState {
 
 export function createAudioRuntimeState(definition: AudioManifestDefinition = {}): AudioRuntimeState {
   return new AudioRuntimeState(definition);
+}
+
+export class AudioRuntimeSystem extends System {
+  public readonly audio: AudioRuntimeState;
+  private readonly clearOperationsOnDestroy: boolean;
+
+  get clearsOperationsOnDestroy(): boolean {
+    return this.clearOperationsOnDestroy;
+  }
+
+  constructor(
+    scene: Scene,
+    options: AudioRuntimeSystemOptions = {}
+  ) {
+    super(scene);
+
+    this.priority = options.priority ?? DEFAULT_AUDIO_RUNTIME_SYSTEM_PRIORITY;
+    this.audio = options.audio ?? createAudioRuntimeState(options.manifest);
+    this.clearOperationsOnDestroy = options.clearOperationsOnDestroy ?? true;
+  }
+
+  override destroy(): void {
+    if (this.clearOperationsOnDestroy) {
+      this.audio.clearOperations();
+    }
+  }
+}
+
+export function addAudioRuntime(
+  scene: Scene,
+  options: AudioRuntimeSystemOptions = {}
+): AudioRuntimeSystem {
+  return scene.addSystem(new AudioRuntimeSystem(scene, options));
+}
+
+export function getAudioRuntime(scene: Scene): AudioRuntimeState | undefined {
+  return scene.getSystem(AudioRuntimeSystem)?.audio;
 }
 
 export function defineAudioAsset(definition: AudioAssetDefinition): DefinedAudioAsset {
