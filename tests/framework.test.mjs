@@ -8,17 +8,21 @@ import {
   EventBus,
   GameFlow,
   RuntimeScheduler,
+  RuntimeServicesSystem,
   StateMachine,
   SpriteAnimationComponent,
   SpriteAnimationSystem,
   TransformComponent,
   ViewComponent,
+  addRuntimeServices,
   advanceSpriteAnimationPlayback,
+  createRuntimeServices,
   createSpriteAnimationPlayback,
   defineSpriteAnimationClip,
   defineSpriteFrame,
   getSpriteAnimationPlaybackFrameId,
   getSpriteAnimationPlaybackFrameIndex,
+  getRuntimeServices,
   pauseSpriteAnimationPlayback,
   resumeSpriteAnimationPlayback,
   stopSpriteAnimationPlayback
@@ -394,6 +398,104 @@ test("runtime scheduler reports invalid timing inputs clearly", () => {
   assert.throws(() => scheduler.repeat(1, () => {}, { startDelaySeconds: -1 }), /Repeat start delay must be a finite non-negative number/);
   assert.throws(() => scheduler.repeat(1, () => {}, { maxRuns: 0 }), /Repeat maxRuns must be a positive integer/);
   assert.throws(() => scheduler.update(Number.POSITIVE_INFINITY), /Scheduler delta must be a finite non-negative number/);
+});
+
+test("runtime services system advances scheduler during scene updates", () => {
+  const scene = new Scene("RuntimeServicesScene");
+  const system = addRuntimeServices(scene);
+  const log = [];
+
+  system.services.scheduler.schedule(0.5, (context) => log.push(`scheduled:${context.elapsedSeconds}`));
+
+  assert.equal(system.priority, -250);
+  assert.equal(getRuntimeServices(scene), system.services);
+
+  scene.start();
+  scene.update(0.25);
+  assert.deepEqual(log, []);
+  assert.deepEqual(system.lastSchedulerUpdate, {
+    elapsedSeconds: 0.25,
+    deltaSeconds: 0.25,
+    firedCount: 0,
+    taskCount: 1
+  });
+
+  scene.update(0.25);
+  assert.deepEqual(log, ["scheduled:0.5"]);
+  assert.deepEqual(system.lastSchedulerUpdate, {
+    elapsedSeconds: 0.5,
+    deltaSeconds: 0.25,
+    firedCount: 1,
+    taskCount: 0
+  });
+});
+
+test("runtime services system can use injected services and disabled scheduler updates", () => {
+  const scene = new Scene("InjectedRuntimeServicesScene");
+  const eventBus = new EventBus();
+  const scheduler = new RuntimeScheduler();
+  const services = createRuntimeServices({ eventBus, scheduler });
+  const log = [];
+
+  eventBus.on("ping", () => log.push("event"));
+  scheduler.schedule(0, () => log.push("scheduled"));
+
+  const system = addRuntimeServices(scene, {
+    services,
+    updateScheduler: false,
+    clearOnDestroy: false,
+    priority: 123
+  });
+
+  assert.equal(system.services, services);
+  assert.equal(system.priority, 123);
+  assert.equal(getRuntimeServices(scene), services);
+
+  scene.start();
+  scene.update(1);
+
+  services.eventBus.emit("ping", undefined);
+  assert.deepEqual(log, ["event"]);
+  assert.equal(services.scheduler.taskCount(), 1);
+  assert.equal(system.lastSchedulerUpdate, undefined);
+
+  scene.destroy();
+  assert.equal(services.eventBus.listenerCount(), 1);
+  assert.equal(services.scheduler.taskCount(), 1);
+});
+
+test("runtime services clear listeners and tasks on system destroy by default", () => {
+  const scene = new Scene("RuntimeServicesCleanupScene");
+  const system = scene.addSystem(new RuntimeServicesSystem(scene));
+
+  system.services.eventBus.on("done", () => {});
+  system.services.scheduler.schedule(1, () => {});
+
+  scene.start();
+  assert.equal(system.services.eventBus.listenerCount(), 1);
+  assert.equal(system.services.scheduler.taskCount(), 1);
+
+  scene.destroy();
+
+  assert.equal(system.services.eventBus.listenerCount(), 0);
+  assert.equal(system.services.scheduler.taskCount(), 0);
+});
+
+test("runtime services can be created and cleared without a scene", () => {
+  const services = createRuntimeServices();
+
+  services.eventBus.on("event", () => {});
+  services.scheduler.schedule(1, () => {});
+
+  assert.deepEqual(services.clear(), {
+    eventListenerCount: 1,
+    scheduledTaskCount: 1
+  });
+  assert.deepEqual(services.clear(), {
+    eventListenerCount: 0,
+    scheduledTaskCount: 0
+  });
+  assert.equal(getRuntimeServices(new Scene("NoRuntimeServicesScene")), undefined);
 });
 
 test("sprite frame and animation clip helpers return isolated data contracts", () => {

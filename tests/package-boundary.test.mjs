@@ -76,18 +76,23 @@ test("framework package subpath can be imported by package name in Node", async 
     "GameFlow",
     "InputSystem",
     "RuntimeScheduler",
+    "RuntimeServices",
+    "RuntimeServicesSystem",
     "SpriteAnimationComponent",
     "SpriteAnimationSystem",
     "StateMachine",
     "TransformComponent",
     "ViewComponent",
     "advanceSpriteAnimationPlayback",
+    "addRuntimeServices",
     "createSpriteAnimationPlayback",
     "createDefaultComponentSchemaRegistry",
+    "createRuntimeServices",
     "defineSpriteAnimationClip",
     "defineSpriteFrame",
     "getSpriteAnimationPlaybackFrameId",
     "getSpriteAnimationPlaybackFrameIndex",
+    "getRuntimeServices",
     "loadAssetManifestAsync"
   ]);
 });
