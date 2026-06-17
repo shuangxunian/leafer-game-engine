@@ -244,7 +244,8 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   assert.equal(publicApi.includes("`0.21.x` starts audio runtime primitives"), true);
   assert.equal(publicApi.includes("AudioRuntimeState"), true);
   assert.equal(publicApi.includes("AudioRuntimeSystem"), true);
-  assert.equal(readme.includes("`v0.21.2` Audio Runtime Service Integration"), true);
+  assert.equal(publicApi.includes("read-only audio runtime snapshots"), true);
+  assert.equal(readme.includes("`v0.21.3` Audio Runtime Tooling Visibility"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -330,6 +331,8 @@ test("tooling package subpath can be imported by package name in Node", async ()
   const tooling = await import(`${packageJson.name}/tooling`);
 
   assertExports(tooling, [
+    "createAudioRuntimePanelSection",
+    "createAudioRuntimeSnapshot",
     "createCollisionSnapshot",
     "createCollisionsPanelSection",
     "createDebugSnapshot",
@@ -341,6 +344,7 @@ test("tooling package subpath can be imported by package name in Node", async ()
     "createSpriteAnimationsPanelSection",
     "createToolingSnapshot",
     "createToolingPanelSections",
+    "formatAudioRuntimeSnapshot",
     "formatCollisionSnapshot",
     "formatDebugSnapshot",
     "formatInputActionSnapshot",

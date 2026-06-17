@@ -14,11 +14,14 @@ import {
   SizeComponent,
   SpriteAnimationComponent,
   TransformComponent,
+  addAudioRuntime,
   addRuntimeServices,
   createDefaultComponentSchemaRegistry,
   defineKeyboardBinding
 } from "../lib/framework/index.js";
 import {
+  createAudioRuntimePanelSection,
+  createAudioRuntimeSnapshot,
   createAssetsPanelSection,
   createCollisionSnapshot,
   createCollisionsPanelSection,
@@ -43,6 +46,7 @@ import {
   formatDebugAssetSnapshot,
   formatDebugGameFlowSnapshot,
   formatDebugSnapshot,
+  formatAudioRuntimeSnapshot,
   formatInputActionSnapshot,
   formatRuntimeServicesSnapshot,
   formatSceneInspectorSnapshot,
@@ -631,6 +635,109 @@ test("runtime services snapshot reports missing services without throwing", () =
   });
 });
 
+test("tooling snapshot can include copied audio runtime state", () => {
+  const scene = new Scene("AudioRuntimeToolingScene");
+  const system = addAudioRuntime(scene, {
+    manifest: {
+      assets: [{ id: "hit", metadata: { kind: "sfx" } }],
+      channels: [{ id: "sfx", volume: 0.75 }],
+      cues: [{ id: "hit:play", assetId: "hit", channelId: "sfx" }]
+    }
+  });
+
+  system.audio.playCue("hit:play");
+  system.audio.setChannelVolume("sfx", 0.5);
+
+  const snapshot = createToolingSnapshot(scene, { audio: true }).audio;
+
+  assert.deepEqual(snapshot, {
+    installed: true,
+    system: {
+      enabled: true,
+      started: false,
+      priority: -240,
+      clearsOperationsOnDestroy: true
+    },
+    assetCount: 1,
+    cueCount: 1,
+    channelCount: 2,
+    operationCount: 2,
+    manifest: {
+      assets: [
+        {
+          id: "hit",
+          preload: false,
+          metadata: { kind: "sfx" }
+        }
+      ],
+      cues: [
+        {
+          id: "hit:play",
+          assetId: "hit",
+          channelId: "sfx",
+          volume: 1,
+          loop: false,
+          metadata: undefined
+        }
+      ],
+      channels: [
+        {
+          id: "master",
+          volume: 1,
+          muted: false,
+          metadata: undefined
+        },
+        {
+          id: "sfx",
+          volume: 0.75,
+          muted: false,
+          metadata: undefined
+        }
+      ]
+    },
+    channels: [
+      { id: "master", volume: 1, muted: false },
+      { id: "sfx", volume: 0.5, muted: false }
+    ],
+    operations: [
+      {
+        sequence: 1,
+        type: "play",
+        cueId: "hit:play",
+        assetId: "hit",
+        channelId: "sfx",
+        volume: 1,
+        loop: false
+      },
+      {
+        sequence: 2,
+        type: "set-volume",
+        channelId: "sfx",
+        volume: 0.5
+      }
+    ]
+  });
+
+  snapshot.manifest.assets[0].metadata.kind = "mutated";
+  snapshot.channels[1].volume = 0;
+  snapshot.operations[0].sequence = 999;
+
+  assert.deepEqual(system.audio.manifest.assets[0].metadata, { kind: "sfx" });
+  assert.equal(system.audio.getChannel("sfx").volume, 0.5);
+  assert.equal(system.audio.getLastOperation().sequence, 2);
+});
+
+test("audio runtime snapshot reports missing systems without throwing", () => {
+  const scene = new Scene("MissingAudioRuntimeScene");
+
+  assert.deepEqual(createAudioRuntimeSnapshot(scene), {
+    installed: false
+  });
+  assert.deepEqual(createToolingSnapshot(scene, { audio: true }).audio, {
+    installed: false
+  });
+});
+
 test("component schema snapshot formatting is stable and readable", () => {
   const registry = new ComponentSchemaRegistry();
   registry.register({
@@ -797,6 +904,66 @@ test("runtime services snapshot formatting is stable and readable", () => {
   ]);
 });
 
+test("audio runtime snapshot formatting is stable and readable", () => {
+  assert.deepEqual(formatAudioRuntimeSnapshot({
+    installed: true,
+    system: {
+      enabled: true,
+      started: false,
+      priority: -240,
+      clearsOperationsOnDestroy: true
+    },
+    assetCount: 1,
+    cueCount: 1,
+    channelCount: 2,
+    operationCount: 2,
+    manifest: {
+      assets: [{ id: "hit", preload: false, metadata: undefined }],
+      cues: [{ id: "hit:play", assetId: "hit", channelId: "sfx", volume: 1, loop: false, metadata: undefined }],
+      channels: [
+        { id: "master", volume: 1, muted: false, metadata: undefined },
+        { id: "sfx", volume: 0.5, muted: false, metadata: undefined }
+      ]
+    },
+    channels: [
+      { id: "master", volume: 1, muted: false },
+      { id: "sfx", volume: 0.5, muted: false }
+    ],
+    operations: [
+      {
+        sequence: 1,
+        type: "play",
+        cueId: "hit:play",
+        assetId: "hit",
+        channelId: "sfx",
+        volume: 1,
+        loop: false
+      },
+      {
+        sequence: 2,
+        type: "set-volume",
+        channelId: "sfx",
+        volume: 0.5
+      }
+    ]
+  }), [
+    "Audio Runtime installed",
+    "System enabled=true started=false priority=-240 clearOnDestroy=true",
+    "Manifest assets=1 cues=1 channels=2",
+    "Operations 2",
+    "Channels",
+    "- master volume=1 muted=false",
+    "- sfx volume=0.5 muted=false",
+    "Operation Records",
+    "- #1 play cue=hit:play asset=hit channel=sfx volume=1 loop=false",
+    "- #2 set-volume channel=sfx volume=0.5"
+  ]);
+
+  assert.deepEqual(formatAudioRuntimeSnapshot({ installed: false }), [
+    "Audio Runtime missing"
+  ]);
+});
+
 test("input action snapshot formatting is stable and readable", () => {
   assert.deepEqual(formatInputActionSnapshot({
     count: 3,
@@ -854,6 +1021,34 @@ test("tooling snapshot formatting appends runtime services data when present", (
     "Scheduler updates=disabled clearOnDestroy=false",
     "EventBus listeners=0 emitted=0",
     "Scheduler elapsed=0.000s tasks=0"
+  ]);
+});
+
+test("tooling snapshot formatting appends audio runtime data when present", () => {
+  const scene = new Scene("AudioRuntimeToolingFormatScene");
+  const system = addAudioRuntime(scene, {
+    manifest: {
+      assets: [{ id: "hit" }],
+      cues: [{ id: "hit:play", assetId: "hit" }]
+    }
+  });
+  system.audio.playCue("hit:play");
+
+  assert.deepEqual(formatToolingSnapshot(createToolingSnapshot(scene, { audio: true })), [
+    "Scene AudioRuntimeToolingFormatScene",
+    "Entities 0/0",
+    "Systems 1",
+    "Order #0 AudioRuntimeSystem:-240",
+    "System #0 AudioRuntimeSystem lifecycle=pending enabled=true started=false destroyed=false priority=-240",
+    "",
+    "Audio Runtime installed",
+    "System enabled=true started=false priority=-240 clearOnDestroy=true",
+    "Manifest assets=1 cues=1 channels=1",
+    "Operations 1",
+    "Channels",
+    "- master volume=1 muted=false",
+    "Operation Records",
+    "- #1 play cue=hit:play asset=hit channel=master volume=1 loop=false"
   ]);
 });
 
@@ -979,6 +1174,15 @@ test("runtime services panel section exposes read-only service state", () => {
   }), {
     title: "Runtime Services",
     lines: ["Runtime Services missing"]
+  });
+});
+
+test("audio runtime panel section exposes read-only audio state", () => {
+  assert.deepEqual(createAudioRuntimePanelSection({
+    installed: false
+  }), {
+    title: "Audio Runtime",
+    lines: ["Audio Runtime missing"]
   });
 });
 
@@ -1217,6 +1421,40 @@ test("tooling panel sections include runtime services data when requested", () =
         "Scheduler updates=enabled clearOnDestroy=true",
         "EventBus listeners=0 emitted=0",
         "Scheduler elapsed=0.000s tasks=0"
+      ]
+    }
+  ]);
+});
+
+test("tooling panel sections include audio runtime data when requested", () => {
+  const scene = new Scene("AudioRuntimeSectionsScene");
+  addAudioRuntime(scene, {
+    manifest: {
+      assets: [{ id: "confirm" }],
+      cues: [{ id: "confirm:play", assetId: "confirm" }]
+    }
+  });
+
+  assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { audio: true })), [
+    {
+      title: "Runtime Debug",
+      lines: [
+        "Scene AudioRuntimeSectionsScene",
+        "Entities active=0 total=0 destroyed=0",
+        "Systems total=1",
+        "System Order",
+        "- #0 AudioRuntimeSystem priority=-240 lifecycle=pending enabled=true started=false destroyed=false"
+      ]
+    },
+    {
+      title: "Audio Runtime",
+      lines: [
+        "Audio Runtime installed",
+        "System enabled=true started=false priority=-240 clearOnDestroy=true",
+        "Manifest assets=1 cues=1 channels=1",
+        "Operations 0",
+        "Channels",
+        "- master volume=1 muted=false"
       ]
     }
   ]);

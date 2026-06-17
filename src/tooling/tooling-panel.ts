@@ -1,4 +1,5 @@
 import type {
+  AudioRuntimeSnapshot,
   CollisionSnapshot,
   ComponentSchemaSnapshot,
   DebugAssetSnapshot,
@@ -13,6 +14,7 @@ import type {
   ToolingSnapshot
 } from "./debug.js";
 import {
+  formatAudioRuntimeSnapshot,
   formatCollisionSnapshot,
   formatComponentSchemaSnapshot,
   formatDebugAssetSnapshot,
@@ -91,6 +93,13 @@ export function createSpriteAnimationsPanelSection(snapshot: SpriteAnimationSnap
   return {
     title: "Sprite Animations",
     lines: formatSpriteAnimationSnapshot(snapshot)
+  };
+}
+
+export function createAudioRuntimePanelSection(snapshot: AudioRuntimeSnapshot): ToolingPanelSection {
+  return {
+    title: "Audio Runtime",
+    lines: formatAudioRuntimeSnapshot(snapshot)
   };
 }
 
@@ -211,6 +220,10 @@ export function createToolingPanelSections(snapshot: ToolingSnapshot, selection:
 
   if (snapshot.animations) {
     sections.push(createSpriteAnimationsPanelSection(snapshot.animations));
+  }
+
+  if (snapshot.audio) {
+    sections.push(createAudioRuntimePanelSection(snapshot.audio));
   }
 
   if (snapshot.inputActions) {

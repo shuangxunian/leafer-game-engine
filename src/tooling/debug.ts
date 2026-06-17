@@ -2,12 +2,15 @@ import type { RenderScene } from "../adapter/index.js";
 import { getRenderSceneLayerNames } from "../adapter/render-types.js";
 import type { Component, Game, Scene } from "../core/index.js";
 import type {
+  AudioRuntimeChannelState,
+  AudioRuntimeOperation,
   AssetLoadStatus,
   AssetRegistry,
   CollisionLayer,
   CollisionPairSnapshot,
   ComponentSchema,
   ComponentSchemaRegistry,
+  DefinedAudioManifest,
   GameFlow,
   GameFlowPhase,
   InputActionMap,
@@ -16,7 +19,7 @@ import type {
   Rect,
   SpriteAnimationPlaybackStatus
 } from "../framework/index.js";
-import { CollisionSystem, RuntimeServicesSystem, SpriteAnimationComponent } from "../framework/index.js";
+import { AudioRuntimeSystem, CollisionSystem, RuntimeServicesSystem, SpriteAnimationComponent } from "../framework/index.js";
 
 export type DebugSnapshot = {
   sceneName: string;
@@ -88,6 +91,7 @@ export type DebugSnapshotOptions = {
 
 export type ToolingSnapshotOptions = DebugSnapshotOptions & {
   animations?: boolean;
+  audio?: boolean;
   collisions?: boolean;
   input?: InputSystem;
   inputActions?: InputActionMap;
@@ -126,11 +130,35 @@ export type InspectorComponentSnapshot = {
 export type ToolingSnapshot = {
   debug: DebugSnapshot;
   animations?: SpriteAnimationSnapshot;
+  audio?: AudioRuntimeSnapshot;
   collisions?: CollisionSnapshot;
   inputActions?: InputActionSnapshot;
   inspector?: SceneInspectorSnapshot;
   runtimeServices?: RuntimeServicesSnapshot;
   schemas?: ComponentSchemaSnapshot;
+};
+
+export type AudioRuntimeSnapshot =
+  | {
+      installed: false;
+    }
+  | {
+      installed: true;
+      system: AudioRuntimeSystemSnapshot;
+      assetCount: number;
+      cueCount: number;
+      channelCount: number;
+      operationCount: number;
+      manifest: DefinedAudioManifest;
+      channels: AudioRuntimeChannelState[];
+      operations: AudioRuntimeOperation[];
+    };
+
+export type AudioRuntimeSystemSnapshot = {
+  enabled: boolean;
+  started: boolean;
+  priority: number;
+  clearsOperationsOnDestroy: boolean;
 };
 
 export type RuntimeServicesSnapshot =
@@ -284,6 +312,7 @@ export function createToolingSnapshot(scene: Scene, options: ToolingSnapshotOpti
   return {
     debug: createDebugSnapshot(scene, options),
     animations: options.animations ? createSpriteAnimationSnapshot(scene) : undefined,
+    audio: options.audio ? createAudioRuntimeSnapshot(scene) : undefined,
     collisions: options.collisions ? createCollisionSnapshot(scene) : undefined,
     inputActions: options.inputActions ? createInputActionSnapshot(options.inputActions, options.input) : undefined,
     inspector: options.inspector ? createSceneInspectorSnapshot(scene) : undefined,
@@ -365,6 +394,10 @@ export function formatToolingSnapshot(snapshot: ToolingSnapshot): string[] {
 
   if (snapshot.animations) {
     lines.push("", ...formatSpriteAnimationSnapshot(snapshot.animations));
+  }
+
+  if (snapshot.audio) {
+    lines.push("", ...formatAudioRuntimeSnapshot(snapshot.audio));
   }
 
   if (snapshot.inputActions) {
@@ -460,6 +493,36 @@ export function createRuntimeServicesSnapshot(scene: Scene): RuntimeServicesSnap
   };
 }
 
+export function createAudioRuntimeSnapshot(scene: Scene): AudioRuntimeSnapshot {
+  const system = scene.getSystem(AudioRuntimeSystem);
+
+  if (!system) {
+    return {
+      installed: false
+    };
+  }
+
+  const manifest = system.audio.manifest;
+  const operations = system.audio.listOperations();
+
+  return {
+    installed: true,
+    system: {
+      enabled: system.enabled,
+      started: system.started,
+      priority: system.priority,
+      clearsOperationsOnDestroy: system.clearsOperationsOnDestroy
+    },
+    assetCount: manifest.assets.length,
+    cueCount: manifest.cues.length,
+    channelCount: manifest.channels.length,
+    operationCount: operations.length,
+    manifest,
+    channels: system.audio.listChannels(),
+    operations
+  };
+}
+
 export function createInputActionSnapshot(
   actionMap: InputActionMap,
   input?: InputSystem
@@ -501,6 +564,35 @@ export function formatRuntimeServicesSnapshot(snapshot: RuntimeServicesSnapshot)
     lines.push(
       `Last Update dt=${snapshot.scheduler.lastUpdate.deltaSeconds.toFixed(3)}s fired=${snapshot.scheduler.lastUpdate.firedCount} tasks=${snapshot.scheduler.lastUpdate.taskCount}`
     );
+  }
+
+  return lines;
+}
+
+export function formatAudioRuntimeSnapshot(snapshot: AudioRuntimeSnapshot): string[] {
+  if (!snapshot.installed) {
+    return ["Audio Runtime missing"];
+  }
+
+  const lines = [
+    "Audio Runtime installed",
+    `System enabled=${snapshot.system.enabled} started=${snapshot.system.started} priority=${snapshot.system.priority} clearOnDestroy=${snapshot.system.clearsOperationsOnDestroy}`,
+    `Manifest assets=${snapshot.assetCount} cues=${snapshot.cueCount} channels=${snapshot.channelCount}`,
+    `Operations ${snapshot.operationCount}`
+  ];
+
+  if (snapshot.channels.length > 0) {
+    lines.push("Channels");
+    for (const channel of snapshot.channels) {
+      lines.push(`- ${channel.id} volume=${channel.volume} muted=${channel.muted}`);
+    }
+  }
+
+  if (snapshot.operations.length > 0) {
+    lines.push("Operation Records");
+    for (const operation of snapshot.operations) {
+      lines.push(`- #${operation.sequence} ${formatAudioRuntimeOperation(operation)}`);
+    }
   }
 
   return lines;
@@ -675,6 +767,19 @@ function formatInputBinding(binding: InputBinding): string {
 
 function formatInputBindingKey(key: string): string {
   return key === " " ? "<space>" : key;
+}
+
+function formatAudioRuntimeOperation(operation: AudioRuntimeOperation): string {
+  const parts: string[] = [operation.type];
+
+  if (operation.cueId !== undefined) parts.push(`cue=${operation.cueId}`);
+  if (operation.assetId !== undefined) parts.push(`asset=${operation.assetId}`);
+  if (operation.channelId !== undefined) parts.push(`channel=${operation.channelId}`);
+  if (operation.volume !== undefined) parts.push(`volume=${operation.volume}`);
+  if (operation.muted !== undefined) parts.push(`muted=${operation.muted}`);
+  if (operation.loop !== undefined) parts.push(`loop=${operation.loop}`);
+
+  return parts.join(" ");
 }
 
 function createCollisionPairSummarySnapshot(pair: CollisionPairSnapshot): CollisionPairSummarySnapshot {
