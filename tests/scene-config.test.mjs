@@ -4,7 +4,9 @@ import assert from "node:assert/strict";
 import { Scene, System } from "../lib/core/index.js";
 import {
   AssetRegistry,
+  LevelLayout,
   SizeComponent,
+  TileMap,
   TransformComponent,
   bootstrapSceneFromConfig,
   SceneSystemRegistry,
@@ -34,6 +36,20 @@ test("scene config bootstraps assets, entities and systems", () => {
     {
       assets: {
         sprites: [{ id: "player", fill: "#ffcf7a" }]
+      },
+      level: {
+        tileMap: {
+          id: "arena",
+          width: 1,
+          height: 1,
+          tileWidth: 16,
+          tileHeight: 16,
+          layers: [{ id: "ground", tiles: ["floor"] }]
+        },
+        layout: {
+          id: "arena-layout",
+          spawns: [{ id: "player", x: 12, y: 34 }]
+        }
       },
       entities: [
         {
@@ -101,6 +117,125 @@ test("scene config validation accepts valid configs without mutating runtime sta
   assert.deepEqual(scene.world.getEntities(), []);
   assert.deepEqual(scene.systems, []);
   assert.deepEqual(assets.listSprites(), []);
+});
+
+test("scene config bootstraps optional level declarations without creating scene content", () => {
+  const scene = new Scene("LevelConfigScene");
+
+  const result = bootstrapSceneFromConfig(scene, {
+    level: {
+      tileMap: {
+        id: "arena",
+        width: 2,
+        height: 2,
+        tileWidth: 16,
+        tileHeight: 16,
+        layers: [
+          {
+            id: "ground",
+            tiles: ["floor", "wall", null, "floor"]
+          }
+        ]
+      },
+      layout: {
+        id: "arena-layout",
+        spawns: [{ id: "player", x: 24, y: 32 }],
+        regions: [{ id: "safe-zone", x: 0, y: 0, width: 64, height: 64, tags: ["safe"] }]
+      }
+    }
+  });
+
+  assert.equal(result.level?.tileMap instanceof TileMap, true);
+  assert.equal(result.level?.layout instanceof LevelLayout, true);
+  assert.equal(result.level?.tileMap?.getTile("ground", 1, 0), "wall");
+  assert.deepEqual(result.level?.layout?.getSpawnPoint("player"), {
+    id: "player",
+    x: 24,
+    y: 32,
+    rotation: 0,
+    metadata: undefined
+  });
+  assert.equal(result.level?.layout?.containsPoint("safe-zone", 63, 63), true);
+  assert.deepEqual(result.entities, []);
+  assert.deepEqual(result.systems, []);
+  assert.deepEqual(scene.world.getEntities(), []);
+  assert.deepEqual(scene.systems, []);
+});
+
+test("scene config validation reports invalid level declarations deterministically", () => {
+  assert.deepEqual(validateSceneConfig({
+    level: {
+      tileMap: {
+        id: "arena",
+        width: 2,
+        height: 2,
+        tileWidth: 16,
+        tileHeight: 16,
+        layers: [{ id: "ground", tiles: ["floor"] }]
+      },
+      layout: {
+        id: "arena-layout",
+        regions: [{ id: "safe-zone", x: 0, y: 0, width: 0, height: 64 }]
+      }
+    }
+  }), {
+    ok: false,
+    errors: [
+      {
+        code: "invalid-tile-map",
+        path: "level.tileMap",
+        message: 'Tile map layer "ground" must contain 4 tiles, received 1.'
+      },
+      {
+        code: "invalid-level-layout",
+        path: "level.layout",
+        message: "Level region width must be greater than 0."
+      }
+    ]
+  });
+});
+
+test("scene config safe bootstrap reports invalid level before runtime mutation", () => {
+  const scene = new Scene("InvalidLevelConfigScene");
+  const assets = new AssetRegistry();
+
+  const result = bootstrapSceneFromConfig(
+    scene,
+    {
+      assets: {
+        sprites: [{ id: "player", fill: "#ffcf7a" }]
+      },
+      level: "not-level",
+      entities: [
+        {
+          name: "ShouldNotExist",
+          components: [{ type: "transform", data: { x: 1, y: 2 } }]
+        }
+      ]
+    },
+    {
+      assets,
+      validateBeforeBootstrap: true
+    }
+  );
+
+  assert.deepEqual(result, {
+    validation: {
+      ok: false,
+      errors: [
+        {
+          code: "invalid-level",
+          path: "level",
+          message: "Scene config level must be an object."
+        }
+      ]
+    },
+    entities: [],
+    systems: []
+  });
+  assert.deepEqual(assets.listSprites(), []);
+  assert.deepEqual(scene.world.getEntities(), []);
+  assert.deepEqual(scene.systems, []);
 });
 
 test("scene config validation reports structural errors deterministically", () => {
@@ -368,6 +503,20 @@ test("scene config stops before entity creation when asset manifest fails", () =
   assert.deepEqual(result.entities, []);
   assert.deepEqual(result.systems, []);
   assert.deepEqual(scene.world.getEntities(), []);
+});
+
+test("scene config fails clearly for invalid level declarations during default bootstrap", () => {
+  const scene = new Scene("InvalidLevelDefaultBootstrapScene");
+
+  assert.throws(
+    () =>
+      bootstrapSceneFromConfig(scene, {
+        level: "not-level"
+      }),
+    /Scene config level must be an object/
+  );
+  assert.deepEqual(scene.world.getEntities(), []);
+  assert.deepEqual(scene.systems, []);
 });
 
 test("scene config requires a system registry for system declarations", () => {

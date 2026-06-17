@@ -3,14 +3,24 @@ import type { AssetLoadResult, AssetManifest, AssetRegistry } from "./assets.js"
 import { AssetRegistry as AssetRegistryClass, loadAssetManifest } from "./assets.js";
 import type { EntityTemplate, EntityTemplateComponent, EntityTemplateRegistry } from "./factory.js";
 import { createDefaultEntityTemplateRegistry, instantiateEntityTemplate } from "./factory.js";
+import type { LevelLayout, LevelLayoutDefinition } from "./level.js";
+import { createLevelLayout } from "./level.js";
+import type { TileMap, TileMapDefinition } from "./tile-map.js";
+import { createTileMap } from "./tile-map.js";
 
 export type SceneConfigSystem<TData = unknown> = {
   type: string;
   data?: TData;
 };
 
+export type SceneConfigLevel = {
+  tileMap?: TileMapDefinition;
+  layout?: LevelLayoutDefinition;
+};
+
 export type SceneConfig = {
   assets?: AssetManifest;
+  level?: SceneConfigLevel;
   entities?: EntityTemplate[];
   systems?: SceneConfigSystem[];
 };
@@ -26,6 +36,10 @@ export type SceneBootstrapOptions = {
 
 export type SceneBootstrapResult = {
   assets?: AssetLoadResult;
+  level?: {
+    tileMap?: TileMap;
+    layout?: LevelLayout;
+  };
   entities: Entity[];
   systems: System[];
   validation?: SceneConfigValidationResult;
@@ -34,6 +48,9 @@ export type SceneBootstrapResult = {
 export type SceneConfigValidationErrorCode =
   | "invalid-assets"
   | "invalid-asset-manifest"
+  | "invalid-level"
+  | "invalid-tile-map"
+  | "invalid-level-layout"
   | "invalid-entities"
   | "invalid-entity"
   | "invalid-components"
@@ -92,6 +109,7 @@ export function validateSceneConfig(
   const errors: SceneConfigValidationError[] = [];
 
   validateSceneConfigAssets(config, options, errors);
+  validateSceneConfigLevel(config, errors);
   validateSceneConfigEntities(config, options, errors);
   validateSceneConfigSystems(config, options, errors);
 
@@ -131,6 +149,7 @@ export function bootstrapSceneFromConfig(
     };
   }
 
+  const level = createSceneConfigLevel(config);
   const entities = (config.entities ?? []).map((template) =>
     instantiateEntityTemplate(scene, template, { registry: options.entityRegistry })
   );
@@ -145,6 +164,7 @@ export function bootstrapSceneFromConfig(
   return {
     validation,
     assets: assetResult,
+    ...(level ? { level } : {}),
     entities,
     systems
   };
@@ -190,6 +210,62 @@ function validateSceneConfigAssets(
       path: error.assetId === undefined ? "assets" : `assets:${error.assetId}`,
       message: error.message
     });
+  }
+}
+
+function validateSceneConfigLevel(
+  config: SceneConfig,
+  errors: SceneConfigValidationError[]
+): void {
+  if (config.level === undefined) return;
+
+  if (!isRecord(config.level)) {
+    errors.push({
+      code: "invalid-level",
+      path: "level",
+      message: "Scene config level must be an object."
+    });
+    return;
+  }
+
+  if (config.level.tileMap !== undefined) {
+    if (!isRecord(config.level.tileMap)) {
+      errors.push({
+        code: "invalid-tile-map",
+        path: "level.tileMap",
+        message: "Scene config level.tileMap must be an object."
+      });
+    } else {
+      try {
+        createTileMap(config.level.tileMap);
+      } catch (error) {
+        errors.push({
+          code: "invalid-tile-map",
+          path: "level.tileMap",
+          message: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }
+  }
+
+  if (config.level.layout !== undefined) {
+    if (!isRecord(config.level.layout)) {
+      errors.push({
+        code: "invalid-level-layout",
+        path: "level.layout",
+        message: "Scene config level.layout must be an object."
+      });
+    } else {
+      try {
+        createLevelLayout(config.level.layout);
+      } catch (error) {
+        errors.push({
+          code: "invalid-level-layout",
+          path: "level.layout",
+          message: error instanceof Error ? error.message : String(error)
+        });
+      }
+    }
   }
 }
 
@@ -336,6 +412,32 @@ function validateSceneConfigSystems(
       });
     }
   });
+}
+
+function createSceneConfigLevel(config: SceneConfig): SceneBootstrapResult["level"] {
+  if (config.level === undefined) return undefined;
+
+  if (!isRecord(config.level)) {
+    throw new Error("Scene config level must be an object.");
+  }
+
+  if (config.level.tileMap !== undefined && !isRecord(config.level.tileMap)) {
+    throw new Error("Scene config level.tileMap must be an object.");
+  }
+
+  if (config.level.layout !== undefined && !isRecord(config.level.layout)) {
+    throw new Error("Scene config level.layout must be an object.");
+  }
+
+  const tileMap = config.level.tileMap ? createTileMap(config.level.tileMap) : undefined;
+  const layout = config.level.layout ? createLevelLayout(config.level.layout) : undefined;
+
+  if (!tileMap && !layout) return undefined;
+
+  return {
+    ...(tileMap ? { tileMap } : {}),
+    ...(layout ? { layout } : {})
+  };
 }
 
 function cloneAssetRegistry(registry?: AssetRegistry): AssetRegistryClass {

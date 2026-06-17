@@ -38,6 +38,17 @@ Scene configs can include a `systems` section when the caller provides a `SceneS
 
 System config is intentionally registry-backed so downstream games decide which system types are allowed. Validation reports missing or unknown system types before bootstrap when requested.
 
+### Level/Map Declarations
+
+Scene configs can include an optional `level` section backed by the existing level/map runtime primitives:
+
+- `level.tileMap` declares a `TileMapDefinition`.
+- `level.layout` declares a `LevelLayoutDefinition`.
+- Validation reuses the tile map and level layout contracts.
+- Successful bootstrap returns `result.level.tileMap` and/or `result.level.layout` helpers when declared.
+
+Level declarations are inert runtime data. They do not create entities, add systems, render maps, generate colliders, spawn gameplay objects, or store editor state by themselves.
+
 ## Validation
 
 Use `validateSceneConfig(...)` from `/framework` when a game wants deterministic diagnostics without mutating runtime state:
@@ -60,7 +71,7 @@ Validation returns:
 - stable error `path`
 - readable `message`
 
-Validation does not register assets, create entities, add systems, or call system factories. It may instantiate component template data in isolation to convert expected component data problems into diagnostics.
+Validation does not register assets, create entities, add systems, create level helper instances for runtime use, or call system factories. It may instantiate component template data and level/map contracts in isolation to convert expected data problems into diagnostics.
 
 ## Safe Bootstrap
 
@@ -81,9 +92,9 @@ if (result.validation && !result.validation.ok) {
 }
 ```
 
-When validation fails in this mode, bootstrap returns empty `entities` and `systems`, does not register assets, and includes the validation result.
+When validation fails in this mode, bootstrap returns empty `entities` and `systems`, does not register assets, does not create level bootstrap output, and includes the validation result.
 
-Default bootstrap behavior remains compatible for callers that do not opt into validation.
+Default bootstrap behavior remains compatible for callers that do not opt into validation. When valid level declarations are present, successful bootstrap includes a `level` result with the created helper objects.
 
 ## Example Consumption
 
@@ -113,6 +124,9 @@ The current scene config scope intentionally does not include:
 - serialized gameplay state
 - save-file migration
 - prefab inheritance
+- automatic entity spawning from level declarations
+- collision or trigger generation from level regions
+- map rendering
 - editor UI
 - drag-and-drop scene authoring
 - component value editing
