@@ -6,18 +6,18 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.11.2` Animation Playback Timing Helpers，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段和 `0.10.x` package-facing API boundary 阶段都已经收口，`0.11.x` 正在推进 sprite animation 和 asset runtime 能力。
+当前项目已经推进到 `v0.11.3` Framework Sprite Animation Component And System，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段和 `0.10.x` package-facing API boundary 阶段都已经收口，`0.11.x` 正在推进 sprite animation 和 asset runtime 能力。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
 - `core` 已具备主循环、场景、实体、组件、系统、时间步进和生命周期管理。
-- `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、GameFlow、相机、资源注册、异步资源加载状态、sprite frame / animation clip 数据契约、animation playback timing helpers、实体工厂、场景配置和组件 schema 等基础能力。
+- `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、GameFlow、相机、资源注册、异步资源加载状态、sprite frame / animation clip 数据契约、animation playback timing helpers、SpriteAnimationComponent/System、实体工厂、场景配置和组件 schema 等基础能力。
 - `adapter` 已经通过渲染抽象接入 Leafer，并把显示层和游戏规则层分开。
 - `runtime` 已经可以在浏览器里装配渲染、场景、动画帧循环和 scene lifecycle start helper。
 - `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、asset load state snapshot、GameFlow snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail、assets/game flow panel section 和 schema-assisted component detail 展示。
 - `examples/dodge-blocks` 作为集成样例，用来验证引擎分层、异步资源加载和运行时能力。
 
-当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程、scene lifecycle 启动边界、sprite animation 数据契约和 deterministic playback timing helpers。
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程、scene lifecycle 启动边界、sprite animation 数据契约、deterministic playback timing helpers 和 ECS animation component/system。
 
 ## 产品边界
 
@@ -562,7 +562,7 @@ import {
 
 ## 当前已经实现了什么
 
-当前已经完成了 `0.1.x` 到 `0.10.x` 的连续整理，`0.11.x` 正在推进 sprite animation 和 asset runtime 能力。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过交互式 runtime inspector 辅助开发、可作为 package 被消费”，并补齐了资源加载基线、GameFlow、scene lifecycle 启动边界、package-facing API 边界和 sprite animation playback timing 基础。
+当前已经完成了 `0.1.x` 到 `0.10.x` 的连续整理，`0.11.x` 正在推进 sprite animation 和 asset runtime 能力。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过交互式 runtime inspector 辅助开发、可作为 package 被消费”，并补齐了资源加载基线、GameFlow、scene lifecycle 启动边界、package-facing API 边界、sprite animation playback timing 基础和 ECS animation component/system。
 
 - Core 稳定性
   - `Game`、`Time`、`Scene`、`World`、`Entity`、`Component`、`System` 已经形成基础骨架。
@@ -578,6 +578,7 @@ import {
   - 已有 `CameraSystem`，能驱动 world layer 位移、缩放和跟随实体。
   - 已有 `AssetRegistry`，支持 typed sprite asset 注册、查找、缺失时报错、异步加载状态、manifest 部分加载结果、sprite frame / animation clip 数据契约和浏览器图片加载适配。
   - 已有 sprite animation playback timing helpers，支持 deterministic advance、loop、non-loop completion、pause/resume/stop 和 frame-level duration override。
+  - 已有 `SpriteAnimationComponent` 和 `SpriteAnimationSystem`，可以在 ECS 中推进动画状态，并把当前 frame 的 sprite asset 应用到 sprite-capable `ViewComponent`。
   - 已有 `defineEntityFactory`，支持把实体创建逻辑从 sample 中抽出来复用。
   - 已有 asset manifest、entity template、scene config 和 component schema registry，开始具备数据驱动内容管线基础。
 
@@ -603,7 +604,7 @@ import {
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
-  - 当前测试数为 112 个。
+  - 当前测试数为 117 个。
   - `npm run check`、`npm test`、`npm run build:example`、`npm run verify:package` 是当前主要验证入口。
 
 ## 当前 demo 的意义
@@ -668,7 +669,7 @@ npm run verify:package
 
 如果我们把目标定义为“做游戏引擎”，那接下来的重点不应该是继续打磨 demo 外观，而应该继续把当前已经有的 runtime、framework、tooling 往产品化方向推进。
 
-`0.7.x` 已经把 interactive runtime inspector 阶段收口了，`0.8.x` 完成了资源加载和 asset pipeline 基线，`0.9.x` 完成了 Game Flow 和 Scene Lifecycle 基线，`0.10.x` 完成了 package-facing API boundary 基线，`0.11.x` 正在把 sprite animation 从数据契约推进到 runtime playback 和 ECS 集成。下一阶段更值得优先投入的是这些方向：
+`0.7.x` 已经把 interactive runtime inspector 阶段收口了，`0.8.x` 完成了资源加载和 asset pipeline 基线，`0.9.x` 完成了 Game Flow 和 Scene Lifecycle 基线，`0.10.x` 完成了 package-facing API boundary 基线，`0.11.x` 已经把 sprite animation 从数据契约推进到 playback helper 和 ECS component/system，后续可以继续接入示例与 tooling 可视化。下一阶段更值得优先投入的是这些方向：
 
 1. 更完整的 runtime tooling / inspector
    - 系统开关和运行时状态查看

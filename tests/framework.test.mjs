@@ -3,10 +3,14 @@ import assert from "node:assert/strict";
 
 import { Scene } from "../lib/core/index.js";
 import {
+  AssetRegistry,
   CameraSystem,
   GameFlow,
   StateMachine,
+  SpriteAnimationComponent,
+  SpriteAnimationSystem,
   TransformComponent,
+  ViewComponent,
   advanceSpriteAnimationPlayback,
   createSpriteAnimationPlayback,
   defineSpriteAnimationClip,
@@ -357,6 +361,151 @@ test("sprite animation playback reports invalid timing inputs clearly", () => {
   );
 });
 
+test("sprite animation system advances components and applies sprite frames to view nodes", () => {
+  const scene = new Scene("AnimationScene");
+  const assets = createAnimationAssets();
+  const node = createFakeSpriteNode();
+  const actor = scene.world.createEntity("hero");
+  const animation = actor.addComponent(new SpriteAnimationComponent("hero-run"));
+  actor.addComponent(new TransformComponent());
+  actor.addComponent(new ViewComponent(node));
+  scene.addSystem(new SpriteAnimationSystem(scene, assets));
+  scene.start();
+
+  scene.update(0.25);
+  scene.lateUpdate(0.25);
+
+  assert.equal(animation.currentFrameId, "hero-run-2");
+  assert.equal(animation.currentSpriteId, "hero-sprite-2");
+  assert.equal(animation.playback.frameIndex, 1);
+  assert.equal(node.asset.id, "hero-sprite-2");
+  assert.equal(node.width, 36);
+  assert.equal(node.height, 40);
+});
+
+test("sprite animation component can pause, resume and stop through the animation system", () => {
+  const scene = new Scene("AnimationControlsScene");
+  const assets = createAnimationAssets();
+  const actor = scene.world.createEntity("hero");
+  const animation = actor.addComponent(new SpriteAnimationComponent("hero-run"));
+  actor.addComponent(new TransformComponent());
+  scene.addSystem(new SpriteAnimationSystem(scene, assets));
+  scene.start();
+
+  animation.pause();
+  scene.update(0.5);
+  assert.equal(animation.playback.status, "paused");
+  assert.equal(animation.currentFrameId, "hero-run-1");
+
+  animation.resume();
+  scene.update(0.25);
+  assert.equal(animation.playback.status, "playing");
+  assert.equal(animation.currentFrameId, "hero-run-2");
+
+  animation.stop();
+  scene.update(0.25);
+  assert.equal(animation.playback.status, "stopped");
+  assert.equal(animation.playback.elapsedSeconds, 0);
+  assert.equal(animation.currentFrameId, "hero-run-1");
+});
+
+test("sprite animation component can switch clips and reset playback", () => {
+  const scene = new Scene("AnimationSwitchScene");
+  const assets = createAnimationAssets();
+  const node = createFakeSpriteNode();
+  const actor = scene.world.createEntity("hero");
+  const animation = actor.addComponent(new SpriteAnimationComponent("hero-run"));
+  actor.addComponent(new TransformComponent());
+  actor.addComponent(new ViewComponent(node));
+  scene.addSystem(new SpriteAnimationSystem(scene, assets));
+  scene.start();
+
+  scene.update(0.5);
+  animation.play("hero-idle");
+  scene.update(0);
+  scene.lateUpdate(0);
+
+  assert.deepEqual(animation.playback, {
+    clipId: "hero-idle",
+    status: "playing",
+    elapsedSeconds: 0,
+    frameIndex: 0,
+    completedLoops: 0
+  });
+  assert.equal(animation.currentFrameId, "hero-idle-1");
+  assert.equal(node.asset.id, "hero-sprite-1");
+});
+
+test("sprite animation system can update animation state without a view component", () => {
+  const scene = new Scene("HeadlessAnimationScene");
+  const assets = createAnimationAssets();
+  const actor = scene.world.createEntity("headless-hero");
+  const animation = actor.addComponent(new SpriteAnimationComponent("hero-run"));
+  scene.addSystem(new SpriteAnimationSystem(scene, assets));
+  scene.start();
+
+  scene.update(0.25);
+  scene.lateUpdate(0.25);
+
+  assert.equal(animation.currentFrameId, "hero-run-2");
+  assert.equal(animation.currentSpriteId, "hero-sprite-2");
+});
+
+test("sprite animation system reports invalid animation setup clearly", () => {
+  const missingClipScene = new Scene("MissingClipScene");
+  const missingClipAssets = createAnimationAssets();
+  const missingClipActor = missingClipScene.world.createEntity("hero");
+  missingClipActor.addComponent(new SpriteAnimationComponent("missing"));
+  missingClipScene.addSystem(new SpriteAnimationSystem(missingClipScene, missingClipAssets));
+  missingClipScene.start();
+  assert.throws(
+    () => missingClipScene.update(0),
+    /Sprite animation clip "missing" is not registered/
+  );
+
+  const missingFrameScene = new Scene("MissingFrameScene");
+  const missingFrameAssets = new AssetRegistry();
+  missingFrameAssets.registerAnimationClip({ id: "broken", frameIds: ["missing-frame"], frameDurationSeconds: 0.25 });
+  const missingFrameActor = missingFrameScene.world.createEntity("hero");
+  missingFrameActor.addComponent(new SpriteAnimationComponent("broken"));
+  missingFrameScene.addSystem(new SpriteAnimationSystem(missingFrameScene, missingFrameAssets));
+  missingFrameScene.start();
+  assert.throws(
+    () => missingFrameScene.update(0),
+    /Sprite frame "missing-frame" is not registered/
+  );
+
+  const missingSpriteScene = new Scene("MissingSpriteScene");
+  const missingSpriteAssets = new AssetRegistry();
+  missingSpriteAssets.registerSpriteFrame({ id: "orphan-frame", spriteId: "missing-sprite" });
+  missingSpriteAssets.registerAnimationClip({ id: "orphan", frameIds: ["orphan-frame"], frameDurationSeconds: 0.25 });
+  const missingSpriteActor = missingSpriteScene.world.createEntity("hero");
+  missingSpriteActor.addComponent(new SpriteAnimationComponent("orphan"));
+  missingSpriteActor.addComponent(new TransformComponent());
+  missingSpriteActor.addComponent(new ViewComponent(createFakeSpriteNode()));
+  missingSpriteScene.addSystem(new SpriteAnimationSystem(missingSpriteScene, missingSpriteAssets));
+  missingSpriteScene.start();
+  missingSpriteScene.update(0);
+  assert.throws(
+    () => missingSpriteScene.lateUpdate(0),
+    /Sprite asset "missing-sprite" is not registered/
+  );
+
+  const nonSpriteScene = new Scene("NonSpriteAnimationScene");
+  const nonSpriteAssets = createAnimationAssets();
+  const nonSpriteActor = nonSpriteScene.world.createEntity("hero");
+  nonSpriteActor.addComponent(new SpriteAnimationComponent("hero-run"));
+  nonSpriteActor.addComponent(new TransformComponent());
+  nonSpriteActor.addComponent(new ViewComponent(createFakeContainer()));
+  nonSpriteScene.addSystem(new SpriteAnimationSystem(nonSpriteScene, nonSpriteAssets));
+  nonSpriteScene.start();
+  nonSpriteScene.update(0);
+  assert.throws(
+    () => nonSpriteScene.lateUpdate(0),
+    /ViewComponent node does not support sprite assets/
+  );
+});
+
 test("camera system maps world layer from position and zoom", () => {
   const scene = new Scene("CameraScene");
   const renderScene = createFakeRenderScene(800, 600);
@@ -395,6 +544,37 @@ test("camera system can follow an entity using transform position and offset", (
   assert.equal(renderScene.layers.world.x, 270);
   assert.equal(renderScene.layers.world.y, 200);
 });
+
+function createAnimationAssets() {
+  const assets = new AssetRegistry();
+  assets.loadManifest({
+    sprites: [
+      { id: "hero-sprite-1", fill: "#ffcf7a", width: 32, height: 32 },
+      { id: "hero-sprite-2", fill: "#6cb7ff", width: 32, height: 32 }
+    ],
+    frames: [
+      { id: "hero-run-1", spriteId: "hero-sprite-1", width: 32, height: 40, durationSeconds: 0.25 },
+      { id: "hero-run-2", spriteId: "hero-sprite-2", width: 36, height: 40, durationSeconds: 0.25 },
+      { id: "hero-idle-1", spriteId: "hero-sprite-1", width: 32, height: 40, durationSeconds: 0.5 }
+    ],
+    clips: [
+      { id: "hero-run", frameIds: ["hero-run-1", "hero-run-2"] },
+      { id: "hero-idle", frameIds: ["hero-idle-1"], loop: false }
+    ]
+  });
+
+  return assets;
+}
+
+function createFakeSpriteNode() {
+  return {
+    ...createFakeContainer(),
+    asset: undefined,
+    setAsset(asset) {
+      this.asset = asset;
+    }
+  };
+}
 
 function createFakeRenderScene(width, height) {
   return {
