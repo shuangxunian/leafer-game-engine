@@ -18,6 +18,8 @@ For the runtime-services boundary across event dispatch, update-driven schedulin
 
 For the input-actions boundary across raw input state, keyboard bindings, action maps, example consumption, and read-only tooling visibility, see [Input Actions Boundary](input-actions.md).
 
+`0.14.x` has started runtime observability hardening. The Node-safe `tooling` entrypoint now exposes more explicit read-only system debug snapshot fields, including system registration order, destroyed state, and a derived lifecycle label.
+
 ---
 
 ## Package Entrypoints
@@ -140,7 +142,7 @@ They should be verified through browser/example builds until the package is spli
 
 - `core` should stay independent from browser and rendering implementations.
 - `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, and opt-in scene runtime service integration.
-- `tooling` can expose structured snapshots and formatters in Node, including read-only sprite animation state, runtime services state, and input action state, but browser panel classes should only be constructed in a DOM environment.
+- `tooling` can expose structured snapshots and formatters in Node, including read-only system lifecycle state, sprite animation state, runtime services state, and input action state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
 - Future package-boundary work may split browser runtime APIs into more explicit entrypoints.

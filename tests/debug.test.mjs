@@ -49,6 +49,16 @@ class DebugSystem extends System {
   priority = 42;
 }
 
+class SlowDebugSystem extends System {
+  priority = 10;
+}
+
+class FastDebugSystem extends System {
+  priority = -10;
+}
+
+class DefaultDebugSystem extends System {}
+
 class InspectorFixtureComponent extends Component {
   label = "hero";
   speed = 12;
@@ -74,11 +84,68 @@ test("debug snapshot includes scene, entity and system details", () => {
   assert.deepEqual(snapshot.systems, [
     {
       name: "DebugSystem",
+      order: 0,
       enabled: true,
       started: true,
-      priority: 42
+      destroyed: false,
+      priority: 42,
+      lifecycle: "running"
     }
   ]);
+});
+
+test("debug snapshot exposes deterministic system order and lifecycle state", () => {
+  const orderScene = new Scene("SystemOrderScene");
+  orderScene.addSystem(new SlowDebugSystem(orderScene));
+  orderScene.addSystem(new FastDebugSystem(orderScene));
+  orderScene.addSystem(new DefaultDebugSystem(orderScene));
+
+  assert.deepEqual(
+    createDebugSnapshot(orderScene).systems.map((system) => ({
+      name: system.name,
+      order: system.order,
+      priority: system.priority,
+      lifecycle: system.lifecycle
+    })),
+    [
+      {
+        name: "FastDebugSystem",
+        order: 1,
+        priority: -10,
+        lifecycle: "pending"
+      },
+      {
+        name: "DefaultDebugSystem",
+        order: 2,
+        priority: 0,
+        lifecycle: "pending"
+      },
+      {
+        name: "SlowDebugSystem",
+        order: 0,
+        priority: 10,
+        lifecycle: "pending"
+      }
+    ]
+  );
+
+  const lifecycleScene = new Scene("SystemLifecycleScene");
+  lifecycleScene.addSystem(new DebugSystem(lifecycleScene));
+  const disabled = lifecycleScene.addSystem(new DefaultDebugSystem(lifecycleScene));
+  const destroyed = lifecycleScene.addSystem(new SlowDebugSystem(lifecycleScene));
+  disabled.enabled = false;
+  destroyed.dispose();
+  lifecycleScene.start();
+
+  const lifecyclesByName = Object.fromEntries(
+    createDebugSnapshot(lifecycleScene).systems.map((system) => [system.name, system.lifecycle])
+  );
+
+  assert.deepEqual(lifecyclesByName, {
+    DebugSystem: "running",
+    DefaultDebugSystem: "disabled",
+    SlowDebugSystem: "destroyed"
+  });
 });
 
 test("debug snapshot can include time, render and asset details", () => {
@@ -680,7 +747,8 @@ test("tooling snapshot formatting appends runtime services data when present", (
     "Scene RuntimeServicesToolingFormatScene",
     "Entities 0/0",
     "Systems 1",
-    "Order RuntimeServicesSystem:-123",
+    "Order #0 RuntimeServicesSystem:-123",
+    "System #0 RuntimeServicesSystem lifecycle=running enabled=true started=true destroyed=false priority=-123",
     "",
     "Runtime Services installed",
     "System enabled=true started=true priority=-123",
@@ -961,7 +1029,8 @@ test("tooling panel sections include runtime services data when requested", () =
         "Scene RuntimeServicesSectionsScene",
         "Entities 0/0",
         "Systems 1",
-        "Order RuntimeServicesSystem:-250"
+        "Order #0 RuntimeServicesSystem:-250",
+        "System #0 RuntimeServicesSystem lifecycle=pending enabled=true started=false destroyed=false priority=-250"
       ]
     },
     {

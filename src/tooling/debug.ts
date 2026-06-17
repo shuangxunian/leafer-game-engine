@@ -29,10 +29,15 @@ export type DebugSnapshot = {
 
 export type DebugSystemSnapshot = {
   name: string;
+  order: number;
   enabled: boolean;
   started: boolean;
+  destroyed: boolean;
   priority: number;
+  lifecycle: DebugSystemLifecycle;
 };
+
+export type DebugSystemLifecycle = "pending" | "running" | "disabled" | "destroyed";
 
 export type DebugTimeSnapshot = {
   delta: number;
@@ -207,9 +212,12 @@ export function createDebugSnapshot(scene: Scene, options: DebugSnapshotOptions 
     systemCount: scene.systems.length,
     systems: scene.systems.map((system) => ({
       name: system.constructor.name,
+      order: system.order,
       enabled: system.enabled,
       started: system.started,
-      priority: system.priority
+      destroyed: system.destroyed,
+      priority: system.priority,
+      lifecycle: getSystemLifecycle(system)
     })),
     time: options.game ? createTimeSnapshot(options.game) : undefined,
     render: options.renderScene ? createRenderSnapshot(options.renderScene) : undefined,
@@ -276,10 +284,22 @@ export function formatDebugSnapshot(snapshot: DebugSnapshot): string[] {
   }
 
   if (snapshot.systems.length > 0) {
-    lines.push(`Order ${snapshot.systems.map((system) => `${system.name}:${system.priority}`).join(" > ")}`);
+    lines.push(`Order ${snapshot.systems.map((system) => `#${system.order} ${system.name}:${system.priority}`).join(" > ")}`);
+    for (const system of snapshot.systems) {
+      lines.push(
+        `System #${system.order} ${system.name} lifecycle=${system.lifecycle} enabled=${system.enabled} started=${system.started} destroyed=${system.destroyed} priority=${system.priority}`
+      );
+    }
   }
 
   return lines;
+}
+
+function getSystemLifecycle(system: Scene["systems"][number]): DebugSystemLifecycle {
+  if (system.destroyed) return "destroyed";
+  if (!system.enabled) return "disabled";
+  if (!system.started) return "pending";
+  return "running";
 }
 
 export function formatSceneInspectorSnapshot(snapshot: SceneInspectorSnapshot): string[] {
