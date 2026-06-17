@@ -4,6 +4,8 @@ This document describes the current package-facing API boundary for `@shuangxuni
 
 The project is a frontend 2D game engine dependency package. It is not an editor package.
 
+`0.10.x` completed the first package-facing API boundary baseline: entrypoints are documented, Node-safe imports are smoke-tested, package artifacts can be verified, and examples use package-style imports during local development.
+
 ---
 
 ## Package Entrypoints

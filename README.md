@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.10.4` Example Import Boundary Cleanup，`0.8.x` resource loading baseline 和 `0.9.x` game-flow/scene-lifecycle 阶段都已经收口，`0.10.x` 正在整理 package-facing API 边界。
+当前项目已经推进到 `v0.10.5` Public API And Package Boundary Docs Closeout，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段和 `0.10.x` package-facing API boundary 阶段都已经收口。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -560,7 +560,7 @@ import {
 
 ## 当前已经实现了什么
 
-当前已经完成了 `0.1.x` 到 `0.9.x` 的连续整理。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过交互式 runtime inspector 辅助开发”，并补齐了资源加载基线、GameFlow 和 scene lifecycle 启动边界。
+当前已经完成了 `0.1.x` 到 `0.10.x` 的连续整理。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过交互式 runtime inspector 辅助开发、可作为 package 被消费”，并补齐了资源加载基线、GameFlow、scene lifecycle 启动边界和 package-facing API 边界。
 
 - Core 稳定性
   - `Game`、`Time`、`Scene`、`World`、`Entity`、`Component`、`System` 已经形成基础骨架。
@@ -601,7 +601,7 @@ import {
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
   - 当前测试数为 104 个。
-  - `npm run check`、`npm test`、`npm run build:example` 是当前主要验证入口。
+  - `npm run check`、`npm test`、`npm run build:example`、`npm run verify:package` 是当前主要验证入口。
 
 ## 当前 demo 的意义
 
@@ -665,7 +665,7 @@ npm run verify:package
 
 如果我们把目标定义为“做游戏引擎”，那接下来的重点不应该是继续打磨 demo 外观，而应该继续把当前已经有的 runtime、framework、tooling 往产品化方向推进。
 
-`0.7.x` 已经把 interactive runtime inspector 阶段收口了，`0.8.x` 完成了资源加载和 asset pipeline 基线，`0.9.x` 也完成了 Game Flow 和 Scene Lifecycle 基线。下一阶段更值得优先投入的是这些方向：
+`0.7.x` 已经把 interactive runtime inspector 阶段收口了，`0.8.x` 完成了资源加载和 asset pipeline 基线，`0.9.x` 完成了 Game Flow 和 Scene Lifecycle 基线，`0.10.x` 完成了 package-facing API boundary 基线。下一阶段更值得优先投入的是这些方向：
 
 1. 更完整的 runtime tooling / inspector
    - 系统开关和运行时状态查看
