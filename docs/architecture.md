@@ -4,7 +4,7 @@
 
 Leafer is the presentation foundation, not the place where gameplay rules live.
 
-The framework keeps gameplay logic, render mapping, and platform concerns separate so that the codebase can evolve toward tools, editors, replay, and more than one game project.
+The framework keeps gameplay logic, render mapping, and platform concerns separate so that the codebase can evolve as a reusable frontend game engine package with runtime tooling, replay support, and more than one game project.
 
 ## Layering
 

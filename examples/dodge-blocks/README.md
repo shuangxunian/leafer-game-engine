@@ -114,4 +114,4 @@ browser runtime
 - player 的 `ViewComponent` 和 `PlayerControllerComponent` 仍在代码中装配
 - hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度
 
-后续新增资源加载、数据驱动场景、关卡配置、编辑器桥接时，这个示例可以继续作为集成验证样例。
+后续新增资源加载、数据驱动场景、关卡配置和 runtime tooling 能力时，这个示例可以继续作为集成验证样例。

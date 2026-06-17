@@ -19,6 +19,15 @@
 
 当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + runtime tooling panel”的第一轮产品化整理。
 
+## 产品边界
+
+这个仓库的产品定位是：
+
+**一个可以被前端项目安装和接入的 2D 游戏引擎依赖包。**
+
+它不是编辑器项目，也不计划在这个仓库里实现可视化编辑器。  
+后续如果要做编辑器，应该是另一个上层项目或独立 package；这里最多提供 runtime、schema、snapshot、tooling API 等可被上层工具消费的能力。
+
 ## 发布信息
 
 包名：
@@ -434,7 +443,7 @@ import {
 
 - 用 `Leafer` 作为渲染和显示底座
 - 在它上面抽象出自己的游戏运行时
-- 最终形成一套适合做 2D 小游戏、互动内容、可视化玩法、带编辑器潜力的游戏引擎
+- 最终形成一套适合做 2D 小游戏、互动内容和可视化玩法的前端游戏引擎依赖包
 
 这也是这个仓库和普通 demo 最大的区别。
 
@@ -444,15 +453,15 @@ import {
 
 - 它本身有比较强的 2D 图形能力
 - 它有清晰的显示对象体系
-- 它适合互动内容、画布应用、编辑器场景
-- 它天然适合“图形系统”和“工具系统”结合
+- 它适合互动内容、画布应用和运行时调试面板
+- 它天然适合把“图形系统”和“游戏运行时”结合起来
 
 这意味着它特别适合承载下面这些方向：
 
 - 2D 小游戏
 - UI 和玩法混合较多的互动应用
 - 棋牌、解谜、经营、卡牌、轻动作游戏
-- 带关卡编辑器或可视化编辑能力的项目
+- 需要清晰 runtime、配置化内容和调试工具的前端项目
 
 但也正因为如此，我们不能把 `Leafer` 直接当作游戏逻辑层来写。  
 如果未来想让这套东西真正可演化，就必须把“渲染”和“游戏规则”分开。
@@ -466,7 +475,7 @@ import {
 这样做的好处是：
 
 - 后续更容易替换渲染实现
-- 更容易做调试工具和编辑器
+- 更容易做调试工具和数据驱动
 - 更容易做数据驱动
 - 更容易做回放、存档、状态同步
 - 更容易把玩法代码沉淀成真正可复用的框架能力
@@ -510,7 +519,7 @@ import {
 - `src/tooling`
   - 调试和开发辅助能力
   - 当前已经包含 debug snapshot、browser overlay、collider visualization、scene inspector snapshot、聚合 tooling snapshot、browser tooling panel 和 component schema panel section
-  - 这一层是后续编辑器、调试面板、场景检查器的基础
+  - 这一层是引擎包内置开发体验的一部分，用来服务调试面板、场景检查和 runtime 可观测性
 
 - `examples`
   - 示例项目层
@@ -550,7 +559,7 @@ import {
   - 已有 `createSceneInspectorSnapshot(...)`，可以导出 scene/entity/component 结构化检查数据。
   - 已有 `createToolingSnapshot(...)`，作为面向工具面板的聚合入口。
   - 已有 `BrowserToolingPanel`，可以分区展示 runtime debug、entity inspector 和 component schema metadata。
-  - 已有 tooling panel section 格式化能力，为后续交互式 inspector/editor 打基础。
+  - 已有 tooling panel section 格式化能力，为后续交互式 runtime inspector 打基础。
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
@@ -630,7 +639,7 @@ npm pack
 3. 更完整的数据驱动能力
    - 组件配置
    - 配置校验和默认值
-   - 为未来编辑器打基础
+   - 为配置化内容和多项目复用打基础
 
 4. 更完整的游戏流和 UI 状态
    - 在 `StateMachine` 之上沉淀 `GameFlow`
@@ -643,11 +652,11 @@ npm pack
    - 出生点和区域管理
    - 关卡数据加载和切换
 
-6. 编辑器友好结构
+6. 引擎包 API 友好结构
    - 组件 schema
    - 实体选择和层级信息
    - 资源引用检查
-   - 让运行时结构天然适合未来做编辑器桥接
+   - 让运行时结构适合被上层工具或独立产品消费
 
 ## 当前阶段的一个重要判断
 
@@ -658,7 +667,7 @@ npm pack
 - 一个已经具备初步工具链的互动内容运行时底座
 
 它还不是成熟引擎，但已经不只是一次性 demo。  
-最重要的事情仍然不是继续堆玩法，而是持续把“可复用能力”从示例中提炼出来，让 `examples/*` 依赖 `src/framework`，让 `src/framework` 依赖 `src/core` 和 `src/adapter`，再让 `src/tooling` 服务调试、检查和未来编辑器。
+最重要的事情仍然不是继续堆玩法，而是持续把“可复用能力”从示例中提炼出来，让 `examples/*` 依赖 `src/framework`，让 `src/framework` 依赖 `src/core` 和 `src/adapter`，再让 `src/tooling` 服务调试、检查和开发体验。
 
 如果这条路走顺了，后面你做第二个、第三个小游戏时，就不再是在“重写一个 demo”，而是在真正使用你自己的引擎。
 
