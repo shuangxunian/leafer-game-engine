@@ -99,7 +99,8 @@ test("framework package subpath can be imported by package name in Node", async 
     "getSpriteAnimationPlaybackFrameIndex",
     "getRuntimeServices",
     "loadAssetManifestAsync",
-    "normalizeKeyboardKey"
+    "normalizeKeyboardKey",
+    "validateSceneConfig"
   ]);
 });
 

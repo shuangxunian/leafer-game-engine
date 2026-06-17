@@ -22,6 +22,8 @@ For the input-actions boundary across raw input state, keyboard bindings, action
 
 For the runtime-observability boundary across debug snapshots, system lifecycle state, text formatting, browser panel section formatting, aggregate tooling snapshots, and example consumption, see [Runtime Observability Boundary](runtime-observability.md).
 
+`0.15.x` starts data-driven scene contract hardening. The Node-safe `framework` entrypoint now exposes `validateSceneConfig(...)` so downstream games can inspect scene config diagnostics before bootstrap mutates a scene, asset registry, entity list, or system list.
+
 ---
 
 ## Package Entrypoints
@@ -57,7 +59,8 @@ import {
   createRuntimeServices,
   createSpriteAnimationPlayback,
   defineKeyboardBinding,
-  getRuntimeServices
+  getRuntimeServices,
+  validateSceneConfig
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
   createInputActionSnapshot,
@@ -96,7 +99,8 @@ import {
   createRuntimeServices,
   createSpriteAnimationPlayback,
   defineKeyboardBinding,
-  getRuntimeServices
+  getRuntimeServices,
+  validateSceneConfig
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
   createInputActionSnapshot,
@@ -143,7 +147,7 @@ They should be verified through browser/example builds until the package is spli
 ## Current Boundary Notes
 
 - `core` should stay independent from browser and rendering implementations.
-- `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, and opt-in scene runtime service integration.
+- `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, opt-in scene runtime service integration, and data-driven scene config validation.
 - `tooling` can expose structured snapshots and formatters in Node, including read-only system lifecycle state, sprite animation state, runtime services state, and input action state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.

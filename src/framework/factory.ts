@@ -65,6 +65,11 @@ export class EntityTemplateRegistry {
 
     return factory(component.data);
   }
+
+  has(type: string): boolean {
+    const normalized = normalizeComponentType(type);
+    return Boolean(normalized && this.factories.has(normalized));
+  }
 }
 
 export function createDefaultEntityTemplateRegistry(): EntityTemplateRegistry {
