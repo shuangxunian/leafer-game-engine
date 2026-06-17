@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { Scene } from "../lib/core/index.js";
+import { Game, Scene } from "../lib/core/index.js";
 import { createAnimationFrameLoop } from "../lib/runtime/frame-loop.js";
+import { createRuntimeController } from "../lib/runtime/runtime-controller.js";
 import { startSceneWithLifecycle } from "../lib/runtime/scene-lifecycle.js";
 
 test("animation frame loop only schedules one callback and can restart after stop", () => {
@@ -51,6 +52,54 @@ test("animation frame loop only schedules one callback and can restart after sto
     globalThis.requestAnimationFrame = originalRequestAnimationFrame;
     globalThis.cancelAnimationFrame = originalCancelAnimationFrame;
   }
+});
+
+test("runtime controller stop only owns the frame loop, not scene cleanup", () => {
+  class OwnedScene extends Scene {
+    constructor() {
+      super("OwnedScene");
+      this.destroyCount = 0;
+    }
+
+    destroy() {
+      this.destroyCount += 1;
+      super.destroy();
+    }
+  }
+
+  const game = new Game();
+  const scene = new OwnedScene();
+  const calls = [];
+  const loop = {
+    running: false,
+    reset() {
+      calls.push("reset");
+    },
+    start() {
+      this.running = true;
+      calls.push("start");
+    },
+    stop() {
+      this.running = false;
+      calls.push("stop");
+    }
+  };
+  const controller = createRuntimeController({ game, loop });
+
+  controller.start(scene);
+
+  assert.equal(scene.started, true);
+  assert.equal(loop.running, true);
+  assert.equal(game.activeScene, scene);
+  assert.deepEqual(calls, ["reset", "start"]);
+
+  controller.stop();
+
+  assert.equal(loop.running, false);
+  assert.equal(scene.started, true);
+  assert.equal(scene.destroyCount, 0);
+  assert.equal(game.activeScene, scene);
+  assert.deepEqual(calls, ["reset", "start", "stop"]);
 });
 
 test("scene lifecycle helper prepares and starts a scene in order", async () => {

@@ -1,6 +1,7 @@
 import { Game, type Scene } from "../core/index.js";
 import { LeaferRenderAdapter, type RenderAdapter, type RenderScene } from "../adapter/index.js";
 import { createAnimationFrameLoop } from "./frame-loop.js";
+import { createRuntimeController } from "./runtime-controller.js";
 
 export type BrowserRuntimeOptions = {
   mount: string | HTMLElement;
@@ -28,18 +29,17 @@ export function createBrowserRuntime(options: BrowserRuntimeOptions): BrowserRun
     const deltaSeconds = Math.min(deltaMilliseconds / 1000, maxDeltaSeconds);
     game.tick(deltaSeconds);
   });
+  const controller = createRuntimeController({ game, loop });
 
   return {
     game,
     renderAdapter,
     renderScene,
     start(scene: Scene) {
-      game.setScene(scene);
-      loop.reset();
-      loop.start();
+      controller.start(scene);
     },
     stop() {
-      loop.stop();
+      controller.stop();
     }
   };
 }

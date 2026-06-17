@@ -60,9 +60,22 @@ test("package publish files include library output and docs", () => {
     "docs/runtime-observability.md",
     "docs/scene-config.md",
     "docs/render-view-contract.md",
+    "docs/runtime-ownership.md",
     "README.md",
     "LICENSE"
   ]);
+});
+
+test("runtime ownership docs ship as package-facing non-editor guidance", async () => {
+  const source = await readFile(new URL("../docs/runtime-ownership.md", import.meta.url), "utf8");
+
+  assert.equal(source.includes("frontend 2D game engine package contract"), true);
+  assert.equal(source.includes("runtime.stop()"), true);
+  assert.equal(source.includes("does not destroy the active scene"), true);
+  assert.equal(source.includes("does not destroy the mounted render scene"), true);
+  assert.equal(source.includes("## Tooling Ownership"), true);
+  assert.equal(source.includes("read-only runtime observability helpers"), true);
+  assert.equal(source.includes("not scene editing, component editing, asset management, or content authoring"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {

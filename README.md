@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.17.2` Game Tick Error Boundary Contract，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段、`0.10.x` package-facing API boundary 阶段、`0.11.x` sprite animation / asset runtime 阶段、`0.12.x` runtime services / event pipeline 阶段、`0.13.x` input actions / control mapping 阶段、`0.14.x` runtime observability hardening 阶段、`0.15.x` data-driven scene contract hardening 阶段和 `0.16.x` render/view contract hardening 阶段都已经收口，`0.17.x` runtime/game loop hardening 阶段正在推进。
+当前项目已经推进到 `v0.17.3` Runtime Ownership Package Guidance，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段、`0.10.x` package-facing API boundary 阶段、`0.11.x` sprite animation / asset runtime 阶段、`0.12.x` runtime services / event pipeline 阶段、`0.13.x` input actions / control mapping 阶段、`0.14.x` runtime observability hardening 阶段、`0.15.x` data-driven scene contract hardening 阶段和 `0.16.x` render/view contract hardening 阶段都已经收口，`0.17.x` runtime/game loop hardening 阶段正在推进。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -17,7 +17,7 @@
 - `tooling` 已经具备只读 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、asset load state snapshot、GameFlow snapshot、sprite animation snapshot、runtime services snapshot、input action snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail、assets/game flow/sprite animations/runtime services/input actions panel section 和 schema-assisted component detail 展示。
 - `examples/dodge-blocks` 作为集成样例，用来验证引擎分层、异步资源加载、sprite animation 和运行时 tooling 能力。
 
-当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + runtime observability / developer tooling”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程、scene lifecycle 启动边界、sprite animation 数据契约、deterministic playback timing helpers、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、第一版 runtime event bus、deterministic scheduler、scene-level runtime services integration、runtime services 只读 tooling 可见性、runtime services 边界文档、第一版 input action mapping、示例级 input action 集成、input action 只读 tooling 可见性、input action 边界文档、system observability snapshot 强化、runtime debug panel 可读性整理、dodge-blocks runtime observability 集成验证、runtime observability 边界文档、scene config validation baseline、opt-in safe scene bootstrap validation gate、dodge-blocks scene config 消费验证、scene config 边界文档、explicit ViewComponent sync contract、sprite-capable render node capability guard、Node-safe render-types subpath、render/view contract package doc、runtime phase cleanup hardening 和 Game.tick error boundary contract。
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + runtime observability / developer tooling”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程、scene lifecycle 启动边界、sprite animation 数据契约、deterministic playback timing helpers、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、第一版 runtime event bus、deterministic scheduler、scene-level runtime services integration、runtime services 只读 tooling 可见性、runtime services 边界文档、第一版 input action mapping、示例级 input action 集成、input action 只读 tooling 可见性、input action 边界文档、system observability snapshot 强化、runtime debug panel 可读性整理、dodge-blocks runtime observability 集成验证、runtime observability 边界文档、scene config validation baseline、opt-in safe scene bootstrap validation gate、dodge-blocks scene config 消费验证、scene config 边界文档、explicit ViewComponent sync contract、sprite-capable render node capability guard、Node-safe render-types subpath、render/view contract package doc、runtime phase cleanup hardening、Game.tick error boundary contract 和 runtime ownership boundary。
 
 ## 产品边界
 
@@ -179,6 +179,10 @@ runtime.start(scene);
 如果你想了解 render node、ViewComponent、render layer、sprite-capable node 和 render scene lifecycle 边界，可以参考：
 
 - [docs/render-view-contract.md](docs/render-view-contract.md)
+
+如果你想了解 `Game`、`Scene`、browser runtime、RenderScene、tooling 和错误处理策略之间的 ownership 边界，可以参考：
+
+- [docs/runtime-ownership.md](docs/runtime-ownership.md)
 
 ## 最小可运行项目目录示例
 
@@ -593,7 +597,7 @@ import {
 
 ## 当前已经实现了什么
 
-当前已经完成了 `0.1.x` 到 `0.16.x` 的连续整理，`0.17.x` runtime/game loop hardening 阶段正在推进。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过 runtime observability 辅助开发、可作为 package 被消费”，并补齐了资源加载基线、GameFlow、scene lifecycle 启动边界、package-facing API 边界、sprite animation playback timing 基础、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、deterministic event bus 基线、update-driven scheduler 基线、opt-in scene runtime services 集成模式、runtime services 只读 tooling snapshot、runtime services 边界文档、input action mapping 基线、dodge-blocks input action 集成、input action 只读 tooling snapshot、input action 边界文档、system observability snapshot 强化、runtime debug panel 可读性整理、dodge-blocks runtime observability 集成验证、runtime observability 边界文档、scene config validation baseline、opt-in safe scene bootstrap validation gate、dodge-blocks scene config 消费验证、scene config 边界文档、explicit ViewComponent sync contract、sprite-capable render node capability guard、Node-safe render-types subpath、render/view contract package doc、runtime phase cleanup hardening 和 Game.tick error boundary contract。
+当前已经完成了 `0.1.x` 到 `0.16.x` 的连续整理，`0.17.x` runtime/game loop hardening 阶段正在推进。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过 runtime observability 辅助开发、可作为 package 被消费”，并补齐了资源加载基线、GameFlow、scene lifecycle 启动边界、package-facing API 边界、sprite animation playback timing 基础、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、deterministic event bus 基线、update-driven scheduler 基线、opt-in scene runtime services 集成模式、runtime services 只读 tooling snapshot、runtime services 边界文档、input action mapping 基线、dodge-blocks input action 集成、input action 只读 tooling snapshot、input action 边界文档、system observability snapshot 强化、runtime debug panel 可读性整理、dodge-blocks runtime observability 集成验证、runtime observability 边界文档、scene config validation baseline、opt-in safe scene bootstrap validation gate、dodge-blocks scene config 消费验证、scene config 边界文档、explicit ViewComponent sync contract、sprite-capable render node capability guard、Node-safe render-types subpath、render/view contract package doc、runtime phase cleanup hardening、Game.tick error boundary contract 和 runtime ownership boundary。
 
 - Core 稳定性
   - `Game`、`Time`、`Scene`、`World`、`Entity`、`Component`、`System` 已经形成基础骨架。
@@ -623,6 +627,7 @@ import {
   - `RenderScene` 已有稳定的 `background / world / ui / overlay` layer contract，并通过 Node-safe `@shuangxunian/leafer-game-engine/adapter/render-types` 的 `RENDER_SCENE_LAYER_ORDER` 和 `getRenderSceneLayerNames(...)` 暴露顺序语义。
   - 当前底层已经接入真实 `Leafer`。
   - `createBrowserRuntime(...)` 可以完成浏览器挂载、渲染场景创建和动画帧循环。
+  - `runtime.stop()` 已明确只停止 animation frame loop，不销毁 active scene 或 mounted render scene。
   - 已有 `startSceneWithLifecycle(...)`，可以在 scene start 前编排 async prepare / ready / running / failed 边界。
   - 示例入口已经和引擎入口拆开，`examples/*` 是消费者而不是引擎本体。
 
@@ -646,7 +651,7 @@ import {
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
-  - 当前测试数为 176 个。
+  - 当前测试数为 178 个。
   - `npm run check`、`npm test`、`npm run build:example`、`npm run verify:package` 是当前主要验证入口。
 
 ## 当前 demo 的意义

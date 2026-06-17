@@ -45,6 +45,7 @@
     "docs/runtime-observability.md",
     "docs/scene-config.md",
     "docs/render-view-contract.md",
+    "docs/runtime-ownership.md",
     "README.md",
     "LICENSE"
   ],
