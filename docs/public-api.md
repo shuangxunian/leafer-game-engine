@@ -6,7 +6,7 @@ The project is a frontend 2D game engine dependency package. It is not an editor
 
 `0.10.x` completed the first package-facing API boundary baseline: entrypoints are documented, Node-safe imports are smoke-tested, package artifacts can be verified, and examples use package-style imports during local development.
 
-`0.11.x` is extending the Node-safe `framework` entrypoint with sprite animation data contracts, deterministic playback timing helpers, and ECS animation component/system behavior.
+`0.11.x` is extending the Node-safe `framework` entrypoint with sprite animation data contracts, deterministic playback timing helpers, and ECS animation component/system behavior. It also exposes read-only sprite animation state through the Node-safe `tooling` entrypoint.
 
 ---
 
@@ -37,7 +37,7 @@ import {
   SpriteAnimationSystem,
   createSpriteAnimationPlayback
 } from "@shuangxunian/leafer-game-engine/framework";
-import { createToolingSnapshot } from "@shuangxunian/leafer-game-engine/tooling";
+import { createToolingSnapshot, formatSpriteAnimationSnapshot } from "@shuangxunian/leafer-game-engine/tooling";
 ```
 
 The smoke tests intentionally use the real package name so they exercise `package.json` exports.
@@ -62,7 +62,7 @@ import {
   SpriteAnimationSystem,
   createSpriteAnimationPlayback
 } from "@shuangxunian/leafer-game-engine/framework";
-import { createToolingSnapshot } from "@shuangxunian/leafer-game-engine/tooling";
+import { createToolingSnapshot, formatSpriteAnimationSnapshot } from "@shuangxunian/leafer-game-engine/tooling";
 ```
 
 This keeps browser runtime dependencies out of tests that only need ECS, gameplay flow, assets, sprite animation playback/system behavior, scene config, or snapshot formatting.
@@ -102,7 +102,7 @@ They should be verified through browser/example builds until the package is spli
 
 - `core` should stay independent from browser and rendering implementations.
 - `framework` should stay usable for logic tests and reusable gameplay primitives, including sprite animation timing helpers and component/system behavior.
-- `tooling` can expose structured snapshots and formatters in Node, but browser panel classes should only be constructed in a DOM environment.
+- `tooling` can expose structured snapshots and formatters in Node, including read-only sprite animation state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
 - Future package-boundary work may split browser runtime APIs into more explicit entrypoints.

@@ -2,7 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { Component, Game, Scene, System } from "../lib/core/index.js";
-import { AssetRegistry, ComponentSchemaRegistry, GameFlow, TransformComponent, createDefaultComponentSchemaRegistry } from "../lib/framework/index.js";
+import {
+  AssetRegistry,
+  ComponentSchemaRegistry,
+  GameFlow,
+  SpriteAnimationComponent,
+  TransformComponent,
+  createDefaultComponentSchemaRegistry
+} from "../lib/framework/index.js";
 import {
   createAssetsPanelSection,
   createComponentSchemasPanelSection,
@@ -13,6 +20,8 @@ import {
   createRuntimeDebugPanelSection,
   createSelectedEntityDetailPanelSection,
   createSceneInspectorSnapshot,
+  createSpriteAnimationSnapshot,
+  createSpriteAnimationsPanelSection,
   createToolingPanelSections,
   createToolingSnapshot,
   formatComponentSchemaSnapshot,
@@ -20,6 +29,7 @@ import {
   formatDebugGameFlowSnapshot,
   formatDebugSnapshot,
   formatSceneInspectorSnapshot,
+  formatSpriteAnimationSnapshot,
   formatToolingSnapshot,
   parseToolingPanelEntityRowId
 } from "../lib/tooling/index.js";
@@ -300,6 +310,40 @@ test("tooling snapshot can include copied component schema metadata", () => {
   });
 });
 
+test("tooling snapshot can include sprite animation state", () => {
+  const scene = new Scene("AnimationToolingScene");
+  const entity = scene.world.createEntity("player");
+  const animation = entity.addComponent(new SpriteAnimationComponent("player-idle"));
+  animation.playback = {
+    clipId: "player-idle",
+    status: "playing",
+    elapsedSeconds: 0.5,
+    frameIndex: 1,
+    completedLoops: 2
+  };
+  animation.currentFrameId = "player-idle-2";
+  animation.currentSpriteId = "player-focus";
+
+  const snapshot = createToolingSnapshot(scene, { animations: true });
+
+  assert.deepEqual(snapshot.animations, {
+    count: 1,
+    animations: [
+      {
+        entityId: entity.id,
+        entityName: "player",
+        clipId: "player-idle",
+        status: "playing",
+        elapsedSeconds: 0.5,
+        frameIndex: 1,
+        completedLoops: 2,
+        currentFrameId: "player-idle-2",
+        currentSpriteId: "player-focus"
+      }
+    ]
+  });
+});
+
 test("component schema snapshot formatting is stable and readable", () => {
   const registry = new ComponentSchemaRegistry();
   registry.register({
@@ -335,6 +379,28 @@ test("scene inspector snapshot formatting is stable and readable", () => {
   ]);
 });
 
+test("sprite animation snapshot formatting is stable and readable", () => {
+  assert.deepEqual(formatSpriteAnimationSnapshot({
+    count: 1,
+    animations: [
+      {
+        entityId: 7,
+        entityName: "player",
+        clipId: "player-idle",
+        status: "paused",
+        elapsedSeconds: 0.125,
+        frameIndex: 0,
+        completedLoops: 3,
+        currentFrameId: "player-idle-1",
+        currentSpriteId: "player"
+      }
+    ]
+  }), [
+    "Sprite Animations 1",
+    "- #7 player clip=player-idle status=paused frame=player-idle-1 sprite=player index=0 elapsed=0.125s loops=3"
+  ]);
+});
+
 test("tooling snapshot formatting appends inspector data when present", () => {
   const scene = new Scene("ToolingFormatScene");
   scene.world.createEntity("player");
@@ -349,6 +415,23 @@ test("tooling snapshot formatting appends inspector data when present", () => {
     "Inspector ToolingFormatScene",
     "Entities 1/1",
     `- #${scene.world.entities[0].id} player [active] components=0`
+  ]);
+});
+
+test("tooling snapshot formatting appends animation data when present", () => {
+  const scene = new Scene("AnimationToolingFormatScene");
+  const entity = scene.world.createEntity("player");
+  const animation = entity.addComponent(new SpriteAnimationComponent("player-idle"));
+  animation.currentFrameId = "player-idle-1";
+  animation.currentSpriteId = "player";
+
+  assert.deepEqual(formatToolingSnapshot(createToolingSnapshot(scene, { animations: true })), [
+    "Scene AnimationToolingFormatScene",
+    "Entities 1/1",
+    "Systems 0",
+    "",
+    "Sprite Animations 1",
+    `- #${entity.id} player clip=player-idle status=playing frame=player-idle-1 sprite=player index=0 elapsed=0.000s loops=0`
   ]);
 });
 
@@ -423,6 +506,16 @@ test("game flow panel section exposes current flow state", () => {
       "Game Flow ready",
       "Gameplay inactive"
     ]
+  });
+});
+
+test("sprite animations panel section exposes animation state", () => {
+  assert.deepEqual(createSpriteAnimationsPanelSection({
+    count: 0,
+    animations: []
+  }), {
+    title: "Sprite Animations",
+    lines: ["Sprite Animations 0"]
   });
 });
 
@@ -538,6 +631,26 @@ test("tooling panel sections include flow data when requested", () => {
       lines: [
         "Game Flow running",
         "Gameplay active"
+      ]
+    }
+  ]);
+});
+
+test("tooling panel sections include animation data when requested", () => {
+  const scene = new Scene("AnimationSectionsScene");
+  const entity = scene.world.createEntity("player");
+  entity.addComponent(new SpriteAnimationComponent("player-idle"));
+
+  assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { animations: true })), [
+    {
+      title: "Runtime Debug",
+      lines: ["Scene AnimationSectionsScene", "Entities 1/1", "Systems 0"]
+    },
+    {
+      title: "Sprite Animations",
+      lines: [
+        "Sprite Animations 1",
+        `- #${entity.id} player clip=player-idle status=playing frame=<unset> sprite=<unset> index=0 elapsed=0.000s loops=0`
       ]
     }
   ]);

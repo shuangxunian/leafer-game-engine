@@ -27,6 +27,7 @@ export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<v
   const schemas = createDefaultComponentSchemaRegistry();
   const createSnapshot = () =>
     createToolingSnapshot(scene, {
+      animations: true,
       assets: scene.assetRegistry,
       flow: gameSystem.gameFlow,
       game: runtime.game,

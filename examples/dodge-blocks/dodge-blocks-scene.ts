@@ -4,6 +4,8 @@ import {
   AssetRegistry,
   CollisionSystem,
   InputSystem,
+  SpriteAnimationComponent,
+  SpriteAnimationSystem,
   ViewComponent,
   createBrowserImageSpriteLoader,
   instantiateEntityTemplate
@@ -23,12 +25,43 @@ const DODGE_BLOCKS_ASSET_MANIFEST = {
       cornerRadius: 14
     },
     {
+      id: "player-focus",
+      fill: "#ffe6a8",
+      source: createSpriteDataUri("#ffe6a8", 52, 52, 14),
+      width: DODGE_GAME_CONFIG.playerSize,
+      height: DODGE_GAME_CONFIG.playerSize,
+      cornerRadius: 14
+    },
+    {
       id: "hazard",
       fill: "#6cb7ff",
       source: createSpriteDataUri("#6cb7ff", 52, 52, 10),
       width: 52,
       height: 52,
       cornerRadius: 10
+    }
+  ],
+  frames: [
+    {
+      id: "player-idle-1",
+      spriteId: "player",
+      width: DODGE_GAME_CONFIG.playerSize,
+      height: DODGE_GAME_CONFIG.playerSize,
+      durationSeconds: 0.35
+    },
+    {
+      id: "player-idle-2",
+      spriteId: "player-focus",
+      width: DODGE_GAME_CONFIG.playerSize,
+      height: DODGE_GAME_CONFIG.playerSize,
+      durationSeconds: 0.35
+    }
+  ],
+  clips: [
+    {
+      id: "player-idle",
+      frameIds: ["player-idle-1", "player-idle-2"],
+      loop: true
     }
   ]
 };
@@ -86,6 +119,7 @@ export class DodgeBlocksScene extends Scene {
 
   protected onStart(): void {
     this.addSystem(new InputSystem(this));
+    this.addSystem(new SpriteAnimationSystem(this, this.assets));
     this.addSystem(new CollisionSystem(this));
     const viewportWidth = this.renderScene.width;
     const viewportHeight = this.renderScene.height;
@@ -154,6 +188,7 @@ export class DodgeBlocksScene extends Scene {
       )
     );
     player.addComponent(new ViewComponent(playerNode));
+    player.addComponent(new SpriteAnimationComponent("player-idle"));
 
     dodgeSystem = this.addSystem(
       new DodgeGameSystem(

@@ -1,6 +1,15 @@
 import type { RenderScene } from "../adapter/index.js";
 import type { Component, Game, Scene } from "../core/index.js";
-import type { AssetLoadStatus, AssetRegistry, ComponentSchema, ComponentSchemaRegistry, GameFlow, GameFlowPhase } from "../framework/index.js";
+import type {
+  AssetLoadStatus,
+  AssetRegistry,
+  ComponentSchema,
+  ComponentSchemaRegistry,
+  GameFlow,
+  GameFlowPhase,
+  SpriteAnimationPlaybackStatus
+} from "../framework/index.js";
+import { SpriteAnimationComponent } from "../framework/index.js";
 
 export type DebugSnapshot = {
   sceneName: string;
@@ -66,6 +75,7 @@ export type DebugSnapshotOptions = {
 };
 
 export type ToolingSnapshotOptions = DebugSnapshotOptions & {
+  animations?: boolean;
   inspector?: boolean;
   schemas?: ComponentSchemaRegistry;
 };
@@ -99,6 +109,7 @@ export type InspectorComponentSnapshot = {
 
 export type ToolingSnapshot = {
   debug: DebugSnapshot;
+  animations?: SpriteAnimationSnapshot;
   inspector?: SceneInspectorSnapshot;
   schemas?: ComponentSchemaSnapshot;
 };
@@ -106,6 +117,23 @@ export type ToolingSnapshot = {
 export type ComponentSchemaSnapshot = {
   count: number;
   schemas: ComponentSchema[];
+};
+
+export type SpriteAnimationSnapshot = {
+  count: number;
+  animations: SpriteAnimationEntitySnapshot[];
+};
+
+export type SpriteAnimationEntitySnapshot = {
+  entityId: number;
+  entityName: string;
+  clipId: string;
+  status: SpriteAnimationPlaybackStatus;
+  elapsedSeconds: number;
+  frameIndex: number;
+  completedLoops: number;
+  currentFrameId?: string;
+  currentSpriteId?: string;
 };
 
 const COMPONENT_LIFECYCLE_FIELDS = new Set(["entity", "enabled", "started", "destroyed"]);
@@ -156,6 +184,7 @@ export function createSceneInspectorSnapshot(scene: Scene): SceneInspectorSnapsh
 export function createToolingSnapshot(scene: Scene, options: ToolingSnapshotOptions = {}): ToolingSnapshot {
   return {
     debug: createDebugSnapshot(scene, options),
+    animations: options.animations ? createSpriteAnimationSnapshot(scene) : undefined,
     inspector: options.inspector ? createSceneInspectorSnapshot(scene) : undefined,
     schemas: options.schemas ? createComponentSchemaSnapshot(options.schemas) : undefined
   };
@@ -220,6 +249,10 @@ export function formatToolingSnapshot(snapshot: ToolingSnapshot): string[] {
     lines.push("", ...formatSceneInspectorSnapshot(snapshot.inspector));
   }
 
+  if (snapshot.animations) {
+    lines.push("", ...formatSpriteAnimationSnapshot(snapshot.animations));
+  }
+
   if (snapshot.schemas) {
     lines.push("", ...formatComponentSchemaSnapshot(snapshot.schemas));
   }
@@ -246,6 +279,20 @@ export function formatDebugGameFlowSnapshot(snapshot: DebugGameFlowSnapshot): st
     `Game Flow ${snapshot.phase}`,
     `Gameplay ${snapshot.canUpdateGameplay ? "active" : "inactive"}`
   ];
+}
+
+export function formatSpriteAnimationSnapshot(snapshot: SpriteAnimationSnapshot): string[] {
+  const lines = [`Sprite Animations ${snapshot.count}`];
+
+  for (const animation of snapshot.animations) {
+    const frame = animation.currentFrameId ?? "<unset>";
+    const sprite = animation.currentSpriteId ?? "<unset>";
+    lines.push(
+      `- #${animation.entityId} ${animation.entityName} clip=${animation.clipId} status=${animation.status} frame=${frame} sprite=${sprite} index=${animation.frameIndex} elapsed=${animation.elapsedSeconds.toFixed(3)}s loops=${animation.completedLoops}`
+    );
+  }
+
+  return lines;
 }
 
 export function createComponentSchemaSnapshot(registry: ComponentSchemaRegistry): ComponentSchemaSnapshot {
@@ -341,6 +388,32 @@ function createGameFlowSnapshot(flow: GameFlow): DebugGameFlowSnapshot {
   return {
     phase: flow.getPhase(),
     canUpdateGameplay: flow.canUpdateGameplay()
+  };
+}
+
+export function createSpriteAnimationSnapshot(scene: Scene): SpriteAnimationSnapshot {
+  const animations: SpriteAnimationEntitySnapshot[] = [];
+
+  for (const entity of scene.world.entities) {
+    const component = entity.getComponent(SpriteAnimationComponent);
+    if (!component) continue;
+
+    animations.push({
+      entityId: entity.id,
+      entityName: entity.name,
+      clipId: component.clipId,
+      status: component.playback.status,
+      elapsedSeconds: component.playback.elapsedSeconds,
+      frameIndex: component.playback.frameIndex,
+      completedLoops: component.playback.completedLoops,
+      ...(component.currentFrameId ? { currentFrameId: component.currentFrameId } : {}),
+      ...(component.currentSpriteId ? { currentSpriteId: component.currentSpriteId } : {})
+    });
+  }
+
+  return {
+    count: animations.length,
+    animations
   };
 }
 

@@ -6,6 +6,7 @@ import type {
   InspectorComponentSnapshot,
   InspectorPrimitive,
   SceneInspectorSnapshot,
+  SpriteAnimationSnapshot,
   ToolingSnapshot
 } from "./debug.js";
 import {
@@ -13,7 +14,8 @@ import {
   formatDebugAssetSnapshot,
   formatDebugGameFlowSnapshot,
   formatDebugSnapshot,
-  formatSceneInspectorSnapshot
+  formatSceneInspectorSnapshot,
+  formatSpriteAnimationSnapshot
 } from "./debug.js";
 
 export type ToolingPanelSection = {
@@ -80,6 +82,13 @@ export function createGameFlowPanelSection(snapshot: DebugGameFlowSnapshot): Too
   };
 }
 
+export function createSpriteAnimationsPanelSection(snapshot: SpriteAnimationSnapshot): ToolingPanelSection {
+  return {
+    title: "Sprite Animations",
+    lines: formatSpriteAnimationSnapshot(snapshot)
+  };
+}
+
 export function createSelectedEntityDetailPanelSection(
   snapshot: SceneInspectorSnapshot,
   selection: Required<ToolingPanelSelection>,
@@ -127,6 +136,10 @@ export function createToolingPanelSections(snapshot: ToolingSnapshot, selection:
 
   if (snapshot.debug.assets) {
     sections.push(createAssetsPanelSection(snapshot.debug.assets));
+  }
+
+  if (snapshot.animations) {
+    sections.push(createSpriteAnimationsPanelSection(snapshot.animations));
   }
 
   if (snapshot.inspector) {

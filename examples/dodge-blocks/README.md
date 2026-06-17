@@ -10,6 +10,8 @@
 - asset manifest 是否能声明示例资源
 - async manifest loading 是否能在玩法启动前完成资源预加载
 - browser image sprite loader 是否能作为示例消费者接入
+- sprite frame / animation clip 是否能作为 manifest 数据接入
+- `SpriteAnimationComponent` / `SpriteAnimationSystem` 是否能作为示例消费者接入
 - entity template 是否能创建玩家基础数据组件
 - transform / size / view 是否能同步到渲染层
 - input 是否能驱动玩家移动
@@ -17,11 +19,12 @@
 - `GameFlow` 是否能管理 ready / running / paused / ended
 - 玩家是否能被限制在当前 viewport 内移动
 - tooling panel 是否能分区显示 runtime debug + assets + game flow + entity inspector + component schema 数据
+- tooling panel 是否能显示 sprite animation runtime 状态
 - tooling panel 是否能点击 entity 行并显示选中状态
 - tooling panel 是否能显示 selected entity detail 摘要
 - tooling panel 是否能用 component schema 辅助展示 selected component 字段
 
-它也不是编辑器或可视化搭建工具的雏形。这个示例只作为引擎包消费者存在，用来证明 runtime、framework、asset pipeline、tooling snapshot 和 scene lifecycle API 能在一个真实浏览器示例里协同工作。
+它也不是编辑器或可视化搭建工具的雏形。这个示例只作为引擎包消费者存在，用来证明 runtime、framework、asset pipeline、sprite animation、tooling snapshot 和 scene lifecycle API 能在一个真实浏览器示例里协同工作。
 
 ## How To Run
 
@@ -51,7 +54,7 @@ npm run dev
   - 通过 `startSceneWithLifecycle(...)` 在 runtime start 前预加载 asset manifest
   - 挂载 keyboard bridge
   - 挂载 browser tooling panel
-  - 分区显示 runtime debug、assets、game flow、entity inspector 和 component schema 信息
+  - 分区显示 runtime debug、assets、game flow、sprite animations、entity inspector 和 component schema 信息
   - 支持在 panel 中点击 entity 行进行选择
   - 选择 entity 后显示 selected entity detail section
   - selected detail 会结合 component schema metadata 展示字段类型、默认值和当前值
@@ -60,10 +63,10 @@ npm run dev
 - `dodge-blocks-scene.ts`
   - 注册 input、collision、gameplay system
   - 创建 UI 文本节点
-  - 通过 asset manifest 声明 sprite assets
+  - 通过 asset manifest 声明 sprite assets、sprite frames 和 animation clips
   - 通过 `loadManifestAsync(...)` 和 browser image sprite loader 预加载示例资源
   - 通过 entity template 创建 player 的 transform / size / collider
-  - 在代码里补充 player controller 和 render view
+  - 在代码里补充 player controller、render view 和 sprite animation component
 
 - `dodge-game-system.ts`
   - 通过 framework `GameFlow` 管理玩法状态
@@ -100,7 +103,7 @@ bootDodgeBlocksExample(runtime).catch((error) => {
 });
 ```
 
-`bootDodgeBlocksExample(...)` 里会创建 scene，通过 scene lifecycle helper 预加载 assets 并启动 runtime、绑定键盘输入，再把包含 asset state、game flow state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
+`bootDodgeBlocksExample(...)` 里会创建 scene，通过 scene lifecycle helper 预加载 assets 并启动 runtime、绑定键盘输入，再把包含 asset state、game flow state、sprite animation state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
 
 示例代码使用 `@shuangxunian/leafer-game-engine` package-style imports 来模拟真实消费者项目；在本仓库开发时，这些导入会通过 Vite alias 和 TypeScript paths 指回 `src`。
 
@@ -123,12 +126,13 @@ browser runtime
 
 当前示例已经有一部分内容走数据驱动：
 
-- `DODGE_BLOCKS_ASSET_MANIFEST` 声明 player / hazard sprite assets
+- `DODGE_BLOCKS_ASSET_MANIFEST` 声明 player / hazard sprite assets，以及 player sprite frames / animation clip
 - 示例通过 `loadManifestAsync(...)` 在 gameplay 启动前完成资源加载
 - 示例通过 `startSceneWithLifecycle(...)` 复用 runtime 层的 prepare / ready / running / failed 启动边界
 - tooling panel 的 `Assets` section 可以显示 player / hazard 的 loaded 状态
+- tooling panel 的 `Sprite Animations` section 可以显示 player 当前 clip / frame / sprite / playback 状态
 - player 的 `transform`、`size`、`collider` 来自 `EntityTemplate`
-- player 的 `ViewComponent` 和 `PlayerControllerComponent` 仍在代码中装配
+- player 的 `ViewComponent`、`PlayerControllerComponent` 和 `SpriteAnimationComponent` 仍在代码中装配
 - gameplay phase 使用 framework `GameFlow`，而不是示例内的本地 phase state machine
 - tooling panel 的 `Game Flow` section 可以显示当前 ready / running / paused / ended 状态
 - hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度
