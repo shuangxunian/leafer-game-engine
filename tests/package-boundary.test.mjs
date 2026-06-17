@@ -210,6 +210,22 @@ test("collision query stage docs are discoverable from roadmap and package docs"
   assert.equal(readme.includes("都已经收口"), true);
 });
 
+test("audio runtime stage docs are discoverable from roadmap", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.21.0.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.21.1.md", import.meta.url), "utf8");
+
+  for (const version of ["v0.21.0", "v0.21.1"]) {
+    assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
+  }
+
+  assert.equal(stage.includes("Audio Runtime Primitives Sprint"), true);
+  assert.equal(stage.includes("not as a visual audio editor"), true);
+  assert.equal(stage.includes("v0.21.1.md"), true);
+  assert.equal(patch.includes("Audio Data Contract Baseline"), true);
+  assert.equal(patch.includes("should not add Web Audio playback"), true);
+});
+
 test("core package subpath can be imported by package name in Node", async () => {
   const core = await import(`${packageJson.name}/core`);
 
