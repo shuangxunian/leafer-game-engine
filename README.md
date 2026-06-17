@@ -6,18 +6,18 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.8.5` Dodge Blocks Asset Loading Integration And Docs Cleanup，`0.8.x` resource loading baseline 已经收口。
+当前项目已经推进到 `v0.9.1` Framework GameFlow Primitive，`0.8.x` resource loading baseline 已经收口。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
 - `core` 已具备主循环、场景、实体、组件、系统、时间步进和生命周期管理。
-- `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、相机、资源注册、异步资源加载状态、实体工厂、场景配置和组件 schema 等基础能力。
+- `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、GameFlow、相机、资源注册、异步资源加载状态、实体工厂、场景配置和组件 schema 等基础能力。
 - `adapter` 已经通过渲染抽象接入 Leafer，并把显示层和游戏规则层分开。
 - `runtime` 已经可以在浏览器里装配渲染、场景和动画帧循环。
 - `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、asset load state snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail、assets panel section 和 schema-assisted component detail 展示。
 - `examples/dodge-blocks` 作为集成样例，用来验证引擎分层、异步资源加载和运行时能力。
 
-当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，并完成了第一版资源加载管线基线。
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，完成了第一版资源加载管线基线，并开始沉淀通用游戏流程能力。
 
 ## 产品边界
 
@@ -546,7 +546,7 @@ import {
   - 已有输入系统和浏览器键盘桥接。
   - 已有 `TransformComponent`、`SizeComponent`、`ViewComponent`、`VelocityComponent`。
   - 已有 `ColliderComponent` 和 `CollisionSystem`，支持 `enter / stay / exit` 语义和 layer 过滤。
-  - 已有 `StateMachine`，可以把示例里的状态流沉淀成通用能力。
+  - 已有 `StateMachine` 和 `GameFlow`，可以把示例里的状态流沉淀成通用能力。
   - 已有 `CameraSystem`，能驱动 world layer 位移、缩放和跟随实体。
   - 已有 `AssetRegistry`，支持 typed sprite asset 注册、查找、缺失时报错、异步加载状态、manifest 部分加载结果和浏览器图片加载适配。
   - 已有 `defineEntityFactory`，支持把实体创建逻辑从 sample 中抽出来复用。
@@ -572,7 +572,7 @@ import {
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
-  - 当前测试数为 86 个。
+  - 当前测试数为 90 个。
   - `npm run check`、`npm test`、`npm run build:example` 是当前主要验证入口。
 
 ## 当前 demo 的意义
@@ -631,7 +631,7 @@ npm pack
 
 如果我们把目标定义为“做游戏引擎”，那接下来的重点不应该是继续打磨 demo 外观，而应该继续把当前已经有的 runtime、framework、tooling 往产品化方向推进。
 
-`0.7.x` 已经把 interactive runtime inspector 阶段收口了，`0.8.x` 也完成了资源加载和 asset pipeline 基线。下一阶段更值得优先投入的是这些方向：
+`0.7.x` 已经把 interactive runtime inspector 阶段收口了，`0.8.x` 也完成了资源加载和 asset pipeline 基线。当前 `0.9.x` 正在推进 Game Flow 和 Scene Lifecycle。下一阶段更值得优先投入的是这些方向：
 
 1. 更完整的 runtime tooling / inspector
    - 系统开关和运行时状态查看

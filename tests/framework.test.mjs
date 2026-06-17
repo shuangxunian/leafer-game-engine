@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { Scene } from "../lib/core/index.js";
-import { CameraSystem, StateMachine, TransformComponent } from "../lib/framework/index.js";
+import { CameraSystem, GameFlow, StateMachine, TransformComponent } from "../lib/framework/index.js";
 
 test("state machine transitions call exit, enter and transition hooks in order", () => {
   const log = [];
@@ -31,6 +31,125 @@ test("state machine ignores same-state transitions", () => {
   assert.equal(flow.transition("idle"), false);
   assert.equal(flow.is("idle"), true);
   assert.equal(flow.matches("running", "idle"), true);
+});
+
+test("game flow moves through common gameplay phases", () => {
+  const transitions = [];
+  const flow = new GameFlow({
+    onTransition: ({ from, to, reason }) => transitions.push(`${reason}:${from}->${to}`)
+  });
+
+  assert.equal(flow.getPhase(), "boot");
+  assert.equal(flow.canUpdateGameplay(), false);
+  assert.deepEqual(flow.markReady(), {
+    ok: true,
+    changed: true,
+    from: "boot",
+    to: "ready",
+    reason: "ready"
+  });
+  assert.deepEqual(flow.start(), {
+    ok: true,
+    changed: true,
+    from: "ready",
+    to: "running",
+    reason: "start"
+  });
+  assert.equal(flow.canUpdateGameplay(), true);
+  assert.deepEqual(flow.pause(), {
+    ok: true,
+    changed: true,
+    from: "running",
+    to: "paused",
+    reason: "pause"
+  });
+  assert.deepEqual(flow.resume(), {
+    ok: true,
+    changed: true,
+    from: "paused",
+    to: "running",
+    reason: "resume"
+  });
+  assert.deepEqual(flow.end(), {
+    ok: true,
+    changed: true,
+    from: "running",
+    to: "ended",
+    reason: "end"
+  });
+  assert.deepEqual(transitions, [
+    "ready:boot->ready",
+    "start:ready->running",
+    "pause:running->paused",
+    "resume:paused->running",
+    "end:running->ended"
+  ]);
+});
+
+test("game flow supports restart and reset semantics", () => {
+  const flow = new GameFlow({ initialPhase: "ended" });
+
+  assert.deepEqual(flow.start(), {
+    ok: true,
+    changed: true,
+    from: "ended",
+    to: "running",
+    reason: "start"
+  });
+  assert.equal(flow.is("running"), true);
+  assert.equal(flow.matches("paused", "running"), true);
+
+  assert.deepEqual(flow.reset(), {
+    ok: true,
+    changed: true,
+    from: "running",
+    to: "ready",
+    reason: "reset"
+  });
+  assert.equal(flow.getPhase(), "ready");
+});
+
+test("game flow treats repeated phase requests as no-ops", () => {
+  const transitions = [];
+  const flow = new GameFlow({
+    initialPhase: "running",
+    onTransition: (transition) => transitions.push(transition)
+  });
+
+  assert.deepEqual(flow.start(), {
+    ok: true,
+    changed: false,
+    from: "running",
+    to: "running",
+    reason: "start"
+  });
+  assert.equal(flow.getPhase(), "running");
+  assert.deepEqual(transitions, []);
+});
+
+test("game flow rejects invalid transitions without mutating state", () => {
+  const flow = new GameFlow();
+
+  assert.deepEqual(flow.pause(), {
+    ok: false,
+    changed: false,
+    from: "boot",
+    to: "paused",
+    reason: "pause",
+    error: 'Cannot pause game flow from "boot" to "paused".'
+  });
+  assert.equal(flow.getPhase(), "boot");
+
+  flow.markReady();
+  assert.deepEqual(flow.resume(), {
+    ok: false,
+    changed: false,
+    from: "ready",
+    to: "running",
+    reason: "resume",
+    error: 'Cannot resume game flow from "ready" to "running".'
+  });
+  assert.equal(flow.getPhase(), "ready");
 });
 
 test("camera system maps world layer from position and zoom", () => {

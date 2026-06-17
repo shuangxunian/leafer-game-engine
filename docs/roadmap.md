@@ -638,21 +638,21 @@
 
 ## 近期执行版本
 
-当前已经不再停留在最早的稳定性冲刺。近期执行重点应收敛到 `0.8.x`：
+当前已经完成 `0.8.x` resource loading baseline。近期执行重点应收敛到 `0.9.x`：
 
-- [v0.8.0](version/v0.8.0.md)
-- [v0.8.3](version/v0.8.3.md)
+- [v0.9.0](version/v0.9.0.md)
+- [v0.9.1](version/v0.9.1.md)
 
-这一阶段的重点不是扩玩法，也不是在本仓库里做编辑器，而是把资源加载作为引擎包能力补完整：
+这一阶段的重点不是扩玩法，也不是在本仓库里做编辑器，而是把通用游戏流程和 scene lifecycle 作为引擎包能力补出来：
 
-- async asset loading
-- manifest partial result
-- browser image loader adapter
-- asset load state visibility
-- examples 作为消费者验证资源加载路径
+- framework-level `GameFlow`
+- start / running / pause / resume / end / reset 语义
+- 示例作为消费者迁移到通用 flow
+- flow state tooling visibility
+- scene loading / ready / running 边界
 - 最小回归测试落地
 
-完成这一步之后，下一阶段建议进入：
+下面是此前已经执行过的版本链，作为阶段记录保留：
 
 - [v0.2.0](version/v0.2.0.md)
 
@@ -806,3 +806,11 @@
 最后收口：
 
 - [v0.8.5](version/v0.8.5.md)
+
+完成 `0.8.x` 后，下一阶段建议进入：
+
+- [v0.9.0](version/v0.9.0.md)
+
+其中第一批建议先做：
+
+- [v0.9.1](version/v0.9.1.md)
