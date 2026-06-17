@@ -46,7 +46,7 @@ npm run dev
 
 - `boot.ts`
   - 启动 `DodgeBlocksScene`
-  - 在 runtime start 前预加载 asset manifest
+  - 通过 `startSceneWithLifecycle(...)` 在 runtime start 前预加载 asset manifest
   - 挂载 keyboard bridge
   - 挂载 browser tooling panel
   - 分区显示 runtime debug、assets、game flow、entity inspector 和 component schema 信息
@@ -98,7 +98,7 @@ bootDodgeBlocksExample(runtime).catch((error) => {
 });
 ```
 
-`bootDodgeBlocksExample(...)` 里会创建 scene、预加载 assets、启动 runtime、绑定键盘输入，并把包含 asset state、game flow state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
+`bootDodgeBlocksExample(...)` 里会创建 scene，通过 scene lifecycle helper 预加载 assets 并启动 runtime、绑定键盘输入，再把包含 asset state、game flow state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
 
 ## What This Example Proves
 
@@ -119,6 +119,7 @@ browser runtime
 
 - `DODGE_BLOCKS_ASSET_MANIFEST` 声明 player / hazard sprite assets
 - 示例通过 `loadManifestAsync(...)` 在 gameplay 启动前完成资源加载
+- 示例通过 `startSceneWithLifecycle(...)` 复用 runtime 层的 prepare / ready / running / failed 启动边界
 - tooling panel 的 `Assets` section 可以显示 player / hazard 的 loaded 状态
 - player 的 `transform`、`size`、`collider` 来自 `EntityTemplate`
 - player 的 `ViewComponent` 和 `PlayerControllerComponent` 仍在代码中装配

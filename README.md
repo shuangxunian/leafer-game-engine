@@ -6,14 +6,14 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.9.3` GameFlow Snapshot And Tooling Visibility，`0.8.x` resource loading baseline 已经收口。
+当前项目已经推进到 `v0.9.4` Scene Lifecycle Start Helper，`0.8.x` resource loading baseline 已经收口。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
 - `core` 已具备主循环、场景、实体、组件、系统、时间步进和生命周期管理。
 - `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、GameFlow、相机、资源注册、异步资源加载状态、实体工厂、场景配置和组件 schema 等基础能力。
 - `adapter` 已经通过渲染抽象接入 Leafer，并把显示层和游戏规则层分开。
-- `runtime` 已经可以在浏览器里装配渲染、场景和动画帧循环。
+- `runtime` 已经可以在浏览器里装配渲染、场景、动画帧循环和 scene lifecycle start helper。
 - `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、asset load state snapshot、GameFlow snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail、assets/game flow panel section 和 schema-assisted component detail 展示。
 - `examples/dodge-blocks` 作为集成样例，用来验证引擎分层、异步资源加载和运行时能力。
 
@@ -25,8 +25,11 @@
 
 **一个可以被前端项目安装和接入的 2D 游戏引擎依赖包。**
 
-它不是编辑器项目，也不计划在这个仓库里实现可视化编辑器、资产面板、拖拽搭场景或关卡编辑工作流。  
-后续如果要做编辑器，应该是另一个上层项目或独立 package；这里最多提供 runtime、schema、snapshot、asset loading、tooling API 等可被上层工具消费的能力。
+它不是编辑器项目，也不计划在这个仓库里实现可视化编辑器、资产管理器、拖拽搭场景、关卡编辑或内容发布工作流。
+
+当前代码里出现的 `tooling`、`inspector`、`debug panel` 都属于引擎包的开发者辅助能力：它们用于观察 runtime 状态、验证 ECS/scene/asset/game flow 数据是否正确，而不是面向最终用户的可视化编辑器。
+
+后续如果要做编辑器，应该是另一个上层项目或独立 package；这个仓库只提供可被它消费的底层能力，例如 runtime、schema、snapshot、asset loading、scene config 和 tooling API。
 
 ## 发布信息
 
@@ -525,7 +528,7 @@ import {
 - `src/tooling`
   - 调试和开发辅助能力
   - 当前已经包含 debug snapshot、browser overlay、collider visualization、scene inspector snapshot、聚合 tooling snapshot、browser tooling panel 和 component schema panel section
-  - 这一层是引擎包内置开发体验的一部分，用来服务调试面板、场景检查和 runtime 可观测性
+  - 这一层是引擎包内置开发体验的一部分，用来服务调试面板、场景检查和 runtime 可观测性，不承载可视化编辑器职责
 
 - `examples`
   - 示例项目层
@@ -556,6 +559,7 @@ import {
   - 引擎层通过 `RenderAdapter / RenderScene / RenderNode` 隔离渲染实现。
   - 当前底层已经接入真实 `Leafer`。
   - `createBrowserRuntime(...)` 可以完成浏览器挂载、渲染场景创建和动画帧循环。
+  - 已有 `startSceneWithLifecycle(...)`，可以在 scene start 前编排 async prepare / ready / running / failed 边界。
   - 示例入口已经和引擎入口拆开，`examples/*` 是消费者而不是引擎本体。
 
 - Tooling 初步成型
@@ -573,7 +577,7 @@ import {
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
-  - 当前测试数为 94 个。
+  - 当前测试数为 98 个。
   - `npm run check`、`npm test`、`npm run build:example` 是当前主要验证入口。
 
 ## 当前 demo 的意义

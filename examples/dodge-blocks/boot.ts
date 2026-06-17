@@ -1,4 +1,5 @@
 import type { BrowserRuntime } from "../../src/runtime/index.js";
+import { startSceneWithLifecycle } from "../../src/runtime/index.js";
 import { BrowserKeyboardBridge, InputSystem, createDefaultComponentSchemaRegistry } from "../../src/framework/index.js";
 import { DodgeBlocksScene } from "./dodge-blocks-scene.js";
 import { DodgeGameSystem } from "./dodge-game-system.js";
@@ -6,8 +7,14 @@ import { BrowserToolingPanel, createToolingSnapshot } from "../../src/tooling/in
 
 export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<void> {
   const scene = new DodgeBlocksScene(runtime.renderAdapter, runtime.renderScene);
-  const preloadResult = await scene.preloadAssets();
-  runtime.start(scene);
+  const lifecycleResult = await startSceneWithLifecycle({
+    scene,
+    prepare: (preparedScene) => preparedScene.preloadAssets(),
+    start: (readyScene) => runtime.start(readyScene)
+  });
+  if (!lifecycleResult.ok) {
+    throw lifecycleResult.error;
+  }
 
   const input = scene.getSystem(InputSystem);
   if (!input) throw new Error("InputSystem was not initialized.");
@@ -40,6 +47,6 @@ export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<v
     destroyScene();
   };
 
-  console.log("Example assets loaded:", preloadResult);
+  console.log("Example assets loaded:", lifecycleResult.prepareResult);
   console.log("Example bootstrapped:", createSnapshot());
 }
