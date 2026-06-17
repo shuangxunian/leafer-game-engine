@@ -264,6 +264,9 @@ test("audio playback adapter stage docs are discoverable from roadmap", async ()
   const patch = await readFile(new URL("../docs/version/v0.22.1.md", import.meta.url), "utf8");
   const systemPatch = await readFile(new URL("../docs/version/v0.22.2.md", import.meta.url), "utf8");
   const browserPatch = await readFile(new URL("../docs/version/v0.22.3.md", import.meta.url), "utf8");
+  const runtimeIndex = await readFile(new URL("../src/runtime/index.ts", import.meta.url), "utf8");
+  const browserAudio = await readFile(new URL("../src/runtime/browser-audio.ts", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
   for (const version of ["v0.22.0", "v0.22.1", "v0.22.2", "v0.22.3"]) {
@@ -283,7 +286,11 @@ test("audio playback adapter stage docs are discoverable from roadmap", async ()
   assert.equal(browserPatch.includes("Browser Audio Playback Adapter Baseline"), true);
   assert.equal(browserPatch.includes("opt-in browser runtime adapter"), true);
   assert.equal(browserPatch.includes("not audio authoring"), true);
-  assert.equal(readme.includes("`v0.22.2` Audio Playback System Draining Integration"), true);
+  assert.equal(runtimeIndex.includes('export * from "./browser-audio.js"'), true);
+  assert.equal(browserAudio.includes("class BrowserAudioPlaybackAdapter"), true);
+  assert.equal(browserAudio.includes("new Audio(source)"), true);
+  assert.equal(publicApi.includes("`v0.22.3` adds a browser-facing audio playback adapter baseline"), true);
+  assert.equal(readme.includes("`v0.22.3` Browser Audio Playback Adapter Baseline"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {

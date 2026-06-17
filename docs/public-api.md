@@ -48,6 +48,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.22.2` adds opt-in scene/system integration around that contract. The Node-safe `framework` entrypoint now exposes `AudioPlaybackSystem`, `addAudioPlayback(...)`, and `getAudioPlayback(...)` so scenes can drain audio runtime operations into an injected playback adapter during updates, while tests or custom loops can still call `drain()` directly and await deterministic result records. The system stores copied last-drain results for later read-only observability work. This is still injected-adapter runtime integration, not browser playback, asset decoding, mixer controls, or audio authoring.
 
+`v0.22.3` adds a browser-facing audio playback adapter baseline. The `/runtime` entrypoint now exports `BrowserAudioPlaybackAdapter`, which implements the framework `AudioPlaybackAdapter` contract by creating browser media elements from audio manifest asset sources and handling play/stop/pause/resume/set-volume/set-muted operations. Tests use an injected fake media element factory so behavior remains deterministic without real DOM playback. This is opt-in browser runtime integration, not a Node-safe `/framework` dependency, not a mixer, not an asset browser, and not audio authoring.
+
 ---
 
 ## Package Entrypoints
@@ -189,7 +191,7 @@ These entrypoints may import Leafer or DOM-dependent code:
 
 ```ts
 import { createBrowserRuntime } from "@shuangxunian/leafer-game-engine";
-import { createBrowserRuntime } from "@shuangxunian/leafer-game-engine/runtime";
+import { BrowserAudioPlaybackAdapter, createBrowserRuntime } from "@shuangxunian/leafer-game-engine/runtime";
 import { LeaferRenderAdapter } from "@shuangxunian/leafer-game-engine/adapter";
 ```
 
@@ -203,7 +205,7 @@ They should be verified through browser/example builds until the package is spli
 - `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, pointer button action bindings, browser pointer button bridging, collision pair query snapshots, audio data contracts/runtime intent state, scene-owned audio runtime system integration, audio playback adapter contracts, update-driven audio playback draining system integration, deterministic audio operation draining, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, opt-in scene runtime service integration, data-driven scene config validation, safe scene config bootstrap, render/view synchronization, render-node capability checks, tile map data contracts, level spawn/region metadata, and optional scene config level/map declarations.
 - `tooling` can expose structured snapshots and formatters in Node, including read-only system lifecycle state, sprite animation state, runtime services state, input action state, collision pair state, and audio runtime state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer. It owns render scene layer naming/order helpers.
-- `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
+- `runtime` currently includes browser runtime assembly and browser audio playback adapter exports, so importing the broad runtime entrypoint in Node is not guaranteed to work.
 - Future package-boundary work may split browser runtime APIs into more explicit entrypoints, but `0.17.x` runtime/game loop hardening guarantees are now documented and covered by package verification.
 
 ---

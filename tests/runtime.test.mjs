@@ -2,9 +2,38 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { Game, Scene } from "../lib/core/index.js";
+import { createAudioRuntimeState, drainAudioRuntimeOperations } from "../lib/framework/index.js";
+import { BrowserAudioPlaybackAdapter } from "../lib/runtime/browser-audio.js";
 import { createAnimationFrameLoop } from "../lib/runtime/frame-loop.js";
 import { createRuntimeController } from "../lib/runtime/runtime-controller.js";
 import { startSceneWithLifecycle } from "../lib/runtime/scene-lifecycle.js";
+
+function createFakeAudioFactory() {
+  const elements = [];
+
+  return {
+    elements,
+    createElement(source) {
+      const element = {
+        src: source,
+        currentTime: 0,
+        volume: 1,
+        muted: false,
+        loop: false,
+        playCount: 0,
+        pauseCount: 0,
+        play() {
+          this.playCount += 1;
+        },
+        pause() {
+          this.pauseCount += 1;
+        }
+      };
+      elements.push(element);
+      return element;
+    }
+  };
+}
 
 test("animation frame loop only schedules one callback and can restart after stop", () => {
   const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
@@ -100,6 +129,129 @@ test("runtime controller stop only owns the frame loop, not scene cleanup", () =
   assert.equal(scene.destroyCount, 0);
   assert.equal(game.activeScene, scene);
   assert.deepEqual(calls, ["reset", "start", "stop"]);
+});
+
+test("browser audio playback adapter plays and stops fake media elements", async () => {
+  const audio = createAudioRuntimeState({
+    assets: [{ id: "hit", source: "/audio/hit.ogg" }],
+    channels: [{ id: "sfx", volume: 0.5 }],
+    cues: [{ id: "hit:play", assetId: "hit", channelId: "sfx", volume: 0.8 }]
+  });
+  const fakeAudio = createFakeAudioFactory();
+  const adapter = new BrowserAudioPlaybackAdapter({
+    audio,
+    createElement: fakeAudio.createElement
+  });
+
+  audio.playCue("hit:play", { loop: true });
+  audio.stopCue("hit:play");
+
+  assert.deepEqual(await drainAudioRuntimeOperations(audio, adapter), [
+    { sequence: 1, type: "play", status: "ok" },
+    { sequence: 2, type: "stop", status: "ok" }
+  ]);
+  assert.equal(fakeAudio.elements.length, 1);
+  assert.equal(fakeAudio.elements[0].src, "/audio/hit.ogg");
+  assert.equal(fakeAudio.elements[0].loop, true);
+  assert.equal(fakeAudio.elements[0].volume, 0.4);
+  assert.equal(fakeAudio.elements[0].playCount, 1);
+  assert.equal(fakeAudio.elements[0].pauseCount, 1);
+  assert.equal(fakeAudio.elements[0].currentTime, 0);
+  assert.deepEqual(adapter.listActiveInstances(), []);
+});
+
+test("browser audio playback adapter handles pause, resume, volume and mute by channel", async () => {
+  const audio = createAudioRuntimeState({
+    assets: [
+      { id: "theme", source: "/audio/theme.ogg" },
+      { id: "hit", source: "/audio/hit.ogg" }
+    ],
+    channels: [
+      { id: "music", volume: 1 },
+      { id: "sfx", volume: 1 }
+    ],
+    cues: [
+      { id: "theme:start", assetId: "theme", channelId: "music", volume: 0.75 },
+      { id: "hit:play", assetId: "hit", channelId: "sfx", volume: 0.5 }
+    ]
+  });
+  const fakeAudio = createFakeAudioFactory();
+  const adapter = new BrowserAudioPlaybackAdapter({
+    audio,
+    createElement: fakeAudio.createElement
+  });
+
+  audio.playCue("theme:start");
+  audio.playCue("hit:play");
+  audio.pauseChannel("music");
+  audio.resumeChannel("music");
+  audio.setChannelVolume("music", 0.25);
+  audio.setChannelMuted("music", true);
+
+  assert.deepEqual(await drainAudioRuntimeOperations(audio, adapter), [
+    { sequence: 1, type: "play", status: "ok" },
+    { sequence: 2, type: "play", status: "ok" },
+    { sequence: 3, type: "pause", status: "ok" },
+    { sequence: 4, type: "resume", status: "ok" },
+    { sequence: 5, type: "set-volume", status: "ok" },
+    { sequence: 6, type: "set-muted", status: "ok" }
+  ]);
+
+  const [music, sfx] = fakeAudio.elements;
+  assert.equal(music.pauseCount, 1);
+  assert.equal(music.playCount, 2);
+  assert.equal(music.volume, 0.1875);
+  assert.equal(music.muted, true);
+  assert.equal(sfx.playCount, 1);
+  assert.equal(sfx.pauseCount, 0);
+  assert.equal(sfx.volume, 0.5);
+  assert.equal(sfx.muted, false);
+  assert.deepEqual(adapter.listActiveInstances().map((operation) => operation.sequence), [1, 2]);
+});
+
+test("browser audio playback adapter reports missing asset and source failures", async () => {
+  const audio = createAudioRuntimeState({
+    assets: [
+      { id: "silent" },
+      { id: "hit", source: "/audio/hit.ogg" }
+    ],
+    cues: [
+      { id: "silent:play", assetId: "silent" },
+      { id: "hit:play", assetId: "hit" }
+    ]
+  });
+  const fakeAudio = createFakeAudioFactory();
+  const adapter = new BrowserAudioPlaybackAdapter({
+    audio,
+    createElement: fakeAudio.createElement
+  });
+
+  audio.playCue("silent:play");
+  assert.deepEqual(await drainAudioRuntimeOperations(audio, adapter, { clearOperations: false }), [
+    {
+      sequence: 1,
+      type: "play",
+      status: "error",
+      error: 'Audio playback asset "silent" does not define a source.'
+    }
+  ]);
+
+  assert.deepEqual(
+    await drainAudioRuntimeOperations(audio, adapter, { clearOperations: false }),
+    [
+      {
+        sequence: 1,
+        type: "play",
+        status: "error",
+        error: 'Audio playback asset "silent" does not define a source.'
+      }
+    ]
+  );
+
+  assert.throws(
+    () => adapter.play({ sequence: 99, type: "play", assetId: "missing" }),
+    /Audio playback asset "missing" is not registered/
+  );
 });
 
 test("scene lifecycle helper prepares and starts a scene in order", async () => {
