@@ -123,7 +123,8 @@ test("runtime hardening stage docs are discoverable from roadmap and package doc
   assert.equal(stage.includes("The `0.17.x` stage is complete"), true);
   assert.equal(publicApi.includes("`0.17.x` closed runtime/game loop hardening"), true);
   assert.equal(publicApi.includes("Runtime Ownership Boundary"), true);
-  assert.equal(readme.includes("`0.18.x` level/map runtime primitives 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.17.x` runtime/game loop hardening 阶段"), true);
+  assert.equal(readme.includes("都已经收口"), true);
 });
 
 test("level map stage docs are discoverable from roadmap and package docs", async () => {
@@ -140,7 +141,8 @@ test("level map stage docs are discoverable from roadmap and package docs", asyn
   assert.equal(stage.includes("The `0.18.x` stage is complete"), true);
   assert.equal(publicApi.includes("`0.18.x` closed level/map runtime primitives"), true);
   assert.equal(publicApi.includes("Level/Map Runtime Boundary"), true);
-  assert.equal(readme.includes("`0.18.x` level/map runtime primitives 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.18.x` level/map runtime primitives 阶段"), true);
+  assert.equal(readme.includes("都已经收口"), true);
 });
 
 test("pointer input stage docs are discoverable from roadmap and package docs", async () => {
@@ -149,10 +151,12 @@ test("pointer input stage docs are discoverable from roadmap and package docs", 
   const patch = await readFile(new URL("../docs/version/v0.19.1.md", import.meta.url), "utf8");
   const bridgePatch = await readFile(new URL("../docs/version/v0.19.2.md", import.meta.url), "utf8");
   const examplePatch = await readFile(new URL("../docs/version/v0.19.3.md", import.meta.url), "utf8");
+  const closeoutPatch = await readFile(new URL("../docs/version/v0.19.4.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const inputDocs = await readFile(new URL("../docs/input-actions.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  for (const version of ["v0.19.0", "v0.19.1", "v0.19.2", "v0.19.3"]) {
+  for (const version of ["v0.19.0", "v0.19.1", "v0.19.2", "v0.19.3", "v0.19.4"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
   }
 
@@ -164,9 +168,15 @@ test("pointer input stage docs are discoverable from roadmap and package docs", 
   assert.equal(stage.includes("v0.19.3.md"), true);
   assert.equal(examplePatch.includes("Dodge Blocks Pointer Action Consumption"), true);
   assert.equal(examplePatch.includes("does not add pointer position tracking"), true);
-  assert.equal(publicApi.includes("`0.19.x` starts pointer/input runtime primitives"), true);
+  assert.equal(stage.includes("v0.19.4.md"), true);
+  assert.equal(stage.includes("The `0.19.x` stage is complete"), true);
+  assert.equal(closeoutPatch.includes("Pointer/Input Runtime Boundary Closeout"), true);
+  assert.equal(closeoutPatch.includes("does not add pointer position tracking"), true);
+  assert.equal(publicApi.includes("`0.19.x` closed pointer/input runtime primitives"), true);
   assert.equal(publicApi.includes("BrowserPointerButtonBridge"), true);
-  assert.equal(readme.includes("`v0.19.3` Dodge Blocks Pointer Action Consumption"), true);
+  assert.equal(inputDocs.includes("The `0.19.x` pointer/input runtime primitives stage is complete."), true);
+  assert.equal(readme.includes("`v0.19.4` Pointer/Input Runtime Boundary Closeout"), true);
+  assert.equal(readme.includes("`0.19.x` pointer/input runtime primitives 阶段都已经收口"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {

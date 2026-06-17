@@ -158,7 +158,7 @@ Tooling does not mutate actions, bindings, input state, scenes, or systems.
 
 ## Current Limitations
 
-The current sprint intentionally does not include:
+The closed `0.19.x` pointer/input stage intentionally does not include:
 
 - keybinding settings UI
 - runtime rebinding controls in tooling
@@ -171,6 +171,12 @@ The current sprint intentionally does not include:
 - editor controls
 
 Those capabilities can be added in future engine stages only if they remain reusable package APIs and do not turn this repository into an editor product.
+
+## Stage Status
+
+The `0.19.x` pointer/input runtime primitives stage is complete.
+
+It covers pointer button bindings, browser pointer button bridging, read-only tooling formatting, and dodge-blocks example consumption. It does not cover pointer position, gestures, drag/drop, settings UI, or editor workflows.
 
 ## Consumer Guidance
 
