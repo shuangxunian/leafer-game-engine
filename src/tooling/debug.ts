@@ -1,4 +1,5 @@
 import type { RenderScene } from "../adapter/index.js";
+import { getRenderSceneLayerNames } from "../adapter/render-types.js";
 import type { Component, Game, Scene } from "../core/index.js";
 import type {
   AssetLoadStatus,
@@ -527,7 +528,7 @@ function createRenderSnapshot(renderScene: RenderScene): DebugRenderSnapshot {
   return {
     width: renderScene.width,
     height: renderScene.height,
-    layers: Object.keys(renderScene.layers)
+    layers: getRenderSceneLayerNames(renderScene)
   };
 }
 

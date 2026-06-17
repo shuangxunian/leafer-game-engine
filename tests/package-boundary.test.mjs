@@ -34,6 +34,7 @@ test("package export map exposes the documented public entrypoints", () => {
   assert.deepEqual(Object.keys(packageJson.exports), [
     ".",
     "./adapter",
+    "./adapter/render-types",
     "./core",
     "./framework",
     "./runtime",
@@ -58,6 +59,7 @@ test("package publish files include library output and docs", () => {
     "docs/input-actions.md",
     "docs/runtime-observability.md",
     "docs/scene-config.md",
+    "docs/render-view-contract.md",
     "README.md",
     "LICENSE"
   ]);
@@ -67,6 +69,13 @@ test("core package subpath can be imported by package name in Node", async () =>
   const core = await import(`${packageJson.name}/core`);
 
   assertExports(core, ["Component", "Entity", "Game", "Scene", "System", "Time", "World"]);
+});
+
+test("adapter render-types subpath exposes Node-safe render layer contract helpers", async () => {
+  const renderTypes = await import(`${packageJson.name}/adapter/render-types`);
+
+  assertExports(renderTypes, ["RENDER_SCENE_LAYER_ORDER", "getRenderSceneLayerNames"]);
+  assert.deepEqual(renderTypes.RENDER_SCENE_LAYER_ORDER, ["background", "world", "ui", "overlay"]);
 });
 
 test("framework package subpath can be imported by package name in Node", async () => {

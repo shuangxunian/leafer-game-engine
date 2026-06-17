@@ -1,3 +1,7 @@
+export const RENDER_SCENE_LAYER_ORDER = ["background", "world", "ui", "overlay"] as const;
+
+export type RenderSceneLayerName = (typeof RENDER_SCENE_LAYER_ORDER)[number];
+
 export interface RenderNode {
   x: number;
   y: number;
@@ -32,12 +36,11 @@ export interface RenderContainer extends RenderNode {
   addChild(node: RenderNode): void;
 }
 
-export type RenderSceneLayers = {
-  background: RenderContainer;
-  world: RenderContainer;
-  ui: RenderContainer;
-  overlay: RenderContainer;
-};
+export type RenderSceneLayers = Record<RenderSceneLayerName, RenderContainer>;
+
+export function getRenderSceneLayerNames(renderScene: Pick<RenderScene, "layers">): RenderSceneLayerName[] {
+  return RENDER_SCENE_LAYER_ORDER.filter((layerName) => layerName in renderScene.layers);
+}
 
 export interface RenderScene {
   readonly root: RenderContainer;

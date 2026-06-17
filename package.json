@@ -14,6 +14,10 @@
       "types": "./lib/adapter/index.d.ts",
       "import": "./lib/adapter/index.js"
     },
+    "./adapter/render-types": {
+      "types": "./lib/adapter/render-types.d.ts",
+      "import": "./lib/adapter/render-types.js"
+    },
     "./core": {
       "types": "./lib/core/index.d.ts",
       "import": "./lib/core/index.js"
@@ -40,6 +44,7 @@
     "docs/input-actions.md",
     "docs/runtime-observability.md",
     "docs/scene-config.md",
+    "docs/render-view-contract.md",
     "README.md",
     "LICENSE"
   ],

@@ -188,6 +188,20 @@ test("debug snapshot can include time, render and asset details", () => {
   });
 });
 
+test("debug render snapshot uses stable render scene layer order", () => {
+  const scene = new Scene("RenderLayerOrderScene");
+  const renderScene = createFakeRenderScene({
+    overlay: createFakeContainer(),
+    ui: createFakeContainer(),
+    world: createFakeContainer(),
+    background: createFakeContainer()
+  });
+
+  const snapshot = createDebugSnapshot(scene, { renderScene });
+
+  assert.deepEqual(snapshot.render?.layers, ["background", "world", "ui", "overlay"]);
+});
+
 test("debug asset snapshot includes copied load states", async () => {
   const scene = new Scene("AssetStateDebugScene");
   const assets = new AssetRegistry();
@@ -1271,15 +1285,15 @@ test("component schemas panel section exposes formatted schema rows", () => {
   assert.equal(createComponentSchemasPanelSection(snapshot).lines[0], "Component Schemas 4");
 });
 
-function createFakeRenderScene() {
+function createFakeRenderScene(layers = {
+  background: createFakeContainer(),
+  world: createFakeContainer(),
+  ui: createFakeContainer(),
+  overlay: createFakeContainer()
+}) {
   return {
     root: createFakeContainer(),
-    layers: {
-      background: createFakeContainer(),
-      world: createFakeContainer(),
-      ui: createFakeContainer(),
-      overlay: createFakeContainer()
-    },
+    layers,
     width: 800,
     height: 600,
     mount() {},

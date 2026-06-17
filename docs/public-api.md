@@ -26,7 +26,9 @@ For the runtime-observability boundary across debug snapshots, system lifecycle 
 
 For the scene-config boundary across asset manifests, entity templates, validation diagnostics, safe bootstrap, example consumption, and non-editor data-contract limits, see [Scene Config Boundary](scene-config.md).
 
-`0.16.x` continues render/view contract hardening. The Node-safe `framework` entrypoint now exposes `ViewComponent.syncFromTransform(...)` as an explicit ECS-to-render-node sync method while preserving existing `lateUpdate(...)` behavior, and `isSpriteCapableRenderNode(...)` as a reusable guard for render nodes that can accept sprite assets.
+`0.16.x` continues render/view contract hardening. The Node-safe `framework` entrypoint now exposes `ViewComponent.syncFromTransform(...)` as an explicit ECS-to-render-node sync method while preserving existing `lateUpdate(...)` behavior, and `isSpriteCapableRenderNode(...)` as a reusable guard for render nodes that can accept sprite assets. The Node-safe `adapter/render-types` entrypoint now also exposes `RENDER_SCENE_LAYER_ORDER` and `getRenderSceneLayerNames(...)` for stable render layer ordering.
+
+For the render/view boundary across render nodes, view synchronization, sprite-capable nodes, render scene layers, lifecycle, and read-only tooling visibility, see [Render/View Contract](render-view-contract.md).
 
 ---
 
@@ -38,6 +40,7 @@ Current package exports are defined in `package.json`:
 | --- | --- | --- |
 | `@shuangxunian/leafer-game-engine` | Browser-facing convenience root that re-exports engine layers | Not Node-safe yet |
 | `@shuangxunian/leafer-game-engine/core` | Engine core: game loop, scene, world, entity, component, system, time | Yes |
+| `@shuangxunian/leafer-game-engine/adapter/render-types` | Render contracts: render nodes, scene layers, layer order helpers | Yes |
 | `@shuangxunian/leafer-game-engine/framework` | Reusable gameplay/framework primitives: input, collision, assets, sprite animation, schema, game flow, event bus, scheduler, runtime services | Yes |
 | `@shuangxunian/leafer-game-engine/tooling` | Runtime snapshots, formatting, and panel section builders | Yes for import; DOM panel classes require browser usage |
 | `@shuangxunian/leafer-game-engine/adapter` | Browser/render adapter integration, including Leafer adapter | Browser-facing |
@@ -51,6 +54,7 @@ These imports are expected to work in Node-side tests:
 
 ```ts
 import { Scene } from "@shuangxunian/leafer-game-engine/core";
+import { RENDER_SCENE_LAYER_ORDER, getRenderSceneLayerNames } from "@shuangxunian/leafer-game-engine/adapter/render-types";
 import {
   EventBus,
   GameFlow,
@@ -93,6 +97,7 @@ Use subpath entrypoints for pure engine logic, framework primitives, and Node-si
 
 ```ts
 import { Scene } from "@shuangxunian/leafer-game-engine/core";
+import { RENDER_SCENE_LAYER_ORDER, getRenderSceneLayerNames } from "@shuangxunian/leafer-game-engine/adapter/render-types";
 import {
   EventBus,
   GameFlow,
@@ -148,7 +153,7 @@ import { createBrowserRuntime } from "@shuangxunian/leafer-game-engine/runtime";
 import { LeaferRenderAdapter } from "@shuangxunian/leafer-game-engine/adapter";
 ```
 
-They should be verified through browser/example builds until the package is split into more granular runtime subpaths.
+They should be verified through browser/example builds until the package is split into more granular runtime subpaths. For Node-safe render contracts, prefer `@shuangxunian/leafer-game-engine/adapter/render-types`; importing the broad adapter entrypoint can pull render-adapter dependencies.
 
 ---
 
@@ -157,7 +162,7 @@ They should be verified through browser/example builds until the package is spli
 - `core` should stay independent from browser and rendering implementations.
 - `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, opt-in scene runtime service integration, data-driven scene config validation, safe scene config bootstrap, render/view synchronization, and render-node capability checks.
 - `tooling` can expose structured snapshots and formatters in Node, including read-only system lifecycle state, sprite animation state, runtime services state, and input action state, but browser panel classes should only be constructed in a DOM environment.
-- `adapter` is render-implementation-facing and can depend on Leafer.
+- `adapter` is render-implementation-facing and can depend on Leafer. It owns render scene layer naming/order helpers.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
 - Future package-boundary work may split browser runtime APIs into more explicit entrypoints.
 
@@ -183,6 +188,7 @@ This command builds the library through `npm pack --dry-run --json` and checks t
 - `docs/input-actions.md`
 - `docs/runtime-observability.md`
 - `docs/scene-config.md`
+- `docs/render-view-contract.md`
 - all JS and type declaration targets from `package.json` exports
 
 It also checks that development-only paths such as `src`, `tests`, `examples`, `dist`, `scripts`, and `node_modules` are not included.
