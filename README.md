@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经完成到 `0.6.x` runtime tooling panel 阶段收口。
+当前项目已经完成到 `0.7.x` interactive runtime inspector 阶段收口。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -14,10 +14,10 @@
 - `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、相机、资源注册、实体工厂、场景配置和组件 schema 等基础能力。
 - `adapter` 已经通过渲染抽象接入 Leafer，并把显示层和游戏规则层分开。
 - `runtime` 已经可以在浏览器里装配渲染、场景和动画帧循环。
-- `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、聚合 tooling snapshot、browser tooling panel 和 component schema 展示。
+- `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail 和 schema-assisted component detail 展示。
 - `examples/dodge-blocks` 作为集成样例，用来验证引擎分层和运行时能力。
 
-当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + runtime tooling panel”的第一轮产品化整理。
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理。
 
 ## 产品边界
 
@@ -387,7 +387,9 @@ import {
   createDebugSnapshot,
   createSceneInspectorSnapshot,
   createToolingSnapshot,
-  createToolingPanelSections
+  createToolingPanelSections,
+  createSelectedEntityDetailPanelSection,
+  parseToolingPanelEntityRowId
 } from "@shuangxunian/leafer-game-engine/tooling";
 ```
 
@@ -400,6 +402,10 @@ import {
 - scene/entity inspector snapshot
 - 面向工具面板的聚合 snapshot
 - runtime debug / entity inspector / component schema 分区数据
+- entity row selection
+- selected entity detail
+- schema-assisted selected component detail
+- entity row parsing helper
 
 ### 当前比较常用的第一批类
 
@@ -528,7 +534,7 @@ import {
 
 ## 当前已经实现了什么
 
-当前已经完成了 `0.1.x` 到 `0.6.x` 的连续整理，重点从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过浏览器 tooling panel 辅助开发”。
+当前已经完成了 `0.1.x` 到 `0.7.x` 的连续整理，重点从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过交互式 runtime inspector 辅助开发”。
 
 - Core 稳定性
   - `Game`、`Time`、`Scene`、`World`、`Entity`、`Component`、`System` 已经形成基础骨架。
@@ -559,11 +565,13 @@ import {
   - 已有 `createSceneInspectorSnapshot(...)`，可以导出 scene/entity/component 结构化检查数据。
   - 已有 `createToolingSnapshot(...)`，作为面向工具面板的聚合入口。
   - 已有 `BrowserToolingPanel`，可以分区展示 runtime debug、entity inspector 和 component schema metadata。
-  - 已有 tooling panel section 格式化能力，为后续交互式 runtime inspector 打基础。
+  - 已有 entity row selection，可以在浏览器 tooling panel 中选择 entity。
+  - 已有 selected entity detail section，可以显示选中实体的状态、组件和 primitive data。
+  - 已有 schema-assisted selected component detail，可以结合 component schema 展示字段类型、默认值和当前值。
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
-  - 当前测试数为 59 个。
+  - 当前测试数为 69 个。
   - `npm run check`、`npm test`、`npm run build:example` 是当前主要验证入口。
 
 ## 当前 demo 的意义
@@ -622,13 +630,13 @@ npm pack
 
 如果我们把目标定义为“做游戏引擎”，那接下来的重点不应该是继续打磨 demo 外观，而应该继续把当前已经有的 runtime、framework、tooling 往产品化方向推进。
 
-`0.6.x` 已经把 runtime tooling panel 阶段收口了。下一阶段更值得优先投入的是这些方向：
+`0.7.x` 已经把 interactive runtime inspector 阶段收口了。下一阶段更值得优先投入的是这些方向：
 
 1. 更完整的 runtime tooling / inspector
-   - 可交互的 scene/entity inspector
-   - entity 选择和高亮
-   - schema-driven 组件字段展示
    - 系统开关和运行时状态查看
+   - 输入状态可视化
+   - asset loading 状态展示
+   - inspector 面板的可读性和可访问性 polish
 
 2. 更正式的资源加载
    - 图片加载
