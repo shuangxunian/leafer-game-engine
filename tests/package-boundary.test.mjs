@@ -220,10 +220,11 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   const stage = await readFile(new URL("../docs/version/v0.21.0.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.21.1.md", import.meta.url), "utf8");
   const systemPatch = await readFile(new URL("../docs/version/v0.21.2.md", import.meta.url), "utf8");
+  const toolingPatch = await readFile(new URL("../docs/version/v0.21.3.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  for (const version of ["v0.21.0", "v0.21.1", "v0.21.2"]) {
+  for (const version of ["v0.21.0", "v0.21.1", "v0.21.2", "v0.21.3"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
   }
 
@@ -231,11 +232,15 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   assert.equal(stage.includes("not as a visual audio editor"), true);
   assert.equal(stage.includes("v0.21.1.md"), true);
   assert.equal(stage.includes("v0.21.2.md"), true);
+  assert.equal(stage.includes("v0.21.3.md"), true);
   assert.equal(patch.includes("Audio Data Contract Baseline"), true);
   assert.equal(patch.includes("does not add Web Audio playback"), true);
   assert.equal(systemPatch.includes("Audio Runtime Service Integration"), true);
   assert.equal(systemPatch.includes("does not add Web Audio playback"), true);
   assert.equal(systemPatch.includes("scene/runtime ownership"), true);
+  assert.equal(toolingPatch.includes("Audio Runtime Tooling Visibility"), true);
+  assert.equal(toolingPatch.includes("read-only runtime observability"), true);
+  assert.equal(toolingPatch.includes("does not add playback controls"), true);
   assert.equal(publicApi.includes("`0.21.x` starts audio runtime primitives"), true);
   assert.equal(publicApi.includes("AudioRuntimeState"), true);
   assert.equal(publicApi.includes("AudioRuntimeSystem"), true);
