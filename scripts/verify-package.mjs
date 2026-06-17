@@ -57,7 +57,7 @@ if (!Array.isArray(packResult) || packResult.length !== 1) {
 
 const packageFiles = new Set(packResult[0].files.map((file) => file.path));
 
-for (const requiredFile of ["package.json", "README.md", "LICENSE", "docs/public-api.md"]) {
+for (const requiredFile of ["package.json", "README.md", "LICENSE", "docs/public-api.md", "docs/product-boundary.md"]) {
   assertHasFile(packageFiles, requiredFile);
 }
 

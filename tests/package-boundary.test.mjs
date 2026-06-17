@@ -49,7 +49,13 @@ test("package export map exposes the documented public entrypoints", () => {
 });
 
 test("package publish files include library output and docs", () => {
-  assert.deepEqual(packageJson.files, ["lib", "docs/public-api.md", "README.md", "LICENSE"]);
+  assert.deepEqual(packageJson.files, [
+    "lib",
+    "docs/public-api.md",
+    "docs/product-boundary.md",
+    "README.md",
+    "LICENSE"
+  ]);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -70,9 +76,13 @@ test("framework package subpath can be imported by package name in Node", async 
     "StateMachine",
     "TransformComponent",
     "ViewComponent",
+    "advanceSpriteAnimationPlayback",
+    "createSpriteAnimationPlayback",
     "createDefaultComponentSchemaRegistry",
     "defineSpriteAnimationClip",
     "defineSpriteFrame",
+    "getSpriteAnimationPlaybackFrameId",
+    "getSpriteAnimationPlaybackFrameIndex",
     "loadAssetManifestAsync"
   ]);
 });

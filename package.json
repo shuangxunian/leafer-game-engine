@@ -34,6 +34,7 @@
   "files": [
     "lib",
     "docs/public-api.md",
+    "docs/product-boundary.md",
     "README.md",
     "LICENSE"
   ],
