@@ -61,20 +61,29 @@ export class World {
 
   update(dt: number): void {
     this.beginPhase();
-    for (const entity of this.entities) entity.update(dt);
-    this.endPhase();
+    try {
+      for (const entity of this.entities) entity.update(dt);
+    } finally {
+      this.endPhase();
+    }
   }
 
   fixedUpdate(dt: number): void {
     this.beginPhase();
-    for (const entity of this.entities) entity.fixedUpdate(dt);
-    this.endPhase();
+    try {
+      for (const entity of this.entities) entity.fixedUpdate(dt);
+    } finally {
+      this.endPhase();
+    }
   }
 
   lateUpdate(dt: number): void {
     this.beginPhase();
-    for (const entity of this.entities) entity.lateUpdate(dt);
-    this.endPhase();
+    try {
+      for (const entity of this.entities) entity.lateUpdate(dt);
+    } finally {
+      this.endPhase();
+    }
   }
 
   destroy(): void {

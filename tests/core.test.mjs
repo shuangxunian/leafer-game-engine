@@ -229,6 +229,45 @@ test("entity deactivates immediately when destroy is requested mid-update", () =
   assert.equal(scene.world.entities.length, 0);
 });
 
+test("scene phases flush pending world mutations when systems throw", () => {
+  for (const phase of ["update", "fixedUpdate", "lateUpdate"]) {
+    class ThrowingSystem extends System {
+      [phase]() {
+        this.scene.world.createEntity(`${phase}-spawned-by-system`);
+        throw new Error(`${phase} system failed`);
+      }
+    }
+
+    const scene = new Scene(`${phase}SystemErrorScene`);
+    scene.addSystem(new ThrowingSystem(scene));
+    scene.start();
+
+    assert.throws(() => scene[phase](1 / 60), new RegExp(`${phase} system failed`));
+    assert.deepEqual(scene.world.getEntities().map((entity) => entity.name), [`${phase}-spawned-by-system`]);
+  }
+});
+
+test("world phases flush pending entity mutations when components throw", () => {
+  for (const phase of ["update", "fixedUpdate", "lateUpdate"]) {
+    class ThrowingComponent extends Component {
+      [phase]() {
+        this.scene.world.createEntity(`${phase}-spawned-by-component`);
+        throw new Error(`${phase} component failed`);
+      }
+    }
+
+    const scene = new Scene(`${phase}ComponentErrorScene`);
+    scene.world.createEntity("actor").addComponent(new ThrowingComponent());
+    scene.start();
+
+    assert.throws(() => scene[phase](1 / 60), new RegExp(`${phase} component failed`));
+    assert.deepEqual(scene.world.getEntities().map((entity) => entity.name), [
+      "actor",
+      `${phase}-spawned-by-component`
+    ]);
+  }
+});
+
 test("replacing a scene destroys the previous scene once", () => {
   class DestroyTrackingScene extends Scene {
     constructor(name) {

@@ -30,6 +30,8 @@ For the scene-config boundary across asset manifests, entity templates, validati
 
 For the render/view boundary across render nodes, view synchronization, sprite-capable nodes, render scene layers, lifecycle, and read-only tooling visibility, see [Render/View Contract](render-view-contract.md).
 
+`0.17.x` starts runtime/game loop hardening. The `core` runtime now guarantees that scene/world phase cleanup runs even when systems or components throw during `update(...)`, `fixedUpdate(...)`, or `lateUpdate(...)`; those errors still propagate to callers.
+
 ---
 
 ## Package Entrypoints
@@ -159,7 +161,7 @@ They should be verified through browser/example builds until the package is spli
 
 ## Current Boundary Notes
 
-- `core` should stay independent from browser and rendering implementations.
+- `core` should stay independent from browser and rendering implementations, and should preserve scene/world phase cleanup invariants even when runtime hooks throw.
 - `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, opt-in scene runtime service integration, data-driven scene config validation, safe scene config bootstrap, render/view synchronization, and render-node capability checks.
 - `tooling` can expose structured snapshots and formatters in Node, including read-only system lifecycle state, sprite animation state, runtime services state, and input action state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer. It owns render scene layer naming/order helpers.

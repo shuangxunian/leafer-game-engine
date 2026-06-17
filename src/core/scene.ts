@@ -53,33 +53,42 @@ export abstract class Scene {
     if (!this.started || this.destroyed) return;
 
     this.world.beginPhase();
-    for (const system of this.systems) {
-      if (system.enabled) system.update(dt);
+    try {
+      for (const system of this.systems) {
+        if (system.enabled) system.update(dt);
+      }
+      this.world.update(dt);
+    } finally {
+      this.world.endPhase();
     }
-    this.world.update(dt);
-    this.world.endPhase();
   }
 
   fixedUpdate(dt: number): void {
     if (!this.started || this.destroyed) return;
 
     this.world.beginPhase();
-    for (const system of this.systems) {
-      if (system.enabled) system.fixedUpdate(dt);
+    try {
+      for (const system of this.systems) {
+        if (system.enabled) system.fixedUpdate(dt);
+      }
+      this.world.fixedUpdate(dt);
+    } finally {
+      this.world.endPhase();
     }
-    this.world.fixedUpdate(dt);
-    this.world.endPhase();
   }
 
   lateUpdate(dt: number): void {
     if (!this.started || this.destroyed) return;
 
     this.world.beginPhase();
-    this.world.lateUpdate(dt);
-    for (const system of this.systems) {
-      if (system.enabled) system.lateUpdate(dt);
+    try {
+      this.world.lateUpdate(dt);
+      for (const system of this.systems) {
+        if (system.enabled) system.lateUpdate(dt);
+      }
+    } finally {
+      this.world.endPhase();
     }
-    this.world.endPhase();
   }
 
   destroy(): void {
