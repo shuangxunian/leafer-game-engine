@@ -643,10 +643,14 @@
 
 ## 近期执行版本
 
-当前已经完成 `0.8.x` resource loading baseline。近期执行重点应收敛到 `0.9.x`：
+当前已经完成 `0.8.x` resource loading baseline，并进入 `0.9.x` Game Flow And Scene Lifecycle 收口：
 
 - [v0.9.0](version/v0.9.0.md)
 - [v0.9.1](version/v0.9.1.md)
+- [v0.9.2](version/v0.9.2.md)
+- [v0.9.3](version/v0.9.3.md)
+- [v0.9.4](version/v0.9.4.md)
+- [v0.9.5](version/v0.9.5.md)
 
 这一阶段的重点不是扩玩法，也不是在本仓库里做编辑器，而是把通用游戏流程和 scene lifecycle 作为引擎包能力补出来：
 
@@ -831,3 +835,7 @@
 随后建议进入：
 
 - [v0.9.4](version/v0.9.4.md)
+
+最后收口：
+
+- [v0.9.5](version/v0.9.5.md)

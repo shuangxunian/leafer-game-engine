@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.9.4` Scene Lifecycle Start Helper，`0.8.x` resource loading baseline 已经收口。
+当前项目已经推进到 `v0.9.5` Game Flow And Scene Lifecycle Docs Cleanup，`0.8.x` resource loading baseline 和 `0.9.x` game-flow/scene-lifecycle 阶段都已经收口。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -17,7 +17,7 @@
 - `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、asset load state snapshot、GameFlow snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail、assets/game flow panel section 和 schema-assisted component detail 展示。
 - `examples/dodge-blocks` 作为集成样例，用来验证引擎分层、异步资源加载和运行时能力。
 
-当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，完成了第一版资源加载管线基线，并开始沉淀通用游戏流程能力。
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程和 scene lifecycle 启动边界。
 
 ## 产品边界
 
@@ -537,7 +537,7 @@ import {
 
 ## 当前已经实现了什么
 
-当前已经完成了 `0.1.x` 到 `0.7.x` 的连续整理，并进入 `0.8.x` 资源加载管线阶段。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过交互式 runtime inspector 辅助开发”，现在正在继续补齐正式引擎包需要的 asset pipeline。
+当前已经完成了 `0.1.x` 到 `0.9.x` 的连续整理。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过交互式 runtime inspector 辅助开发”，并补齐了资源加载基线、GameFlow 和 scene lifecycle 启动边界。
 
 - Core 稳定性
   - `Game`、`Time`、`Scene`、`World`、`Entity`、`Component`、`System` 已经形成基础骨架。
@@ -636,7 +636,7 @@ npm pack
 
 如果我们把目标定义为“做游戏引擎”，那接下来的重点不应该是继续打磨 demo 外观，而应该继续把当前已经有的 runtime、framework、tooling 往产品化方向推进。
 
-`0.7.x` 已经把 interactive runtime inspector 阶段收口了，`0.8.x` 也完成了资源加载和 asset pipeline 基线。当前 `0.9.x` 正在推进 Game Flow 和 Scene Lifecycle。下一阶段更值得优先投入的是这些方向：
+`0.7.x` 已经把 interactive runtime inspector 阶段收口了，`0.8.x` 完成了资源加载和 asset pipeline 基线，`0.9.x` 也完成了 Game Flow 和 Scene Lifecycle 基线。下一阶段更值得优先投入的是这些方向：
 
 1. 更完整的 runtime tooling / inspector
    - 系统开关和运行时状态查看

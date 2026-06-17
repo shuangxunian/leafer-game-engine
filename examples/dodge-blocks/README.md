@@ -21,6 +21,8 @@
 - tooling panel 是否能显示 selected entity detail 摘要
 - tooling panel 是否能用 component schema 辅助展示 selected component 字段
 
+它也不是编辑器或可视化搭建工具的雏形。这个示例只作为引擎包消费者存在，用来证明 runtime、framework、asset pipeline、tooling snapshot 和 scene lifecycle API 能在一个真实浏览器示例里协同工作。
+
 ## How To Run
 
 在仓库根目录执行：
@@ -107,8 +109,10 @@ bootDodgeBlocksExample(runtime).catch((error) => {
 ```text
 browser runtime
   -> scene
+  -> scene lifecycle
   -> systems
   -> entities/components
+  -> game flow
   -> render adapter
   -> tooling panel
 ```
