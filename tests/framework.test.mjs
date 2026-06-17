@@ -11,6 +11,7 @@ import {
   InputSystem,
   RuntimeScheduler,
   RuntimeServicesSystem,
+  SizeComponent,
   StateMachine,
   SpriteAnimationComponent,
   SpriteAnimationSystem,
@@ -929,6 +930,72 @@ test("sprite animation system reports invalid animation setup clearly", () => {
     () => nonSpriteScene.lateUpdate(0),
     /ViewComponent node does not support sprite assets/
   );
+});
+
+test("view component can explicitly sync transform and optional size to render node", () => {
+  const node = createFakeContainer();
+  const view = new ViewComponent(node);
+  const transform = new TransformComponent();
+  transform.x = 12;
+  transform.y = 34;
+  transform.rotation = 45;
+  transform.scaleX = 2;
+  transform.scaleY = 3;
+
+  view.syncFromTransform(transform);
+
+  assert.equal(node.x, 12);
+  assert.equal(node.y, 34);
+  assert.equal(node.rotation, 45);
+  assert.equal(node.scaleX, 2);
+  assert.equal(node.scaleY, 3);
+  assert.equal(node.width, undefined);
+  assert.equal(node.height, undefined);
+
+  view.syncFromTransform(transform, new SizeComponent(64, 48));
+
+  assert.equal(node.width, 64);
+  assert.equal(node.height, 48);
+});
+
+test("view component lateUpdate delegates transform and size sync", () => {
+  const scene = new Scene("ViewSyncScene");
+  const node = createFakeContainer();
+  const entity = scene.world.createEntity("actor");
+  const transform = entity.addComponent(new TransformComponent());
+  entity.addComponent(new SizeComponent(20, 30));
+  entity.addComponent(new ViewComponent(node));
+  transform.x = 100;
+  transform.y = 120;
+  transform.rotation = 15;
+  transform.scaleX = 1.5;
+  transform.scaleY = 0.75;
+
+  scene.start();
+  scene.lateUpdate(1 / 60);
+
+  assert.equal(node.x, 100);
+  assert.equal(node.y, 120);
+  assert.equal(node.rotation, 15);
+  assert.equal(node.scaleX, 1.5);
+  assert.equal(node.scaleY, 0.75);
+  assert.equal(node.width, 20);
+  assert.equal(node.height, 30);
+});
+
+test("view component owns and destroys its render node", () => {
+  let destroyCalls = 0;
+  const node = {
+    ...createFakeContainer(),
+    destroy() {
+      destroyCalls += 1;
+    }
+  };
+  const view = new ViewComponent(node);
+
+  view.destroy();
+
+  assert.equal(destroyCalls, 1);
 });
 
 test("camera system maps world layer from position and zoom", () => {

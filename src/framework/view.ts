@@ -12,21 +12,24 @@ export class ViewComponent extends Component {
     return [TransformComponent];
   }
 
-  lateUpdate(): void {
-    const transform = this.entity?.getComponent(TransformComponent);
-    if (!transform) return;
-
+  syncFromTransform(transform: TransformComponent, size?: SizeComponent): void {
     this.node.x = transform.x;
     this.node.y = transform.y;
     this.node.rotation = transform.rotation;
     this.node.scaleX = transform.scaleX;
     this.node.scaleY = transform.scaleY;
 
-    const size = this.entity?.getComponent(SizeComponent);
     if (size) {
       this.node.width = size.width;
       this.node.height = size.height;
     }
+  }
+
+  lateUpdate(): void {
+    const transform = this.entity?.getComponent(TransformComponent);
+    if (!transform) return;
+
+    this.syncFromTransform(transform, this.entity?.getComponent(SizeComponent));
   }
 
   override destroy(): void {

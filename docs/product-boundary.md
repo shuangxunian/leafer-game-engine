@@ -37,6 +37,8 @@
 
 **开发者辅助能力，用来观察 runtime 状态、验证数据、定位问题。**
 
+这里的 `inspector` 指的是 inspection data / runtime inspection，也就是“检查运行时状态”，不是编辑器里的属性面板或内容编辑器。
+
 它们可以读取和展示：
 
 - runtime debug snapshot
@@ -56,7 +58,7 @@
 - 资产导入/整理工具
 - 关卡制作工具
 
-即使 `tooling` 包含选择、展开、过滤或分区展示等交互，它也只服务“看清楚 runtime 发生了什么”，不负责修改场景、组件、资源或关卡内容。
+即使 `tooling` 包含选择、展开、过滤或分区展示等交互，它也只服务“看清楚 runtime 发生了什么”，不负责修改场景、组件、资源或关卡内容。这些交互最多是 read-only navigation，不是 authoring。
 
 如果未来的独立编辑器需要这些数据，它应该通过本包暴露的稳定 runtime、schema、snapshot、asset、scene config 和 tooling API 来消费，而不是把编辑器实现放回这个仓库。
 
