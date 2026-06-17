@@ -221,10 +221,11 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   const patch = await readFile(new URL("../docs/version/v0.21.1.md", import.meta.url), "utf8");
   const systemPatch = await readFile(new URL("../docs/version/v0.21.2.md", import.meta.url), "utf8");
   const toolingPatch = await readFile(new URL("../docs/version/v0.21.3.md", import.meta.url), "utf8");
+  const examplePatch = await readFile(new URL("../docs/version/v0.21.4.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  for (const version of ["v0.21.0", "v0.21.1", "v0.21.2", "v0.21.3"]) {
+  for (const version of ["v0.21.0", "v0.21.1", "v0.21.2", "v0.21.3", "v0.21.4"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
   }
 
@@ -233,6 +234,7 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   assert.equal(stage.includes("v0.21.1.md"), true);
   assert.equal(stage.includes("v0.21.2.md"), true);
   assert.equal(stage.includes("v0.21.3.md"), true);
+  assert.equal(stage.includes("v0.21.4.md"), true);
   assert.equal(patch.includes("Audio Data Contract Baseline"), true);
   assert.equal(patch.includes("does not add Web Audio playback"), true);
   assert.equal(systemPatch.includes("Audio Runtime Service Integration"), true);
@@ -241,6 +243,9 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   assert.equal(toolingPatch.includes("Audio Runtime Tooling Visibility"), true);
   assert.equal(toolingPatch.includes("read-only runtime observability"), true);
   assert.equal(toolingPatch.includes("does not add playback controls"), true);
+  assert.equal(examplePatch.includes("Audio Runtime Example Consumption and Boundary Closeout"), true);
+  assert.equal(examplePatch.includes("does not add Web Audio playback"), true);
+  assert.equal(examplePatch.includes("downstream-style package consumer"), true);
   assert.equal(publicApi.includes("`0.21.x` starts audio runtime primitives"), true);
   assert.equal(publicApi.includes("AudioRuntimeState"), true);
   assert.equal(publicApi.includes("AudioRuntimeSystem"), true);
