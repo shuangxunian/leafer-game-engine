@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.9.5` Game Flow And Scene Lifecycle Docs Cleanup，`0.8.x` resource loading baseline 和 `0.9.x` game-flow/scene-lifecycle 阶段都已经收口。
+当前项目已经推进到 `v0.10.1` Public API Inventory And Import Smoke Tests，`0.8.x` resource loading baseline 和 `0.9.x` game-flow/scene-lifecycle 阶段都已经收口，`0.10.x` 正在整理 package-facing API 边界。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -124,6 +124,10 @@ runtime.start(scene);
 如果你想看更完整的用法，可以直接参考仓库里的示例项目：
 
 - [examples/dodge-blocks](examples/dodge-blocks)
+
+如果你想了解当前 package 入口边界，可以参考：
+
+- [docs/public-api.md](docs/public-api.md)
 
 ## 最小可运行项目目录示例
 
@@ -577,7 +581,7 @@ import {
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
-  - 当前测试数为 98 个。
+  - 当前测试数为 103 个。
   - `npm run check`、`npm test`、`npm run build:example` 是当前主要验证入口。
 
 ## 当前 demo 的意义
