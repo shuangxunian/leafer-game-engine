@@ -22,7 +22,9 @@ For the input-actions boundary across raw input state, keyboard bindings, action
 
 For the runtime-observability boundary across debug snapshots, system lifecycle state, text formatting, browser panel section formatting, aggregate tooling snapshots, and example consumption, see [Runtime Observability Boundary](runtime-observability.md).
 
-`0.15.x` starts data-driven scene contract hardening. The Node-safe `framework` entrypoint now exposes `validateSceneConfig(...)` so downstream games can inspect scene config diagnostics before bootstrap mutates a scene, asset registry, entity list, or system list. `bootstrapSceneFromConfig(...)` also supports an opt-in `validateBeforeBootstrap` safety gate for callers that want validation diagnostics returned before any scene/entity/system/asset mutation, and `examples/dodge-blocks` now consumes that scene config path for static asset/entity declarations.
+`0.15.x` closed data-driven scene contract hardening. The Node-safe `framework` entrypoint now exposes `validateSceneConfig(...)` so downstream games can inspect scene config diagnostics before bootstrap mutates a scene, asset registry, entity list, or system list. `bootstrapSceneFromConfig(...)` also supports an opt-in `validateBeforeBootstrap` safety gate for callers that want validation diagnostics returned before any scene/entity/system/asset mutation, and `examples/dodge-blocks` now consumes that scene config path for static asset/entity declarations.
+
+For the scene-config boundary across asset manifests, entity templates, validation diagnostics, safe bootstrap, example consumption, and non-editor data-contract limits, see [Scene Config Boundary](scene-config.md).
 
 ---
 
@@ -176,6 +178,7 @@ This command builds the library through `npm pack --dry-run --json` and checks t
 - `docs/runtime-services.md`
 - `docs/input-actions.md`
 - `docs/runtime-observability.md`
+- `docs/scene-config.md`
 - all JS and type declaration targets from `package.json` exports
 
 It also checks that development-only paths such as `src`, `tests`, `examples`, `dist`, `scripts`, and `node_modules` are not included.

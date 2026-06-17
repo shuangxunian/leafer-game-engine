@@ -66,7 +66,8 @@ for (const requiredFile of [
   "docs/animation-runtime.md",
   "docs/runtime-services.md",
   "docs/input-actions.md",
-  "docs/runtime-observability.md"
+  "docs/runtime-observability.md",
+  "docs/scene-config.md"
 ]) {
   assertHasFile(packageFiles, requiredFile);
 }

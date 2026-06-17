@@ -57,6 +57,7 @@ test("package publish files include library output and docs", () => {
     "docs/runtime-services.md",
     "docs/input-actions.md",
     "docs/runtime-observability.md",
+    "docs/scene-config.md",
     "README.md",
     "LICENSE"
   ]);

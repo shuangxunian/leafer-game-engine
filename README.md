@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.15.3` Dodge Blocks Scene Config Consumption Polish，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段、`0.10.x` package-facing API boundary 阶段、`0.11.x` sprite animation / asset runtime 阶段、`0.12.x` runtime services / event pipeline 阶段、`0.13.x` input actions / control mapping 阶段和 `0.14.x` runtime observability hardening 阶段都已经收口，`0.15.x` data-driven scene contract hardening 阶段正在推进。
+当前项目已经推进到 `v0.15.4` Data-Driven Scene Contract Closeout，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段、`0.10.x` package-facing API boundary 阶段、`0.11.x` sprite animation / asset runtime 阶段、`0.12.x` runtime services / event pipeline 阶段、`0.13.x` input actions / control mapping 阶段、`0.14.x` runtime observability hardening 阶段和 `0.15.x` data-driven scene contract hardening 阶段都已经收口。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -17,7 +17,7 @@
 - `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、asset load state snapshot、GameFlow snapshot、sprite animation snapshot、runtime services snapshot、input action snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail、assets/game flow/sprite animations/runtime services/input actions panel section 和 schema-assisted component detail 展示。
 - `examples/dodge-blocks` 作为集成样例，用来验证引擎分层、异步资源加载、sprite animation 和运行时 tooling 能力。
 
-当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + runtime observability / developer tooling”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程、scene lifecycle 启动边界、sprite animation 数据契约、deterministic playback timing helpers、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、第一版 runtime event bus、deterministic scheduler、scene-level runtime services integration、runtime services 只读 tooling 可见性、runtime services 边界文档、第一版 input action mapping、示例级 input action 集成、input action 只读 tooling 可见性、input action 边界文档、system observability snapshot 强化、runtime debug panel 可读性整理、dodge-blocks runtime observability 集成验证、runtime observability 边界文档、scene config validation baseline、opt-in safe scene bootstrap validation gate 和 dodge-blocks scene config 消费验证。
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + runtime observability / developer tooling”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程、scene lifecycle 启动边界、sprite animation 数据契约、deterministic playback timing helpers、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、第一版 runtime event bus、deterministic scheduler、scene-level runtime services integration、runtime services 只读 tooling 可见性、runtime services 边界文档、第一版 input action mapping、示例级 input action 集成、input action 只读 tooling 可见性、input action 边界文档、system observability snapshot 强化、runtime debug panel 可读性整理、dodge-blocks runtime observability 集成验证、runtime observability 边界文档、scene config validation baseline、opt-in safe scene bootstrap validation gate、dodge-blocks scene config 消费验证和 scene config 边界文档。
 
 ## 产品边界
 
@@ -171,6 +171,10 @@ runtime.start(scene);
 如果你想了解 runtime observability 的 debug snapshot、system lifecycle、tooling panel section 和只读边界，可以参考：
 
 - [docs/runtime-observability.md](docs/runtime-observability.md)
+
+如果你想了解 scene config 的资源声明、实体模板、验证诊断、安全启动和非编辑器边界，可以参考：
+
+- [docs/scene-config.md](docs/scene-config.md)
 
 ## 最小可运行项目目录示例
 
@@ -585,7 +589,7 @@ import {
 
 ## 当前已经实现了什么
 
-当前已经完成了 `0.1.x` 到 `0.14.x` 的连续整理，`0.15.x` data-driven scene contract hardening 阶段正在推进。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过 runtime observability 辅助开发、可作为 package 被消费”，并补齐了资源加载基线、GameFlow、scene lifecycle 启动边界、package-facing API 边界、sprite animation playback timing 基础、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、deterministic event bus 基线、update-driven scheduler 基线、opt-in scene runtime services 集成模式、runtime services 只读 tooling snapshot、runtime services 边界文档、input action mapping 基线、dodge-blocks input action 集成、input action 只读 tooling snapshot、input action 边界文档、system observability snapshot 强化、runtime debug panel 可读性整理、dodge-blocks runtime observability 集成验证、runtime observability 边界文档、scene config validation baseline、opt-in safe scene bootstrap validation gate 和 dodge-blocks scene config 消费验证。
+当前已经完成了 `0.1.x` 到 `0.15.x` 的连续整理。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过 runtime observability 辅助开发、可作为 package 被消费”，并补齐了资源加载基线、GameFlow、scene lifecycle 启动边界、package-facing API 边界、sprite animation playback timing 基础、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、deterministic event bus 基线、update-driven scheduler 基线、opt-in scene runtime services 集成模式、runtime services 只读 tooling snapshot、runtime services 边界文档、input action mapping 基线、dodge-blocks input action 集成、input action 只读 tooling snapshot、input action 边界文档、system observability snapshot 强化、runtime debug panel 可读性整理、dodge-blocks runtime observability 集成验证、runtime observability 边界文档、scene config validation baseline、opt-in safe scene bootstrap validation gate、dodge-blocks scene config 消费验证和 scene config 边界文档。
 
 - Core 稳定性
   - `Game`、`Time`、`Scene`、`World`、`Entity`、`Component`、`System` 已经形成基础骨架。
@@ -701,7 +705,7 @@ npm run verify:package
 
 如果我们把目标定义为“做游戏引擎”，那接下来的重点不应该是继续打磨 demo 外观，而应该继续把当前已经有的 runtime、framework、tooling 往产品化方向推进。
 
-`0.7.x` 已经把 selection-aware runtime tooling 阶段收口了，`0.8.x` 完成了资源加载和 asset pipeline 基线，`0.9.x` 完成了 Game Flow 和 Scene Lifecycle 基线，`0.10.x` 完成了 package-facing API boundary 基线，`0.11.x` 已经把 sprite animation 从数据契约推进到 playback helper、ECS component/system、示例集成、tooling 可见性和 runtime 边界文档，`0.12.x` 已经完成 deterministic EventBus、RuntimeScheduler、opt-in scene runtime services、runtime services tooling visibility 和 runtime services 边界文档，`0.13.x` 已经完成 input action mapping、示例集成、tooling visibility 和边界文档，`0.14.x` 已经完成 runtime observability hardening、示例验证和边界文档，`0.15.x` 已经开始强化 data-driven scene contract。下一阶段更值得优先投入的是这些方向：
+`0.7.x` 已经把 selection-aware runtime tooling 阶段收口了，`0.8.x` 完成了资源加载和 asset pipeline 基线，`0.9.x` 完成了 Game Flow 和 Scene Lifecycle 基线，`0.10.x` 完成了 package-facing API boundary 基线，`0.11.x` 已经把 sprite animation 从数据契约推进到 playback helper、ECS component/system、示例集成、tooling 可见性和 runtime 边界文档，`0.12.x` 已经完成 deterministic EventBus、RuntimeScheduler、opt-in scene runtime services、runtime services tooling visibility 和 runtime services 边界文档，`0.13.x` 已经完成 input action mapping、示例集成、tooling visibility 和边界文档，`0.14.x` 已经完成 runtime observability hardening、示例验证和边界文档，`0.15.x` 已经完成 data-driven scene contract hardening。下一阶段更值得优先投入的是这些方向：
 
 1. 更克制的只读 runtime observability / inspector
    - 系统状态查看
