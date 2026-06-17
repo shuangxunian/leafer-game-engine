@@ -30,7 +30,7 @@ For the scene-config boundary across asset manifests, entity templates, validati
 
 For the render/view boundary across render nodes, view synchronization, sprite-capable nodes, render scene layers, lifecycle, and read-only tooling visibility, see [Render/View Contract](render-view-contract.md).
 
-`0.17.x` starts runtime/game loop hardening. The `core` runtime now guarantees that scene/world phase cleanup runs even when systems or components throw during `update(...)`, `fixedUpdate(...)`, or `lateUpdate(...)`; those errors still propagate to callers.
+`0.17.x` starts runtime/game loop hardening. The `core` runtime now guarantees that scene/world phase cleanup runs even when systems or components throw during `update(...)`, `fixedUpdate(...)`, or `lateUpdate(...)`; those errors still propagate to callers. `Game.tick(...)` also has deterministic error-boundary behavior: update errors stop fixed/late work, fixed-step attempts settle the accumulator before propagating, and late errors occur after update/fixed work has completed.
 
 ---
 

@@ -125,6 +125,82 @@ test("game tick runs update, fixedUpdate and lateUpdate in expected order", () =
   assert.equal(system.lateUpdateCount, 1);
 });
 
+test("game tick propagates update errors before fixed and late phases", () => {
+  class UpdateThrowingSystem extends CountingSystem {
+    update() {
+      super.update();
+      throw new Error("update failed");
+    }
+  }
+
+  const game = new Game(0.02);
+  const scene = new Scene("TickUpdateErrorScene");
+  const system = scene.addSystem(new UpdateThrowingSystem(scene));
+
+  game.setScene(scene);
+
+  assert.throws(() => game.tick(0.05), /update failed/);
+  assert.equal(system.updateCount, 1);
+  assert.equal(system.fixedUpdateCount, 0);
+  assert.equal(system.lateUpdateCount, 0);
+});
+
+test("game tick settles attempted fixed steps when fixedUpdate throws", () => {
+  class FixedThrowingSystem extends CountingSystem {
+    fixedUpdate() {
+      super.fixedUpdate();
+      if (this.fixedUpdateCount === 1) {
+        throw new Error("fixed failed");
+      }
+    }
+  }
+
+  const game = new Game(0.02);
+  const scene = new Scene("TickFixedErrorScene");
+  const system = scene.addSystem(new FixedThrowingSystem(scene));
+
+  game.setScene(scene);
+
+  assert.throws(() => game.tick(0.05), /fixed failed/);
+  assert.equal(system.updateCount, 1);
+  assert.equal(system.fixedUpdateCount, 1);
+  assert.equal(system.lateUpdateCount, 0);
+
+  game.tick(0.001);
+
+  assert.equal(system.updateCount, 2);
+  assert.equal(system.fixedUpdateCount, 2);
+  assert.equal(system.lateUpdateCount, 1);
+});
+
+test("game tick propagates lateUpdate errors after update and fixed phases", () => {
+  class LateThrowingSystem extends CountingSystem {
+    lateUpdate() {
+      super.lateUpdate();
+      if (this.lateUpdateCount === 1) {
+        throw new Error("late failed");
+      }
+    }
+  }
+
+  const game = new Game(0.02);
+  const scene = new Scene("TickLateErrorScene");
+  const system = scene.addSystem(new LateThrowingSystem(scene));
+
+  game.setScene(scene);
+
+  assert.throws(() => game.tick(0.05), /late failed/);
+  assert.equal(system.updateCount, 1);
+  assert.equal(system.fixedUpdateCount, 2);
+  assert.equal(system.lateUpdateCount, 1);
+
+  game.tick(0.01);
+
+  assert.equal(system.updateCount, 2);
+  assert.equal(system.fixedUpdateCount, 3);
+  assert.equal(system.lateUpdateCount, 2);
+});
+
 test("world defers entity add and remove mutations until phase boundaries", () => {
   class MutationScene extends Scene {
     constructor() {

@@ -30,8 +30,11 @@ export class Game {
     this.activeScene.update(dt);
 
     while (this.accumulator >= this.time.fixedDelta) {
-      this.activeScene.fixedUpdate(this.time.fixedDelta);
-      this.accumulator -= this.time.fixedDelta;
+      try {
+        this.activeScene.fixedUpdate(this.time.fixedDelta);
+      } finally {
+        this.accumulator -= this.time.fixedDelta;
+      }
     }
 
     this.activeScene.lateUpdate(dt);
