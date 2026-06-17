@@ -128,3 +128,17 @@ test("dodge-blocks example imports engine APIs through package-style entrypoints
     assert.equal(source.includes("../../src/"), false, `${fileUrl.pathname} should not import engine APIs from src`);
   }
 });
+
+test("dodge-blocks gameplay consumes input action mappings instead of direct physical key queries", async () => {
+  const gameplayFiles = [
+    "dodge-game-system.ts",
+    "player-controller.ts"
+  ];
+
+  for (const file of gameplayFiles) {
+    const source = await readFile(new URL(file, dodgeBlocksExampleUrl), "utf8");
+    assert.equal(source.includes("InputActionMap"), true, `${file} should consume semantic input actions`);
+    assert.equal(source.includes("isPressed(\""), false, `${file} should not query raw physical pressed keys`);
+    assert.equal(source.includes("wasPressed(\""), false, `${file} should not query raw physical just-pressed keys`);
+  }
+});

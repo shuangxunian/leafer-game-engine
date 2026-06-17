@@ -12,6 +12,7 @@ import {
 } from "@shuangxunian/leafer-game-engine/framework";
 import type { RenderAdapter, RenderScene } from "@shuangxunian/leafer-game-engine/adapter";
 import { DODGE_GAME_CONFIG, DodgeGameSystem } from "./dodge-game-system.js";
+import { createDodgeInputActions } from "./input-actions.js";
 import { PlayerControllerComponent } from "./player-controller.js";
 
 const DODGE_BLOCKS_ASSET_MANIFEST = {
@@ -91,6 +92,7 @@ function createPlayerTemplate(x: number, y: number): EntityTemplate {
 
 export class DodgeBlocksScene extends Scene {
   private readonly assets = createDodgeBlocksAssets();
+  private readonly inputActions = createDodgeInputActions();
 
   get assetRegistry(): AssetRegistry {
     return this.assets;
@@ -179,6 +181,7 @@ export class DodgeBlocksScene extends Scene {
     player.addComponent(
       new PlayerControllerComponent(
         260,
+        this.inputActions,
         {
           width: viewportWidth,
           height: viewportHeight,
@@ -203,6 +206,7 @@ export class DodgeBlocksScene extends Scene {
           overlayBody: overlayBodyNode,
           overlayAction: overlayActionNode
         },
+        this.inputActions,
         this.assets
       )
     );

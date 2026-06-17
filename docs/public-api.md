@@ -14,7 +14,7 @@ For the animation-specific boundary across asset metadata, playback helpers, ECS
 
 For the runtime-services boundary across event dispatch, update-driven scheduling, scene integration, and read-only tooling visibility, see [Runtime Services Boundary](runtime-services.md).
 
-`0.13.x` starts the input actions baseline with a Node-safe `InputActionMap`, keyboard binding normalization helpers, and action-state queries that work with the existing `InputSystem`.
+`0.13.x` starts the input actions baseline with a Node-safe `InputActionMap`, keyboard binding normalization helpers, action-state queries that work with the existing `InputSystem`, and downstream-style example consumption in `examples/dodge-blocks`.
 
 ---
 

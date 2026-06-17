@@ -15,6 +15,7 @@
 - entity template 是否能创建玩家基础数据组件
 - transform / size / view 是否能同步到渲染层
 - input 是否能驱动玩家移动
+- input action mapping 是否能把物理键盘输入转换成语义玩法动作
 - collision 是否能判断玩家和障碍物接触
 - `GameFlow` 是否能管理 ready / running / paused / ended
 - 玩家是否能被限制在当前 viewport 内移动
@@ -39,9 +40,14 @@ npm run dev
 
 ## Controls
 
-- `WASD` 或方向键移动玩家
-- `Space` 或 `Enter` 开始/重新开始
-- `P` 或 `Esc` 暂停/继续
+示例玩法代码读取的是语义动作，而不是直接读取物理键：
+
+- `move:left`：`A` 或方向左键
+- `move:right`：`D` 或方向右键
+- `move:up`：`W` 或方向上键
+- `move:down`：`S` 或方向下键
+- `confirm`：`Space` 或 `Enter`
+- `pause`：`P` 或 `Esc`
 
 ## File Map
 
@@ -62,6 +68,7 @@ npm run dev
 
 - `dodge-blocks-scene.ts`
   - 注册 input、collision、gameplay system
+  - 创建并注入 dodge-blocks input action map
   - 创建 UI 文本节点
   - 通过 asset manifest 声明 sprite assets、sprite frames 和 animation clips
   - 通过 `loadManifestAsync(...)` 和 browser image sprite loader 预加载示例资源
@@ -70,6 +77,7 @@ npm run dev
 
 - `dodge-game-system.ts`
   - 通过 framework `GameFlow` 管理玩法状态
+  - 通过 input action map 读取 `confirm` 和 `pause`
   - 生成障碍物
   - 维护 score / best score
   - 检测碰撞并切换 ended
@@ -79,9 +87,13 @@ npm run dev
   - 保留运行时随机障碍物生成逻辑
 
 - `player-controller.ts`
-  - 读取 `InputSystem`
+  - 读取 `InputSystem` 和 input action map
   - 更新玩家位置
   - 把玩家限制在 playfield 内
+
+- `input-actions.ts`
+  - 定义示例级语义动作
+  - 把 `WASD`、方向键、`Space`、`Enter`、`P` 和 `Esc` 映射到 gameplay actions
 
 - `styles.css`
   - 示例页面的基础外观
@@ -133,6 +145,7 @@ browser runtime
 - tooling panel 的 `Sprite Animations` section 可以显示 player 当前 clip / frame / sprite / playback 状态
 - player 的 `transform`、`size`、`collider` 来自 `EntityTemplate`
 - player 的 `ViewComponent`、`PlayerControllerComponent` 和 `SpriteAnimationComponent` 仍在代码中装配
+- player movement、start/restart 和 pause/resume 使用 `InputActionMap`，而不是在 gameplay 代码里硬编码物理键
 - gameplay phase 使用 framework `GameFlow`，而不是示例内的本地 phase state machine
 - tooling panel 的 `Game Flow` section 可以显示当前 ready / running / paused / ended 状态
 - hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度

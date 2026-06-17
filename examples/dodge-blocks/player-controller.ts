@@ -1,5 +1,11 @@
 import { Component } from "@shuangxunian/leafer-game-engine/core";
-import { InputSystem, SizeComponent, TransformComponent } from "@shuangxunian/leafer-game-engine/framework";
+import type { InputActionMap } from "@shuangxunian/leafer-game-engine/framework";
+import {
+  InputSystem,
+  SizeComponent,
+  TransformComponent
+} from "@shuangxunian/leafer-game-engine/framework";
+import { DODGE_INPUT_ACTION } from "./input-actions.js";
 
 type Bounds = {
   width: number;
@@ -10,6 +16,7 @@ type Bounds = {
 export class PlayerControllerComponent extends Component {
   constructor(
     private readonly speed = 220,
+    private readonly inputActions: InputActionMap,
     private readonly bounds?: Bounds,
     private readonly canMove?: () => boolean
   ) {
@@ -29,10 +36,10 @@ export class PlayerControllerComponent extends Component {
     let dx = 0;
     let dy = 0;
 
-    if (input.isPressed("a") || input.isPressed("arrowleft")) dx -= 1;
-    if (input.isPressed("d") || input.isPressed("arrowright")) dx += 1;
-    if (input.isPressed("w") || input.isPressed("arrowup")) dy -= 1;
-    if (input.isPressed("s") || input.isPressed("arrowdown")) dy += 1;
+    if (this.inputActions.isPressed(input, DODGE_INPUT_ACTION.MoveLeft)) dx -= 1;
+    if (this.inputActions.isPressed(input, DODGE_INPUT_ACTION.MoveRight)) dx += 1;
+    if (this.inputActions.isPressed(input, DODGE_INPUT_ACTION.MoveUp)) dy -= 1;
+    if (this.inputActions.isPressed(input, DODGE_INPUT_ACTION.MoveDown)) dy += 1;
 
     transform.x += dx * this.speed * dt;
     transform.y += dy * this.speed * dt;

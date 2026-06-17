@@ -1,6 +1,7 @@
 import type { Entity, Scene } from "@shuangxunian/leafer-game-engine/core";
 import { System } from "@shuangxunian/leafer-game-engine/core";
 import type { RenderAdapter, RenderScene, RenderText } from "@shuangxunian/leafer-game-engine/adapter";
+import type { InputActionMap } from "@shuangxunian/leafer-game-engine/framework";
 import {
   AssetRegistry,
   CollisionSystem,
@@ -10,6 +11,7 @@ import {
   TransformComponent
 } from "@shuangxunian/leafer-game-engine/framework";
 import { hazardFactory } from "./factories.js";
+import { DODGE_INPUT_ACTION } from "./input-actions.js";
 
 const PLAYER_SIZE = 52;
 const HAZARD_MIN_SIZE = 28;
@@ -41,6 +43,7 @@ export class DodgeGameSystem extends System {
     private readonly renderScene: RenderScene,
     private readonly player: Entity,
     private readonly hud: Hud,
+    private readonly inputActions: InputActionMap,
     private readonly assets?: AssetRegistry
   ) {
     super(scene);
@@ -63,17 +66,17 @@ export class DodgeGameSystem extends System {
     const input = this.scene.getSystem(InputSystem);
     if (!input) return;
 
-    if (input.wasPressed("p") || input.wasPressed("escape")) {
+    if (this.inputActions.wasPressed(input, DODGE_INPUT_ACTION.Pause)) {
       if (this.flow.is("running")) this.flow.pause();
       else if (this.flow.is("paused")) this.flow.resume();
     }
 
-    if (this.flow.is("ready") && (input.wasPressed(" ") || input.wasPressed("enter"))) {
+    if (this.flow.is("ready") && this.inputActions.wasPressed(input, DODGE_INPUT_ACTION.Confirm)) {
       this.startRun();
       return;
     }
 
-    if (this.flow.is("ended") && (input.wasPressed(" ") || input.wasPressed("enter"))) {
+    if (this.flow.is("ended") && this.inputActions.wasPressed(input, DODGE_INPUT_ACTION.Confirm)) {
       this.startRun();
       return;
     }
