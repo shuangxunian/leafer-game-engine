@@ -40,7 +40,7 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `0.19.x` closed pointer/input runtime primitives. The `framework` entrypoint now exposes `definePointerButtonBinding(...)`, `normalizePointerButton(...)`, and `getPointerButtonInputId(...)` so downstream games can bind semantic input actions to primary, secondary, or auxiliary pointer buttons. It also exposes `BrowserPointerButtonBridge` so browser games can write normalized pointer button state into `InputSystem`. `examples/dodge-blocks` consumes this path by binding `confirm` to primary pointer input. Tooling formatting displays pointer button bindings as read-only input action state.
 
-`0.20.x` starts collision query runtime primitives. `CollisionSystem` now exposes structured collision pair query methods for current, enter, stay, and exit buckets so downstream games can inspect entity/layer/rect data without rebuilding pair metadata from raw entity arrays. The Node-safe `tooling` entrypoint can also expose those pairs as read-only collision snapshots and browser panel sections. This remains AABB runtime query/observability data, not a physics simulation or collider editor.
+`0.20.x` closed collision query runtime primitives. `CollisionSystem` now exposes structured collision pair query methods for current, enter, stay, and exit buckets so downstream games can inspect entity/layer/rect data without rebuilding pair metadata from raw entity arrays. The Node-safe `tooling` entrypoint can also expose those pairs as read-only collision snapshots and browser panel sections, and `examples/dodge-blocks` consumes that path as a downstream-style browser example. This remains AABB runtime query/observability data, not a physics simulation or collider editor.
 
 ---
 

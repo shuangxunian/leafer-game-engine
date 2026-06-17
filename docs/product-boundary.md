@@ -20,7 +20,7 @@
 - `framework`：输入、碰撞、相机、GameFlow、资源、sprite animation、实体工厂、场景配置和组件 schema。
 - `adapter`：把引擎抽象映射到具体渲染实现，例如 Leafer。
 - `runtime`：浏览器环境下的启动、挂载、帧循环和 scene lifecycle 装配。
-- `tooling`：runtime snapshot、debug overlay、inspector snapshot、panel section、schema/asset/game-flow 状态展示等开发者辅助能力。
+- `tooling`：runtime snapshot、debug overlay、inspector snapshot、panel section、schema/asset/game-flow/collision 状态展示等开发者辅助能力。
 - `examples`：作为下游消费者样例，验证引擎 API、包边界和集成方式。
 
 ## 本仓库不做什么
@@ -63,6 +63,7 @@
 - sprite animation playback/debug state
 - runtime services state
 - input action mapping and live action state
+- collision pair state
 
 它们不应该在当前仓库中变成：
 

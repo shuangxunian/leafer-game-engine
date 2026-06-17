@@ -28,11 +28,12 @@
 - Runtime Debug panel 是否能显示 time、viewport、entity counts、system order 和 system lifecycle 只读状态
 - tooling panel 是否能显示 sprite animation runtime 状态
 - tooling panel 是否能显示 input action mappings 和当前 action state
+- tooling panel 是否能显示 current / enter / stay / exit collision pair 摘要
 - tooling panel 是否能点击 entity 行并显示选中状态
 - tooling panel 是否能显示 selected entity detail 摘要
 - tooling panel 是否能用 component schema 辅助展示 selected component 字段
 
-它也不是编辑器或可视化搭建工具的雏形。这个示例只作为引擎包消费者存在，用来证明 runtime、framework、asset pipeline、sprite animation、tooling snapshot 和 scene lifecycle API 能在一个真实浏览器示例里协同工作。
+它也不是编辑器或可视化搭建工具的雏形。这个示例只作为引擎包消费者存在，用来证明 runtime、framework、asset pipeline、sprite animation、collision query tooling snapshot 和 scene lifecycle API 能在一个真实浏览器示例里协同工作。
 
 ## How To Run
 
@@ -67,7 +68,7 @@ npm run dev
   - 通过 `startSceneWithLifecycle(...)` 在 runtime start 前预加载 asset manifest
   - 挂载 keyboard bridge 和 pointer button bridge
   - 挂载 browser tooling panel
-  - 分区显示 runtime debug、assets、game flow、sprite animations、input actions、entity inspector 和 component schema 信息
+  - 分区显示 runtime debug、assets、game flow、sprite animations、input actions、collisions、entity inspector 和 component schema 信息
   - Runtime Debug section 展示 time / viewport / entity counts / system order / lifecycle 等只读状态
   - 支持在 panel 中点击 entity 行进行选择
   - 选择 entity 后显示 selected entity detail section
@@ -125,9 +126,9 @@ bootDodgeBlocksExample(runtime).catch((error) => {
 });
 ```
 
-`bootDodgeBlocksExample(...)` 里会创建 scene，通过 scene lifecycle helper 预加载 assets 并启动 runtime、绑定键盘和 pointer button 输入，再把包含 asset state、game flow state、sprite animation state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
+`bootDodgeBlocksExample(...)` 里会创建 scene，通过 scene lifecycle helper 预加载 assets 并启动 runtime、绑定键盘和 pointer button 输入，再把包含 asset state、game flow state、sprite animation state、collision pair state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
 
-Runtime Debug panel 会消费 `runtime.game` 和 `runtime.renderScene`，因此可以显示时间步进、viewport、entity counts、system totals、system order 和 system lifecycle。这里的 tooling 仍然只是观察 runtime 状态，不提供系统开关、组件改值、场景编辑或资产管理入口。
+Runtime Debug panel 会消费 `runtime.game` 和 `runtime.renderScene`，因此可以显示时间步进、viewport、entity counts、system totals、system order 和 system lifecycle。`Collisions` panel 只读取 `CollisionSystem` 的 current / enter / stay / exit collision pair summary，不提供 collider 编辑、碰撞响应配置、触发器脚本或运行时修改入口。这里的 tooling 仍然只是观察 runtime 状态，不提供系统开关、组件改值、场景编辑或资产管理入口。
 
 示例代码使用 `@shuangxunian/leafer-game-engine` package-style imports 来模拟真实消费者项目；在本仓库开发时，这些导入会通过 Vite alias 和 TypeScript paths 指回 `src`。
 
@@ -160,6 +161,7 @@ browser runtime
 - tooling panel 的 `Runtime Debug` section 可以显示 time / viewport / entity counts / system order / lifecycle 只读摘要
 - tooling panel 的 `Sprite Animations` section 可以显示 player 当前 clip / frame / sprite / playback 状态
 - tooling panel 的 `Input Actions` section 可以显示 action id、keyboard bindings、pressed 和 justPressed
+- tooling panel 的 `Collisions` section 可以显示 current / enter / stay / exit collision pair 只读摘要
 - player 的 `transform`、`size`、`collider` 来自 scene config entity template
 - player 静态基础数据通过 `bootstrapSceneFromConfig(..., { validateBeforeBootstrap: true })` 创建
 - player 初始位置和重置位置读取 scene config level layout 的 `player-start` spawn

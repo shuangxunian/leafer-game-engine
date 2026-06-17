@@ -73,6 +73,7 @@ Browser panel section formatting is presentation-only. It does not add mutation 
 - game flow
 - sprite animations
 - input actions
+- collisions
 - runtime services
 - scene/entity/component inspector data
 - component schemas
@@ -85,6 +86,7 @@ The aggregate snapshot remains a data composition helper for runtime observabili
 
 - passes `runtime.game` into `createToolingSnapshot(...)` for time state
 - passes `runtime.renderScene` into `createToolingSnapshot(...)` for viewport/layer state
+- passes `collisions: true` into `createToolingSnapshot(...)` for collision pair summaries
 - mounts `BrowserToolingPanel`
 - refreshes read-only panel data on an interval
 - detaches the panel when the scene is destroyed

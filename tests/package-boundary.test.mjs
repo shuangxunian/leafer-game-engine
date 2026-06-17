@@ -184,23 +184,30 @@ test("collision query stage docs are discoverable from roadmap and package docs"
   const stage = await readFile(new URL("../docs/version/v0.20.0.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.20.1.md", import.meta.url), "utf8");
   const toolingPatch = await readFile(new URL("../docs/version/v0.20.2.md", import.meta.url), "utf8");
+  const closeoutPatch = await readFile(new URL("../docs/version/v0.20.3.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  for (const version of ["v0.20.0", "v0.20.1", "v0.20.2"]) {
+  for (const version of ["v0.20.0", "v0.20.1", "v0.20.2", "v0.20.3"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
   }
 
   assert.equal(stage.includes("Collision Query Runtime Primitives Sprint"), true);
+  assert.equal(stage.includes("The `0.20.x` stage is complete"), true);
   assert.equal(stage.includes("v0.20.2.md"), true);
+  assert.equal(stage.includes("v0.20.3.md"), true);
   assert.equal(patch.includes("Collision Pair Query Baseline"), true);
   assert.equal(patch.includes("does not add a physics engine"), true);
   assert.equal(toolingPatch.includes("Collision Pair Tooling Snapshot Baseline"), true);
   assert.equal(toolingPatch.includes("read-only runtime observability"), true);
-  assert.equal(publicApi.includes("`0.20.x` starts collision query runtime primitives"), true);
+  assert.equal(closeoutPatch.includes("Collision Query Runtime Boundary Closeout"), true);
+  assert.equal(closeoutPatch.includes("does not add physics simulation"), true);
+  assert.equal(publicApi.includes("`0.20.x` closed collision query runtime primitives"), true);
   assert.equal(publicApi.includes("structured collision pair query methods"), true);
   assert.equal(publicApi.includes("read-only collision snapshots"), true);
-  assert.equal(readme.includes("`v0.20.2` Collision Pair Tooling Snapshot Baseline"), true);
+  assert.equal(readme.includes("`v0.20.3` Collision Query Runtime Boundary Closeout"), true);
+  assert.equal(readme.includes("`0.20.x` collision query runtime primitives 阶段"), true);
+  assert.equal(readme.includes("都已经收口"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -336,6 +343,7 @@ test("dodge-blocks example passes runtime debug context into tooling snapshots",
   assert.equal(source.includes("createToolingSnapshot(scene"), true);
   assert.equal(source.includes("game: runtime.game"), true, "boot should pass Game time state into tooling snapshots");
   assert.equal(source.includes("renderScene: runtime.renderScene"), true, "boot should pass viewport state into tooling snapshots");
+  assert.equal(source.includes("collisions: true"), true, "boot should pass collision pair state into tooling snapshots");
 });
 
 test("dodge-blocks example consumes scene config bootstrap APIs", async () => {
@@ -367,7 +375,9 @@ test("dodge-blocks docs frame tooling as read-only runtime observability", async
   const source = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
 
   assert.equal(source.includes("Runtime Debug panel"), true);
+  assert.equal(source.includes("Collisions` panel"), true);
   assert.equal(source.includes("system order"), true);
   assert.equal(source.includes("system lifecycle"), true);
+  assert.equal(source.includes("current / enter / stay / exit collision pair summary"), true);
   assert.equal(source.includes("不提供系统开关、组件改值、场景编辑或资产管理入口"), true);
 });
