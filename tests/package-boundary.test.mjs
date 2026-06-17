@@ -75,6 +75,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "CollisionSystem",
     "EventBus",
     "GameFlow",
+    "InputActionMap",
     "InputSystem",
     "RuntimeScheduler",
     "RuntimeServices",
@@ -89,12 +90,14 @@ test("framework package subpath can be imported by package name in Node", async 
     "createSpriteAnimationPlayback",
     "createDefaultComponentSchemaRegistry",
     "createRuntimeServices",
+    "defineKeyboardBinding",
     "defineSpriteAnimationClip",
     "defineSpriteFrame",
     "getSpriteAnimationPlaybackFrameId",
     "getSpriteAnimationPlaybackFrameIndex",
     "getRuntimeServices",
-    "loadAssetManifestAsync"
+    "loadAssetManifestAsync",
+    "normalizeKeyboardKey"
   ]);
 });
 

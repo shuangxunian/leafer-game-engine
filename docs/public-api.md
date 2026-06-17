@@ -14,6 +14,8 @@ For the animation-specific boundary across asset metadata, playback helpers, ECS
 
 For the runtime-services boundary across event dispatch, update-driven scheduling, scene integration, and read-only tooling visibility, see [Runtime Services Boundary](runtime-services.md).
 
+`0.13.x` starts the input actions baseline with a Node-safe `InputActionMap`, keyboard binding normalization helpers, and action-state queries that work with the existing `InputSystem`.
+
 ---
 
 ## Package Entrypoints
@@ -40,6 +42,7 @@ import { Scene } from "@shuangxunian/leafer-game-engine/core";
 import {
   EventBus,
   GameFlow,
+  InputActionMap,
   RuntimeScheduler,
   RuntimeServicesSystem,
   SpriteAnimationComponent,
@@ -47,6 +50,7 @@ import {
   addRuntimeServices,
   createRuntimeServices,
   createSpriteAnimationPlayback,
+  defineKeyboardBinding,
   getRuntimeServices
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
@@ -75,6 +79,7 @@ import { Scene } from "@shuangxunian/leafer-game-engine/core";
 import {
   EventBus,
   GameFlow,
+  InputActionMap,
   RuntimeScheduler,
   RuntimeServicesSystem,
   SpriteAnimationComponent,
@@ -82,6 +87,7 @@ import {
   addRuntimeServices,
   createRuntimeServices,
   createSpriteAnimationPlayback,
+  defineKeyboardBinding,
   getRuntimeServices
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
@@ -127,7 +133,7 @@ They should be verified through browser/example builds until the package is spli
 ## Current Boundary Notes
 
 - `core` should stay independent from browser and rendering implementations.
-- `framework` should stay usable for logic tests and reusable gameplay primitives, including sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, and opt-in scene runtime service integration.
+- `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, and opt-in scene runtime service integration.
 - `tooling` can expose structured snapshots and formatters in Node, including read-only sprite animation state and runtime services state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.

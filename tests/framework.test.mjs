@@ -7,6 +7,8 @@ import {
   CameraSystem,
   EventBus,
   GameFlow,
+  InputActionMap,
+  InputSystem,
   RuntimeScheduler,
   RuntimeServicesSystem,
   StateMachine,
@@ -18,11 +20,13 @@ import {
   advanceSpriteAnimationPlayback,
   createRuntimeServices,
   createSpriteAnimationPlayback,
+  defineKeyboardBinding,
   defineSpriteAnimationClip,
   defineSpriteFrame,
   getSpriteAnimationPlaybackFrameId,
   getSpriteAnimationPlaybackFrameIndex,
   getRuntimeServices,
+  normalizeKeyboardKey,
   pauseSpriteAnimationPlayback,
   resumeSpriteAnimationPlayback,
   stopSpriteAnimationPlayback
@@ -174,6 +178,99 @@ test("game flow rejects invalid transitions without mutating state", () => {
     error: 'Cannot resume game flow from "ready" to "running".'
   });
   assert.equal(flow.getPhase(), "ready");
+});
+
+test("input action map normalizes keyboard bindings and ignores duplicate bindings", () => {
+  const actions = new InputActionMap([
+    {
+      id: " move:left ",
+      bindings: [
+        defineKeyboardBinding("A"),
+        defineKeyboardBinding("a"),
+        defineKeyboardBinding("ArrowLeft")
+      ]
+    }
+  ]);
+
+  assert.deepEqual(actions.getAction("move:left"), {
+    id: "move:left",
+    bindings: [
+      { type: "keyboard", key: "a" },
+      { type: "keyboard", key: "arrowleft" }
+    ]
+  });
+  assert.equal(normalizeKeyboardKey("Space"), "space");
+  assert.throws(() => normalizeKeyboardKey(""), /Keyboard input binding key must be a non-empty string/);
+});
+
+test("input action map queries pressed and just-pressed input state", () => {
+  const input = new InputSystem();
+  const actions = new InputActionMap([
+    {
+      id: "jump",
+      bindings: [defineKeyboardBinding("Space"), defineKeyboardBinding("W")]
+    }
+  ]);
+
+  assert.equal(actions.isPressed(input, "jump"), false);
+  assert.equal(actions.wasPressed(input, "jump"), false);
+
+  input.press("space");
+
+  assert.equal(actions.isPressed(input, "jump"), true);
+  assert.equal(actions.wasPressed(input, "jump"), true);
+
+  input.lateUpdate();
+
+  assert.equal(actions.isPressed(input, "jump"), true);
+  assert.equal(actions.wasPressed(input, "jump"), false);
+
+  input.release("space");
+
+  assert.equal(actions.isPressed(input, "jump"), false);
+});
+
+test("input action map can bind and unbind keyboard inputs", () => {
+  const actions = new InputActionMap();
+
+  actions
+    .bind("pause", defineKeyboardBinding("Escape"))
+    .bind("pause", defineKeyboardBinding("escape"))
+    .bind("confirm", defineKeyboardBinding("Enter"));
+
+  assert.deepEqual(actions.listActions(), [
+    {
+      id: "pause",
+      bindings: [{ type: "keyboard", key: "escape" }]
+    },
+    {
+      id: "confirm",
+      bindings: [{ type: "keyboard", key: "enter" }]
+    }
+  ]);
+  assert.deepEqual(actions.getActionIdsForBinding(defineKeyboardBinding("ESCAPE")), ["pause"]);
+  assert.equal(actions.unbind("pause", defineKeyboardBinding("Escape")), true);
+  assert.equal(actions.unbind("pause", defineKeyboardBinding("Escape")), false);
+  assert.deepEqual(actions.getBindings("pause"), []);
+  assert.equal(actions.removeAction("confirm"), true);
+  assert.equal(actions.hasAction("confirm"), false);
+});
+
+test("input action map returns copied action definitions", () => {
+  const actions = new InputActionMap([
+    {
+      id: "fire",
+      bindings: [defineKeyboardBinding("F")]
+    }
+  ]);
+
+  const listed = actions.listActions();
+  listed[0].bindings[0].key = "mutated";
+
+  assert.deepEqual(actions.getBindings("fire"), [{ type: "keyboard", key: "f" }]);
+  assert.deepEqual(actions.getAction("missing"), undefined);
+  assert.equal(actions.isPressed(new InputSystem(), "missing"), false);
+  assert.throws(() => actions.registerAction({ id: " " }), /Input action id must be a non-empty string/);
 });
 
 test("event bus dispatches events in subscription order with stable envelopes", () => {
