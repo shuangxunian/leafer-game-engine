@@ -22,7 +22,7 @@
 - input 是否能驱动玩家移动
 - input action mapping 是否能把物理键盘和 pointer button input 转换成语义玩法动作
 - collision 是否能判断玩家和障碍物接触
-- audio runtime 是否能记录语义音频 intent
+- audio runtime 是否能记录语义音频 intent，并可选交给 browser playback adapter 消费
 - `GameFlow` 是否能管理 ready / running / paused / ended
 - 玩家是否能被限制在当前 viewport 内移动
 - tooling panel 是否能分区显示 runtime debug + assets + game flow + entity inspector + component schema 数据
@@ -35,9 +35,9 @@
 - tooling panel 是否能显示 selected entity detail 摘要
 - tooling panel 是否能用 component schema 辅助展示 selected component 字段
 
-它也不是编辑器或可视化搭建工具的雏形。这个示例只作为引擎包消费者存在，用来证明 runtime、framework、asset pipeline、sprite animation、audio runtime intent、collision query tooling snapshot 和 scene lifecycle API 能在一个真实浏览器示例里协同工作。
+它也不是编辑器或可视化搭建工具的雏形。这个示例只作为引擎包消费者存在，用来证明 runtime、framework、asset pipeline、sprite animation、audio runtime intent、browser audio playback adapter、collision query tooling snapshot 和 scene lifecycle API 能在一个真实浏览器示例里协同工作。
 
-当前示例里的 audio 只记录 `game:start`、`game:pause`、`game:resume`、`player:hit` 这些语义 cue intent，并通过 tooling 只读展示。它不播放声音、不加载音频文件、不提供音量滑条、mixer、waveform、asset browser 或任何 audio authoring workflow。
+当前示例里的 audio 会记录 `game:start`、`game:pause`、`game:resume`、`player:hit` 这些语义 cue intent，并通过 `AudioPlaybackSystem` + `BrowserAudioPlaybackAdapter` 可选消费 manifest 里的 placeholder audio source。它不提供播放按钮、音量滑条、mixer、waveform、asset browser 或任何 audio authoring workflow。
 
 ## How To Run
 
@@ -70,6 +70,7 @@ npm run dev
 - `boot.ts`
   - 启动 `DodgeBlocksScene`
   - 通过 `startSceneWithLifecycle(...)` 在 runtime start 前预加载 asset manifest
+  - 通过 `addAudioPlayback(...)` 注入 `BrowserAudioPlaybackAdapter`，把 audio runtime intent 可选交给浏览器 media element 消费
   - 挂载 keyboard bridge 和 pointer button bridge
   - 挂载 browser tooling panel
   - 分区显示 runtime debug、assets、game flow、sprite animations、audio runtime、input actions、collisions、entity inspector 和 component schema 信息
@@ -81,7 +82,7 @@ npm run dev
 
 - `dodge-blocks-scene.ts`
   - 注册 input、collision、gameplay system
-  - 通过 `addAudioRuntime(...)` 安装示例级 audio runtime intent state
+  - 通过 `addAudioRuntime(...)` 安装示例级 audio runtime intent state，并在 manifest asset 上声明 placeholder runtime audio source
   - 创建并注入 dodge-blocks input action map
   - 创建 UI 文本节点
   - 通过 `createDodgeBlocksSceneConfig(...)` 声明静态示例内容
@@ -132,9 +133,9 @@ bootDodgeBlocksExample(runtime).catch((error) => {
 });
 ```
 
-`bootDodgeBlocksExample(...)` 里会创建 scene，通过 scene lifecycle helper 预加载 assets 并启动 runtime、绑定键盘和 pointer button 输入，再把包含 asset state、game flow state、sprite animation state、audio runtime state、collision pair state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
+`bootDodgeBlocksExample(...)` 里会创建 scene，通过 scene lifecycle helper 预加载 assets 并启动 runtime、注入可选 browser audio playback adapter、绑定键盘和 pointer button 输入，再把包含 asset state、game flow state、sprite animation state、audio runtime state、collision pair state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
 
-Runtime Debug panel 会消费 `runtime.game` 和 `runtime.renderScene`，因此可以显示时间步进、viewport、entity counts、system totals、system order 和 system lifecycle。`Audio Runtime` panel 只读取 audio manifest、channel state 和 operation records，不播放声音，也不提供 playback buttons、volume sliders、mixer controls 或 audio authoring 入口。`Collisions` panel 只读取 `CollisionSystem` 的 current / enter / stay / exit collision pair summary，不提供 collider 编辑、碰撞响应配置、触发器脚本或运行时修改入口。这里的 tooling 仍然只是观察 runtime 状态，不提供系统开关、组件改值、场景编辑、音频编辑或资产管理入口。
+Runtime Debug panel 会消费 `runtime.game` 和 `runtime.renderScene`，因此可以显示时间步进、viewport、entity counts、system totals、system order 和 system lifecycle。`Audio Runtime` panel 只读取 audio manifest、channel state 和 operation records；实际播放由 `boot.ts` 可选安装的 `AudioPlaybackSystem` 消费，不由 tooling panel 触发，也不提供 playback buttons、volume sliders、mixer controls 或 audio authoring 入口。`Collisions` panel 只读取 `CollisionSystem` 的 current / enter / stay / exit collision pair summary，不提供 collider 编辑、碰撞响应配置、触发器脚本或运行时修改入口。这里的 tooling 仍然只是观察 runtime 状态，不提供系统开关、组件改值、场景编辑、音频编辑或资产管理入口。
 
 示例代码使用 `@shuangxunian/leafer-game-engine` package-style imports 来模拟真实消费者项目；在本仓库开发时，这些导入会通过 Vite alias 和 TypeScript paths 指回 `src`。
 
@@ -167,6 +168,7 @@ browser runtime
 - tooling panel 的 `Runtime Debug` section 可以显示 time / viewport / entity counts / system order / lifecycle 只读摘要
 - tooling panel 的 `Sprite Animations` section 可以显示 player 当前 clip / frame / sprite / playback 状态
 - tooling panel 的 `Audio Runtime` section 可以显示示例 audio manifest、channel state 和 `game:start` / `game:pause` / `game:resume` / `player:hit` operation records
+- 示例通过 `AudioPlaybackSystem` 和 `BrowserAudioPlaybackAdapter` 可选消费这些 audio operation records，并播放 manifest asset 上声明的 placeholder audio source
 - tooling panel 的 `Input Actions` section 可以显示 action id、keyboard bindings、pressed 和 justPressed
 - tooling panel 的 `Collisions` section 可以显示 current / enter / stay / exit collision pair 只读摘要
 - player 的 `transform`、`size`、`collider` 来自 scene config entity template
@@ -178,7 +180,7 @@ browser runtime
 - `confirm` 同时消费 keyboard 和 primary pointer button bindings，验证 browser pointer bridge 到 semantic action 的链路
 - gameplay phase 使用 framework `GameFlow`，而不是示例内的本地 phase state machine
 - tooling panel 的 `Game Flow` section 可以显示当前 ready / running / paused / ended 状态
-- audio runtime 使用 framework `AudioRuntimeSystem`，示例只记录 semantic cue intent，不引入 Web Audio playback 或音频内容生产能力
+- audio runtime 使用 framework `AudioRuntimeSystem`，browser playback 使用 runtime `BrowserAudioPlaybackAdapter`，示例只证明 opt-in playback consumption，不引入 Web Audio graph、mixer、音频编辑器或音频内容生产能力
 - hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度，不适合放进静态 scene config；scene config 只声明 `hazard-spawn` region 作为运行时参考数据
 
 这个示例不会把 level/map 声明变成编辑器、地图渲染器或自动生成器。它只是证明下游游戏可以显式读取引擎返回的 `TileMap` / `LevelLayout` helper，并由游戏代码决定如何使用这些运行时数据。

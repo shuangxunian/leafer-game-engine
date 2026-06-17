@@ -1089,3 +1089,5 @@
 最后收口：
 
 - [v0.22.4](version/v0.22.4.md)
+
+`0.22.x` 已完成 audio playback adapter 阶段：Node-safe adapter contract、scene/system draining、browser runtime adapter、dodge-blocks opt-in playback consumption 和非编辑器/非 mixer 边界都已文档化并测试。

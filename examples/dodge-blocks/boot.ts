@@ -1,9 +1,11 @@
 import type { BrowserRuntime } from "@shuangxunian/leafer-game-engine/runtime";
-import { startSceneWithLifecycle } from "@shuangxunian/leafer-game-engine/runtime";
+import { BrowserAudioPlaybackAdapter, startSceneWithLifecycle } from "@shuangxunian/leafer-game-engine/runtime";
 import {
   BrowserKeyboardBridge,
   BrowserPointerButtonBridge,
   InputSystem,
+  addAudioPlayback,
+  getAudioRuntime,
   createDefaultComponentSchemaRegistry
 } from "@shuangxunian/leafer-game-engine/framework";
 import { DodgeBlocksScene } from "./dodge-blocks-scene.js";
@@ -25,6 +27,13 @@ export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<v
   if (!input) throw new Error("InputSystem was not initialized.");
   const gameSystem = scene.getSystem(DodgeGameSystem);
   if (!gameSystem) throw new Error("DodgeGameSystem was not initialized.");
+  const audio = getAudioRuntime(scene);
+  if (!audio) throw new Error("AudioRuntimeSystem was not initialized.");
+  addAudioPlayback(scene, {
+    audio,
+    adapter: new BrowserAudioPlaybackAdapter({ audio }),
+    priority: 260
+  });
 
   const keyboard = new BrowserKeyboardBridge(input);
   keyboard.attach();

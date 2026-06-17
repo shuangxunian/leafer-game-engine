@@ -258,7 +258,7 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   assert.equal(publicApi.includes("AudioRuntimeState"), true);
   assert.equal(publicApi.includes("AudioRuntimeSystem"), true);
   assert.equal(publicApi.includes("read-only audio runtime snapshots"), true);
-  assert.equal(readme.includes("`0.21.x` audio runtime primitives 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.21.x` audio runtime primitives 阶段和 `0.22.x` audio playback adapter 阶段都已经收口"), true);
 });
 
 test("audio playback adapter stage docs are discoverable from roadmap", async () => {
@@ -298,8 +298,10 @@ test("audio playback adapter stage docs are discoverable from roadmap", async ()
   assert.equal(runtimeIndex.includes('export * from "./browser-audio.js"'), true);
   assert.equal(browserAudio.includes("class BrowserAudioPlaybackAdapter"), true);
   assert.equal(browserAudio.includes("new Audio(source)"), true);
-  assert.equal(publicApi.includes("`v0.22.3` adds a browser-facing audio playback adapter baseline"), true);
-  assert.equal(readme.includes("`v0.22.3` Browser Audio Playback Adapter Baseline"), true);
+  assert.equal(publicApi.includes("`v0.22.4` closes audio playback adapter work"), true);
+  assert.equal(publicApi.includes("does not add playback buttons, volume sliders, mixer controls"), true);
+  assert.equal(readme.includes("`v0.22.4` Audio Playback Example Consumption and Boundary Closeout"), true);
+  assert.equal(readme.includes("`0.22.x` audio playback adapter 阶段都已经收口"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -466,7 +468,7 @@ test("dodge-blocks example passes runtime debug context into tooling snapshots",
   assert.equal(source.includes("collisions: true"), true, "boot should pass collision pair state into tooling snapshots");
 });
 
-test("dodge-blocks example consumes audio runtime intent APIs without playback scope", async () => {
+test("dodge-blocks example consumes opt-in browser audio playback APIs without editor scope", async () => {
   const sceneSource = await readFile(new URL("dodge-blocks-scene.ts", dodgeBlocksExampleUrl), "utf8");
   const gameplaySource = await readFile(new URL("dodge-game-system.ts", dodgeBlocksExampleUrl), "utf8");
   const bootSource = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
@@ -474,16 +476,26 @@ test("dodge-blocks example consumes audio runtime intent APIs without playback s
 
   assert.equal(sceneSource.includes("addAudioRuntime"), true);
   assert.equal(sceneSource.includes("DODGE_BLOCKS_AUDIO_MANIFEST"), true);
+  assert.equal(sceneSource.includes("source: createToneAudioDataUri"), true);
+  assert.equal(sceneSource.includes('id: "ui-confirm"'), true);
+  assert.equal(sceneSource.includes('id: "player-hit"'), true);
   assert.equal(sceneSource.includes('GameStart: "game:start"'), true);
   assert.equal(sceneSource.includes('PlayerHit: "player:hit"'), true);
   assert.equal(gameplaySource.includes("getAudioRuntime"), true);
   assert.equal(gameplaySource.includes("playAudioCue"), true);
   assert.equal(gameplaySource.includes('GamePause: "game:pause"'), true);
   assert.equal(gameplaySource.includes('GameResume: "game:resume"'), true);
+  assert.equal(bootSource.includes("BrowserAudioPlaybackAdapter"), true);
+  assert.equal(bootSource.includes("addAudioPlayback"), true);
+  assert.equal(bootSource.includes("getAudioRuntime"), true);
+  assert.equal(bootSource.includes("priority: 260"), true);
   assert.equal(bootSource.includes("audio: true"), true);
   assert.equal(docs.includes("semantic audio cue intent"), true);
-  assert.equal(docs.includes("不播放声音"), true);
-  assert.equal(docs.includes("不引入 Web Audio playback"), true);
+  assert.equal(docs.includes("AudioPlaybackSystem"), true);
+  assert.equal(docs.includes("BrowserAudioPlaybackAdapter"), true);
+  assert.equal(docs.includes("placeholder audio source"), true);
+  assert.equal(docs.includes("不提供播放按钮、音量滑条、mixer、waveform、asset browser"), true);
+  assert.equal(docs.includes("不引入 Web Audio graph、mixer、音频编辑器或音频内容生产能力"), true);
 });
 
 test("dodge-blocks example consumes scene config bootstrap APIs", async () => {

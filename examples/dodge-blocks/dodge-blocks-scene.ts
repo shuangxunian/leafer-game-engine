@@ -99,9 +99,21 @@ const DODGE_BLOCKS_ASSET_MANIFEST = {
 
 const DODGE_BLOCKS_AUDIO_MANIFEST = {
   assets: [
-    { id: "ui-confirm" },
-    { id: "ui-pause" },
-    { id: "player-hit" }
+    {
+      id: "ui-confirm",
+      source: createToneAudioDataUri(880, 0.08, 0.28),
+      durationSeconds: 0.08
+    },
+    {
+      id: "ui-pause",
+      source: createToneAudioDataUri(440, 0.07, 0.22),
+      durationSeconds: 0.07
+    },
+    {
+      id: "player-hit",
+      source: createToneAudioDataUri(160, 0.11, 0.35),
+      durationSeconds: 0.11
+    }
   ],
   channels: [
     { id: "ui", volume: 0.7 },
@@ -443,6 +455,61 @@ function createPlayfieldRegion(viewportWidth: number, viewportHeight: number): {
 function createSpriteDataUri(fill: string, width: number, height: number, radius: number): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="${width}" height="${height}" rx="${radius}" fill="${fill}"/></svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function createToneAudioDataUri(frequency: number, durationSeconds: number, volume: number): string {
+  const sampleRate = 8000;
+  const sampleCount = Math.max(1, Math.floor(sampleRate * durationSeconds));
+  const dataBytes = sampleCount * 2;
+  const bytes = new Uint8Array(44 + dataBytes);
+  writeAscii(bytes, 0, "RIFF");
+  writeUint32(bytes, 4, 36 + dataBytes);
+  writeAscii(bytes, 8, "WAVE");
+  writeAscii(bytes, 12, "fmt ");
+  writeUint32(bytes, 16, 16);
+  writeUint16(bytes, 20, 1);
+  writeUint16(bytes, 22, 1);
+  writeUint32(bytes, 24, sampleRate);
+  writeUint32(bytes, 28, sampleRate * 2);
+  writeUint16(bytes, 32, 2);
+  writeUint16(bytes, 34, 16);
+  writeAscii(bytes, 36, "data");
+  writeUint32(bytes, 40, dataBytes);
+
+  for (let index = 0; index < sampleCount; index += 1) {
+    const fade = Math.min(1, index / 80, (sampleCount - index) / 80);
+    const sample = Math.sin((index / sampleRate) * Math.PI * 2 * frequency) * volume * fade;
+    const value = Math.round(sample * 32767);
+    writeInt16(bytes, 44 + index * 2, value);
+  }
+
+  let binary = "";
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return `data:audio/wav;base64,${btoa(binary)}`;
+}
+
+function writeAscii(bytes: Uint8Array, offset: number, value: string): void {
+  for (let index = 0; index < value.length; index += 1) {
+    bytes[offset + index] = value.charCodeAt(index);
+  }
+}
+
+function writeUint16(bytes: Uint8Array, offset: number, value: number): void {
+  bytes[offset] = value & 0xff;
+  bytes[offset + 1] = (value >> 8) & 0xff;
+}
+
+function writeInt16(bytes: Uint8Array, offset: number, value: number): void {
+  writeUint16(bytes, offset, value < 0 ? 0x10000 + value : value);
+}
+
+function writeUint32(bytes: Uint8Array, offset: number, value: number): void {
+  bytes[offset] = value & 0xff;
+  bytes[offset + 1] = (value >> 8) & 0xff;
+  bytes[offset + 2] = (value >> 16) & 0xff;
+  bytes[offset + 3] = (value >> 24) & 0xff;
 }
 
 function formatAssetLoadFailure(result: AsyncAssetManifestLoadResult): string {
