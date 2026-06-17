@@ -18,7 +18,9 @@ For the runtime-services boundary across event dispatch, update-driven schedulin
 
 For the input-actions boundary across raw input state, keyboard bindings, action maps, example consumption, and read-only tooling visibility, see [Input Actions Boundary](input-actions.md).
 
-`0.14.x` has started runtime observability hardening. The Node-safe `tooling` entrypoint now exposes more explicit read-only system debug snapshot fields, including system registration order, destroyed state, and a derived lifecycle label. Browser tooling panel section helpers also format Runtime Debug rows for clearer read-only scanning without adding mutation controls.
+`0.14.x` closed runtime observability hardening. The Node-safe `tooling` entrypoint now exposes more explicit read-only system debug snapshot fields, including system registration order, destroyed state, and a derived lifecycle label. Browser tooling panel section helpers also format Runtime Debug rows for clearer read-only scanning without adding mutation controls.
+
+For the runtime-observability boundary across debug snapshots, system lifecycle state, text formatting, browser panel section formatting, aggregate tooling snapshots, and example consumption, see [Runtime Observability Boundary](runtime-observability.md).
 
 ---
 
@@ -167,6 +169,7 @@ This command builds the library through `npm pack --dry-run --json` and checks t
 - `docs/animation-runtime.md`
 - `docs/runtime-services.md`
 - `docs/input-actions.md`
+- `docs/runtime-observability.md`
 - all JS and type declaration targets from `package.json` exports
 
 It also checks that development-only paths such as `src`, `tests`, `examples`, `dist`, `scripts`, and `node_modules` are not included.

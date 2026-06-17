@@ -38,6 +38,7 @@
     "docs/animation-runtime.md",
     "docs/runtime-services.md",
     "docs/input-actions.md",
+    "docs/runtime-observability.md",
     "README.md",
     "LICENSE"
   ],

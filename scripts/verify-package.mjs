@@ -65,7 +65,8 @@ for (const requiredFile of [
   "docs/product-boundary.md",
   "docs/animation-runtime.md",
   "docs/runtime-services.md",
-  "docs/input-actions.md"
+  "docs/input-actions.md",
+  "docs/runtime-observability.md"
 ]) {
   assertHasFile(packageFiles, requiredFile);
 }
