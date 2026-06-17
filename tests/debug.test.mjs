@@ -6,8 +6,10 @@ import {
   AssetRegistry,
   ComponentSchemaRegistry,
   GameFlow,
+  RuntimeServicesSystem,
   SpriteAnimationComponent,
   TransformComponent,
+  addRuntimeServices,
   createDefaultComponentSchemaRegistry
 } from "../lib/framework/index.js";
 import {
@@ -18,6 +20,8 @@ import {
   createEntityInspectorPanelSection,
   createGameFlowPanelSection,
   createRuntimeDebugPanelSection,
+  createRuntimeServicesPanelSection,
+  createRuntimeServicesSnapshot,
   createSelectedEntityDetailPanelSection,
   createSceneInspectorSnapshot,
   createSpriteAnimationSnapshot,
@@ -28,6 +32,7 @@ import {
   formatDebugAssetSnapshot,
   formatDebugGameFlowSnapshot,
   formatDebugSnapshot,
+  formatRuntimeServicesSnapshot,
   formatSceneInspectorSnapshot,
   formatSpriteAnimationSnapshot,
   formatToolingSnapshot,
@@ -344,6 +349,58 @@ test("tooling snapshot can include sprite animation state", () => {
   });
 });
 
+test("tooling snapshot can include runtime services state", () => {
+  const scene = new Scene("RuntimeServicesToolingScene");
+  const system = addRuntimeServices(scene);
+  const log = [];
+
+  system.services.eventBus.on("ready", () => log.push("ready"));
+  system.services.eventBus.emit("ready", undefined);
+  system.services.scheduler.schedule(0.25, () => log.push("scheduled"));
+
+  scene.start();
+  scene.update(0.25);
+
+  const snapshot = createToolingSnapshot(scene, { runtimeServices: true });
+
+  assert.deepEqual(log, ["ready", "scheduled"]);
+  assert.deepEqual(snapshot.runtimeServices, {
+    installed: true,
+    system: {
+      enabled: true,
+      started: true,
+      priority: -250,
+      schedulerUpdatesEnabled: true,
+      clearsOnDestroy: true
+    },
+    eventBus: {
+      listenerCount: 1,
+      emittedCount: 1
+    },
+    scheduler: {
+      elapsedSeconds: 0.25,
+      taskCount: 0,
+      lastUpdate: {
+        elapsedSeconds: 0.25,
+        deltaSeconds: 0.25,
+        firedCount: 1,
+        taskCount: 0
+      }
+    }
+  });
+});
+
+test("runtime services snapshot reports missing services without throwing", () => {
+  const scene = new Scene("MissingRuntimeServicesScene");
+
+  assert.deepEqual(createRuntimeServicesSnapshot(scene), {
+    installed: false
+  });
+  assert.deepEqual(createToolingSnapshot(scene, { runtimeServices: true }).runtimeServices, {
+    installed: false
+  });
+});
+
 test("component schema snapshot formatting is stable and readable", () => {
   const registry = new ComponentSchemaRegistry();
   registry.register({
@@ -472,6 +529,67 @@ test("tooling snapshot formatting includes flow data when present", () => {
   ]);
 });
 
+test("runtime services snapshot formatting is stable and readable", () => {
+  assert.deepEqual(formatRuntimeServicesSnapshot({
+    installed: true,
+    system: {
+      enabled: true,
+      started: true,
+      priority: -250,
+      schedulerUpdatesEnabled: true,
+      clearsOnDestroy: true
+    },
+    eventBus: {
+      listenerCount: 2,
+      emittedCount: 3
+    },
+    scheduler: {
+      elapsedSeconds: 1.25,
+      taskCount: 4,
+      lastUpdate: {
+        elapsedSeconds: 1.25,
+        deltaSeconds: 0.5,
+        firedCount: 1,
+        taskCount: 4
+      }
+    }
+  }), [
+    "Runtime Services installed",
+    "System enabled=true started=true priority=-250",
+    "Scheduler updates=enabled clearOnDestroy=true",
+    "EventBus listeners=2 emitted=3",
+    "Scheduler elapsed=1.250s tasks=4",
+    "Last Update dt=0.500s fired=1 tasks=4"
+  ]);
+
+  assert.deepEqual(formatRuntimeServicesSnapshot({ installed: false }), [
+    "Runtime Services missing"
+  ]);
+});
+
+test("tooling snapshot formatting appends runtime services data when present", () => {
+  const scene = new Scene("RuntimeServicesToolingFormatScene");
+  addRuntimeServices(scene, {
+    updateScheduler: false,
+    clearOnDestroy: false,
+    priority: -123
+  });
+  scene.start();
+
+  assert.deepEqual(formatToolingSnapshot(createToolingSnapshot(scene, { runtimeServices: true })), [
+    "Scene RuntimeServicesToolingFormatScene",
+    "Entities 0/0",
+    "Systems 1",
+    "Order RuntimeServicesSystem:-123",
+    "",
+    "Runtime Services installed",
+    "System enabled=true started=true priority=-123",
+    "Scheduler updates=disabled clearOnDestroy=false",
+    "EventBus listeners=0 emitted=0",
+    "Scheduler elapsed=0.000s tasks=0"
+  ]);
+});
+
 test("tooling panel sections expose runtime debug output", () => {
   const scene = new Scene("RuntimePanelScene");
 
@@ -516,6 +634,15 @@ test("sprite animations panel section exposes animation state", () => {
   }), {
     title: "Sprite Animations",
     lines: ["Sprite Animations 0"]
+  });
+});
+
+test("runtime services panel section exposes read-only service state", () => {
+  assert.deepEqual(createRuntimeServicesPanelSection({
+    installed: false
+  }), {
+    title: "Runtime Services",
+    lines: ["Runtime Services missing"]
   });
 });
 
@@ -651,6 +778,33 @@ test("tooling panel sections include animation data when requested", () => {
       lines: [
         "Sprite Animations 1",
         `- #${entity.id} player clip=player-idle status=playing frame=<unset> sprite=<unset> index=0 elapsed=0.000s loops=0`
+      ]
+    }
+  ]);
+});
+
+test("tooling panel sections include runtime services data when requested", () => {
+  const scene = new Scene("RuntimeServicesSectionsScene");
+  scene.addSystem(new RuntimeServicesSystem(scene));
+
+  assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { runtimeServices: true })), [
+    {
+      title: "Runtime Debug",
+      lines: [
+        "Scene RuntimeServicesSectionsScene",
+        "Entities 0/0",
+        "Systems 1",
+        "Order RuntimeServicesSystem:-250"
+      ]
+    },
+    {
+      title: "Runtime Services",
+      lines: [
+        "Runtime Services installed",
+        "System enabled=true started=false priority=-250",
+        "Scheduler updates=enabled clearOnDestroy=true",
+        "EventBus listeners=0 emitted=0",
+        "Scheduler elapsed=0.000s tasks=0"
       ]
     }
   ]);

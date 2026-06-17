@@ -9,7 +9,7 @@ import type {
   GameFlowPhase,
   SpriteAnimationPlaybackStatus
 } from "../framework/index.js";
-import { SpriteAnimationComponent } from "../framework/index.js";
+import { RuntimeServicesSystem, SpriteAnimationComponent } from "../framework/index.js";
 
 export type DebugSnapshot = {
   sceneName: string;
@@ -77,6 +77,7 @@ export type DebugSnapshotOptions = {
 export type ToolingSnapshotOptions = DebugSnapshotOptions & {
   animations?: boolean;
   inspector?: boolean;
+  runtimeServices?: boolean;
   schemas?: ComponentSchemaRegistry;
 };
 
@@ -111,7 +112,45 @@ export type ToolingSnapshot = {
   debug: DebugSnapshot;
   animations?: SpriteAnimationSnapshot;
   inspector?: SceneInspectorSnapshot;
+  runtimeServices?: RuntimeServicesSnapshot;
   schemas?: ComponentSchemaSnapshot;
+};
+
+export type RuntimeServicesSnapshot =
+  | {
+      installed: false;
+    }
+  | {
+      installed: true;
+      system: RuntimeServicesSystemSnapshot;
+      eventBus: RuntimeServicesEventBusSnapshot;
+      scheduler: RuntimeServicesSchedulerSnapshot;
+    };
+
+export type RuntimeServicesSystemSnapshot = {
+  enabled: boolean;
+  started: boolean;
+  priority: number;
+  schedulerUpdatesEnabled: boolean;
+  clearsOnDestroy: boolean;
+};
+
+export type RuntimeServicesEventBusSnapshot = {
+  listenerCount: number;
+  emittedCount: number;
+};
+
+export type RuntimeServicesSchedulerSnapshot = {
+  elapsedSeconds: number;
+  taskCount: number;
+  lastUpdate?: RuntimeServicesSchedulerUpdateSnapshot;
+};
+
+export type RuntimeServicesSchedulerUpdateSnapshot = {
+  elapsedSeconds: number;
+  deltaSeconds: number;
+  firedCount: number;
+  taskCount: number;
 };
 
 export type ComponentSchemaSnapshot = {
@@ -186,6 +225,7 @@ export function createToolingSnapshot(scene: Scene, options: ToolingSnapshotOpti
     debug: createDebugSnapshot(scene, options),
     animations: options.animations ? createSpriteAnimationSnapshot(scene) : undefined,
     inspector: options.inspector ? createSceneInspectorSnapshot(scene) : undefined,
+    runtimeServices: options.runtimeServices ? createRuntimeServicesSnapshot(scene) : undefined,
     schemas: options.schemas ? createComponentSchemaSnapshot(options.schemas) : undefined
   };
 }
@@ -253,6 +293,10 @@ export function formatToolingSnapshot(snapshot: ToolingSnapshot): string[] {
     lines.push("", ...formatSpriteAnimationSnapshot(snapshot.animations));
   }
 
+  if (snapshot.runtimeServices) {
+    lines.push("", ...formatRuntimeServicesSnapshot(snapshot.runtimeServices));
+  }
+
   if (snapshot.schemas) {
     lines.push("", ...formatComponentSchemaSnapshot(snapshot.schemas));
   }
@@ -289,6 +333,67 @@ export function formatSpriteAnimationSnapshot(snapshot: SpriteAnimationSnapshot)
     const sprite = animation.currentSpriteId ?? "<unset>";
     lines.push(
       `- #${animation.entityId} ${animation.entityName} clip=${animation.clipId} status=${animation.status} frame=${frame} sprite=${sprite} index=${animation.frameIndex} elapsed=${animation.elapsedSeconds.toFixed(3)}s loops=${animation.completedLoops}`
+    );
+  }
+
+  return lines;
+}
+
+export function createRuntimeServicesSnapshot(scene: Scene): RuntimeServicesSnapshot {
+  const system = scene.getSystem(RuntimeServicesSystem);
+
+  if (!system) {
+    return {
+      installed: false
+    };
+  }
+
+  const lastUpdate = system.lastSchedulerUpdate
+    ? {
+        elapsedSeconds: system.lastSchedulerUpdate.elapsedSeconds,
+        deltaSeconds: system.lastSchedulerUpdate.deltaSeconds,
+        firedCount: system.lastSchedulerUpdate.firedCount,
+        taskCount: system.lastSchedulerUpdate.taskCount
+      }
+    : undefined;
+
+  return {
+    installed: true,
+    system: {
+      enabled: system.enabled,
+      started: system.started,
+      priority: system.priority,
+      schedulerUpdatesEnabled: system.schedulerUpdatesEnabled,
+      clearsOnDestroy: system.clearsOnDestroy
+    },
+    eventBus: {
+      listenerCount: system.services.eventBus.listenerCount(),
+      emittedCount: system.services.eventBus.emittedCount
+    },
+    scheduler: {
+      elapsedSeconds: system.services.scheduler.elapsedSeconds,
+      taskCount: system.services.scheduler.taskCount(),
+      ...(lastUpdate ? { lastUpdate } : {})
+    }
+  };
+}
+
+export function formatRuntimeServicesSnapshot(snapshot: RuntimeServicesSnapshot): string[] {
+  if (!snapshot.installed) {
+    return ["Runtime Services missing"];
+  }
+
+  const lines = [
+    "Runtime Services installed",
+    `System enabled=${snapshot.system.enabled} started=${snapshot.system.started} priority=${snapshot.system.priority}`,
+    `Scheduler updates=${snapshot.system.schedulerUpdatesEnabled ? "enabled" : "disabled"} clearOnDestroy=${snapshot.system.clearsOnDestroy}`,
+    `EventBus listeners=${snapshot.eventBus.listenerCount} emitted=${snapshot.eventBus.emittedCount}`,
+    `Scheduler elapsed=${snapshot.scheduler.elapsedSeconds.toFixed(3)}s tasks=${snapshot.scheduler.taskCount}`
+  ];
+
+  if (snapshot.scheduler.lastUpdate) {
+    lines.push(
+      `Last Update dt=${snapshot.scheduler.lastUpdate.deltaSeconds.toFixed(3)}s fired=${snapshot.scheduler.lastUpdate.firedCount} tasks=${snapshot.scheduler.lastUpdate.taskCount}`
     );
   }
 

@@ -10,7 +10,7 @@ The project is a frontend 2D game engine dependency package. It is not an editor
 
 For the animation-specific boundary across asset metadata, playback helpers, ECS behavior, render application, example consumption, and read-only tooling visibility, see [Sprite Animation Runtime Boundary](animation-runtime.md).
 
-`0.12.x` starts the runtime services baseline with a Node-safe `EventBus` for deterministic gameplay/runtime event dispatch, a Node-safe `RuntimeScheduler` for update-driven delayed/repeated tasks, and opt-in scene integration through `RuntimeServicesSystem`.
+`0.12.x` starts the runtime services baseline with a Node-safe `EventBus` for deterministic gameplay/runtime event dispatch, a Node-safe `RuntimeScheduler` for update-driven delayed/repeated tasks, opt-in scene integration through `RuntimeServicesSystem`, and read-only runtime services visibility through `/tooling`.
 
 ---
 
@@ -45,7 +45,11 @@ import {
   addRuntimeServices,
   createSpriteAnimationPlayback
 } from "@shuangxunian/leafer-game-engine/framework";
-import { createToolingSnapshot, formatSpriteAnimationSnapshot } from "@shuangxunian/leafer-game-engine/tooling";
+import {
+  createToolingSnapshot,
+  formatRuntimeServicesSnapshot,
+  formatSpriteAnimationSnapshot
+} from "@shuangxunian/leafer-game-engine/tooling";
 ```
 
 The smoke tests intentionally use the real package name so they exercise `package.json` exports.
@@ -74,7 +78,11 @@ import {
   addRuntimeServices,
   createSpriteAnimationPlayback
 } from "@shuangxunian/leafer-game-engine/framework";
-import { createToolingSnapshot, formatSpriteAnimationSnapshot } from "@shuangxunian/leafer-game-engine/tooling";
+import {
+  createToolingSnapshot,
+  formatRuntimeServicesSnapshot,
+  formatSpriteAnimationSnapshot
+} from "@shuangxunian/leafer-game-engine/tooling";
 ```
 
 This keeps browser runtime dependencies out of tests that only need ECS, gameplay flow, event dispatch, update-driven scheduling, scene runtime service ownership, assets, sprite animation playback/system behavior, scene config, or snapshot formatting.
@@ -114,7 +122,7 @@ They should be verified through browser/example builds until the package is spli
 
 - `core` should stay independent from browser and rendering implementations.
 - `framework` should stay usable for logic tests and reusable gameplay primitives, including sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, and opt-in scene runtime service integration.
-- `tooling` can expose structured snapshots and formatters in Node, including read-only sprite animation state, but browser panel classes should only be constructed in a DOM environment.
+- `tooling` can expose structured snapshots and formatters in Node, including read-only sprite animation state and runtime services state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
 - Future package-boundary work may split browser runtime APIs into more explicit entrypoints.

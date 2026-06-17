@@ -44,6 +44,14 @@ export class RuntimeServicesSystem<TEvents extends object = Record<string, unkno
   private readonly updateScheduler: boolean;
   private readonly clearOnDestroy: boolean;
 
+  get schedulerUpdatesEnabled(): boolean {
+    return this.updateScheduler;
+  }
+
+  get clearsOnDestroy(): boolean {
+    return this.clearOnDestroy;
+  }
+
   constructor(
     scene: Scene,
     options: RuntimeServicesSystemOptions<TEvents> = {}

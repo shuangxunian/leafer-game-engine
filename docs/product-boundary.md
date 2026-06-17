@@ -43,6 +43,7 @@
 - GameFlow state
 - component schema metadata
 - sprite animation playback/debug state
+- runtime services state
 
 它们不应该在当前仓库中变成：
 
@@ -51,6 +52,8 @@
 - 运行时内容修改器
 - 资产导入/整理工具
 - 关卡制作工具
+
+即使 `tooling` 包含选择、展开、过滤或分区展示等交互，它也只服务“看清楚 runtime 发生了什么”，不负责修改场景、组件、资源或关卡内容。
 
 如果未来的独立编辑器需要这些数据，它应该通过本包暴露的稳定 runtime、schema、snapshot、asset、scene config 和 tooling API 来消费，而不是把编辑器实现放回这个仓库。
 
@@ -66,4 +69,3 @@
 如果答案大多是“是”，它大概率属于本仓库。
 
 如果需求主要是拖拽、编排、资源管理、关卡制作、可视化编辑或发布工作流，它应该进入未来的独立编辑器项目。
-

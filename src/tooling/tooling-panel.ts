@@ -5,6 +5,7 @@ import type {
   DebugSnapshot,
   InspectorComponentSnapshot,
   InspectorPrimitive,
+  RuntimeServicesSnapshot,
   SceneInspectorSnapshot,
   SpriteAnimationSnapshot,
   ToolingSnapshot
@@ -14,6 +15,7 @@ import {
   formatDebugAssetSnapshot,
   formatDebugGameFlowSnapshot,
   formatDebugSnapshot,
+  formatRuntimeServicesSnapshot,
   formatSceneInspectorSnapshot,
   formatSpriteAnimationSnapshot
 } from "./debug.js";
@@ -89,6 +91,13 @@ export function createSpriteAnimationsPanelSection(snapshot: SpriteAnimationSnap
   };
 }
 
+export function createRuntimeServicesPanelSection(snapshot: RuntimeServicesSnapshot): ToolingPanelSection {
+  return {
+    title: "Runtime Services",
+    lines: formatRuntimeServicesSnapshot(snapshot)
+  };
+}
+
 export function createSelectedEntityDetailPanelSection(
   snapshot: SceneInspectorSnapshot,
   selection: Required<ToolingPanelSelection>,
@@ -140,6 +149,10 @@ export function createToolingPanelSections(snapshot: ToolingSnapshot, selection:
 
   if (snapshot.animations) {
     sections.push(createSpriteAnimationsPanelSection(snapshot.animations));
+  }
+
+  if (snapshot.runtimeServices) {
+    sections.push(createRuntimeServicesPanelSection(snapshot.runtimeServices));
   }
 
   if (snapshot.inspector) {

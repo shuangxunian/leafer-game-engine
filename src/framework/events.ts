@@ -31,6 +31,10 @@ export class EventBus<TEvents extends object = Record<string, unknown>> {
   private nextListenerId = 1;
   private nextSequence = 1;
 
+  get emittedCount(): number {
+    return this.nextSequence - 1;
+  }
+
   on<Type extends EventMapKey<TEvents>>(
     type: Type,
     handler: EventHandler<TEvents[Type], Type>
