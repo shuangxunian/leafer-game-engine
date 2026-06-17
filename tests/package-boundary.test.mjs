@@ -78,6 +78,23 @@ test("runtime ownership docs ship as package-facing non-editor guidance", async 
   assert.equal(source.includes("not scene editing, component editing, asset management, or content authoring"), true);
 });
 
+test("runtime hardening stage docs are discoverable from roadmap and package docs", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.17.0.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  for (const version of ["v0.17.1", "v0.17.2", "v0.17.3", "v0.17.4"]) {
+    assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
+    assert.equal(stage.includes(`${version}.md`), true, `stage doc should link ${version}`);
+  }
+
+  assert.equal(stage.includes("The `0.17.x` stage is complete"), true);
+  assert.equal(publicApi.includes("`0.17.x` closed runtime/game loop hardening"), true);
+  assert.equal(publicApi.includes("Runtime Ownership Boundary"), true);
+  assert.equal(readme.includes("`0.17.x` runtime/game loop hardening 阶段都已经收口"), true);
+});
+
 test("core package subpath can be imported by package name in Node", async () => {
   const core = await import(`${packageJson.name}/core`);
 

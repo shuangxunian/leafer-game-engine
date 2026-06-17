@@ -30,7 +30,7 @@ For the scene-config boundary across asset manifests, entity templates, validati
 
 For the render/view boundary across render nodes, view synchronization, sprite-capable nodes, render scene layers, lifecycle, and read-only tooling visibility, see [Render/View Contract](render-view-contract.md).
 
-`0.17.x` starts runtime/game loop hardening. The `core` runtime now guarantees that scene/world phase cleanup runs even when systems or components throw during `update(...)`, `fixedUpdate(...)`, or `lateUpdate(...)`; those errors still propagate to callers. `Game.tick(...)` also has deterministic error-boundary behavior: update errors stop fixed/late work, fixed-step attempts settle the accumulator before propagating, and late errors occur after update/fixed work has completed. Runtime ownership guidance now documents which objects own scenes, render resources, frame loops, and read-only tooling state.
+`0.17.x` closed runtime/game loop hardening. The `core` runtime now guarantees that scene/world phase cleanup runs even when systems or components throw during `update(...)`, `fixedUpdate(...)`, or `lateUpdate(...)`; those errors still propagate to callers. `Game.tick(...)` also has deterministic error-boundary behavior: update errors stop fixed/late work, fixed-step attempts settle the accumulator before propagating, and late errors occur after update/fixed work has completed. Runtime ownership guidance documents which objects own scenes, render resources, frame loops, and read-only tooling state.
 
 For the runtime ownership boundary across `Game`, `Scene`, browser runtime, render scene lifecycle, tooling, and downstream error policy, see [Runtime Ownership Boundary](runtime-ownership.md).
 
@@ -168,7 +168,7 @@ They should be verified through browser/example builds until the package is spli
 - `tooling` can expose structured snapshots and formatters in Node, including read-only system lifecycle state, sprite animation state, runtime services state, and input action state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer. It owns render scene layer naming/order helpers.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
-- Future package-boundary work may split browser runtime APIs into more explicit entrypoints, but `0.16.x` render/view contracts are now documented and covered by package verification.
+- Future package-boundary work may split browser runtime APIs into more explicit entrypoints, but `0.17.x` runtime/game loop hardening guarantees are now documented and covered by package verification.
 
 ---
 
