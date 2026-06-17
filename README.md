@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.8.4` Asset Load State Snapshot And Tooling Visibility，`0.7.x` interactive runtime inspector 已经收口。
+当前项目已经推进到 `v0.8.5` Dodge Blocks Asset Loading Integration And Docs Cleanup，`0.8.x` resource loading baseline 已经收口。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -15,9 +15,9 @@
 - `adapter` 已经通过渲染抽象接入 Leafer，并把显示层和游戏规则层分开。
 - `runtime` 已经可以在浏览器里装配渲染、场景和动画帧循环。
 - `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、asset load state snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail、assets panel section 和 schema-assisted component detail 展示。
-- `examples/dodge-blocks` 作为集成样例，用来验证引擎分层和运行时能力。
+- `examples/dodge-blocks` 作为集成样例，用来验证引擎分层、异步资源加载和运行时能力。
 
-当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，并开始补齐更正式的资源加载管线。
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，并完成了第一版资源加载管线基线。
 
 ## 产品边界
 
@@ -548,7 +548,7 @@ import {
   - 已有 `ColliderComponent` 和 `CollisionSystem`，支持 `enter / stay / exit` 语义和 layer 过滤。
   - 已有 `StateMachine`，可以把示例里的状态流沉淀成通用能力。
   - 已有 `CameraSystem`，能驱动 world layer 位移、缩放和跟随实体。
-  - 已有 `AssetRegistry`，支持 typed sprite asset 注册、查找、缺失时报错、异步加载状态和 manifest 部分加载结果。
+  - 已有 `AssetRegistry`，支持 typed sprite asset 注册、查找、缺失时报错、异步加载状态、manifest 部分加载结果和浏览器图片加载适配。
   - 已有 `defineEntityFactory`，支持把实体创建逻辑从 sample 中抽出来复用。
   - 已有 asset manifest、entity template、scene config 和 component schema registry，开始具备数据驱动内容管线基础。
 
@@ -631,7 +631,7 @@ npm pack
 
 如果我们把目标定义为“做游戏引擎”，那接下来的重点不应该是继续打磨 demo 外观，而应该继续把当前已经有的 runtime、framework、tooling 往产品化方向推进。
 
-`0.7.x` 已经把 interactive runtime inspector 阶段收口了，当前 `0.8.x` 正在推进资源加载和 asset pipeline。下一阶段更值得优先投入的是这些方向：
+`0.7.x` 已经把 interactive runtime inspector 阶段收口了，`0.8.x` 也完成了资源加载和 asset pipeline 基线。下一阶段更值得优先投入的是这些方向：
 
 1. 更完整的 runtime tooling / inspector
    - 系统开关和运行时状态查看

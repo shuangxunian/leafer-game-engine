@@ -3,8 +3,9 @@ import { BrowserKeyboardBridge, InputSystem, createDefaultComponentSchemaRegistr
 import { DodgeBlocksScene } from "./dodge-blocks-scene.js";
 import { BrowserToolingPanel, createToolingSnapshot } from "../../src/tooling/index.js";
 
-export function bootDodgeBlocksExample(runtime: BrowserRuntime): void {
+export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<void> {
   const scene = new DodgeBlocksScene(runtime.renderAdapter, runtime.renderScene);
+  const preloadResult = await scene.preloadAssets();
   runtime.start(scene);
 
   const input = scene.getSystem(InputSystem);
@@ -35,5 +36,6 @@ export function bootDodgeBlocksExample(runtime: BrowserRuntime): void {
     destroyScene();
   };
 
+  console.log("Example assets loaded:", preloadResult);
   console.log("Example bootstrapped:", createSnapshot());
 }

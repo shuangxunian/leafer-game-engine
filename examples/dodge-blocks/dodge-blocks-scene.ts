@@ -1,10 +1,11 @@
 import { Scene } from "../../src/core/index.js";
-import type { EntityTemplate } from "../../src/framework/index.js";
+import type { AsyncAssetManifestLoadResult, EntityTemplate } from "../../src/framework/index.js";
 import {
   AssetRegistry,
   CollisionSystem,
   InputSystem,
   ViewComponent,
+  createBrowserImageSpriteLoader,
   instantiateEntityTemplate
 } from "../../src/framework/index.js";
 import type { RenderAdapter, RenderScene } from "../../src/adapter/index.js";
@@ -16,6 +17,7 @@ const DODGE_BLOCKS_ASSET_MANIFEST = {
     {
       id: "player",
       fill: "#ffcf7a",
+      source: createSpriteDataUri("#ffcf7a", 52, 52, 14),
       width: DODGE_GAME_CONFIG.playerSize,
       height: DODGE_GAME_CONFIG.playerSize,
       cornerRadius: 14
@@ -23,6 +25,9 @@ const DODGE_BLOCKS_ASSET_MANIFEST = {
     {
       id: "hazard",
       fill: "#6cb7ff",
+      source: createSpriteDataUri("#6cb7ff", 52, 52, 10),
+      width: 52,
+      height: 52,
       cornerRadius: 10
     }
   ]
@@ -65,14 +70,21 @@ export class DodgeBlocksScene extends Scene {
     super("DodgeBlocksScene");
   }
 
-  protected onStart(): void {
-    const assetResult = this.assets.loadManifest(DODGE_BLOCKS_ASSET_MANIFEST);
+  async preloadAssets(): Promise<AsyncAssetManifestLoadResult> {
+    const assetResult = await this.assets.loadManifestAsync(
+      DODGE_BLOCKS_ASSET_MANIFEST,
+      createBrowserImageSpriteLoader()
+    );
     if (!assetResult.ok) {
       throw new Error(
-        `Failed to load dodge-blocks assets: ${assetResult.errors.map((error) => error.message).join("; ")}`
+        `Failed to load dodge-blocks assets: ${formatAssetLoadFailure(assetResult)}`
       );
     }
 
+    return assetResult;
+  }
+
+  protected onStart(): void {
     this.addSystem(new InputSystem(this));
     this.addSystem(new CollisionSystem(this));
     const viewportWidth = this.renderScene.width;
@@ -169,6 +181,19 @@ export class DodgeBlocksScene extends Scene {
 
 function createDodgeBlocksAssets(): AssetRegistry {
   return new AssetRegistry();
+}
+
+function createSpriteDataUri(fill: string, width: number, height: number, radius: number): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><rect width="${width}" height="${height}" rx="${radius}" fill="${fill}"/></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function formatAssetLoadFailure(result: AsyncAssetManifestLoadResult): string {
+  const validationErrors = result.errors.map((error) => error.message);
+  const loadErrors = result.loadResults
+    .filter((loadResult) => loadResult.status === "failed")
+    .map((loadResult) => `${loadResult.id}: ${loadResult.error ?? "Unknown error"}`);
+  return [...validationErrors, ...loadErrors].join("; ") || "Unknown asset loading failure.";
 }
 
 function clamp(value: number, min: number, max: number): number {

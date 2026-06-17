@@ -6,4 +6,6 @@ const runtime = createBrowserRuntime({
   mount: "game-root"
 });
 
-bootDodgeBlocksExample(runtime);
+bootDodgeBlocksExample(runtime).catch((error: unknown) => {
+  console.error("Failed to boot dodge-blocks example:", error);
+});
