@@ -8,7 +8,8 @@ import {
   GameFlow,
   InputSystem,
   ColliderComponent,
-  TransformComponent
+  TransformComponent,
+  getAudioRuntime
 } from "@shuangxunian/leafer-game-engine/framework";
 import { hazardFactory } from "./factories.js";
 import { DODGE_INPUT_ACTION } from "./input-actions.js";
@@ -20,6 +21,12 @@ const HAZARD_MIN_SPEED = 170;
 const HAZARD_MAX_SPEED = 320;
 const BASE_SPAWN_INTERVAL = 0.55;
 const MIN_SPAWN_INTERVAL = 0.22;
+const DODGE_AUDIO_CUE = {
+  GameStart: "game:start",
+  GamePause: "game:pause",
+  GameResume: "game:resume",
+  PlayerHit: "player:hit"
+} as const;
 
 type Hud = {
   score: RenderText;
@@ -87,8 +94,13 @@ export class DodgeGameSystem extends System {
     if (!input) return;
 
     if (this.inputActions.wasPressed(input, DODGE_INPUT_ACTION.Pause)) {
-      if (this.flow.is("running")) this.flow.pause();
-      else if (this.flow.is("paused")) this.flow.resume();
+      if (this.flow.is("running")) {
+        this.playAudioCue(DODGE_AUDIO_CUE.GamePause);
+        this.flow.pause();
+      } else if (this.flow.is("paused")) {
+        this.playAudioCue(DODGE_AUDIO_CUE.GameResume);
+        this.flow.resume();
+      }
     }
 
     if (this.flow.is("ready") && this.inputActions.wasPressed(input, DODGE_INPUT_ACTION.Confirm)) {
@@ -133,6 +145,7 @@ export class DodgeGameSystem extends System {
 
     if (collisions.hasCollision(this.player, "hazard")) {
       this.bestScore = Math.max(this.bestScore, this.getScore());
+      this.playAudioCue(DODGE_AUDIO_CUE.PlayerHit);
       this.flow.end();
     }
   }
@@ -144,7 +157,12 @@ export class DodgeGameSystem extends System {
   private startRun(): void {
     this.clearHazards();
     this.resetRunState();
+    this.playAudioCue(DODGE_AUDIO_CUE.GameStart);
     this.flow.start();
+  }
+
+  private playAudioCue(cueId: string): void {
+    getAudioRuntime(this.scene)?.playCue(cueId);
   }
 
   private resetRunState(): void {

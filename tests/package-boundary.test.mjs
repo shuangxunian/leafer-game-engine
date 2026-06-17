@@ -211,7 +211,7 @@ test("collision query stage docs are discoverable from roadmap and package docs"
   assert.equal(publicApi.includes("structured collision pair query methods"), true);
   assert.equal(publicApi.includes("read-only collision snapshots"), true);
   assert.equal(readme.includes("collision query runtime boundary closeout"), true);
-  assert.equal(readme.includes("`0.20.x` collision query runtime primitives 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.20.x` collision query runtime primitives 阶段"), true);
   assert.equal(readme.includes("都已经收口"), true);
 });
 
@@ -246,11 +246,11 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   assert.equal(examplePatch.includes("Audio Runtime Example Consumption and Boundary Closeout"), true);
   assert.equal(examplePatch.includes("does not add Web Audio playback"), true);
   assert.equal(examplePatch.includes("downstream-style package consumer"), true);
-  assert.equal(publicApi.includes("`0.21.x` starts audio runtime primitives"), true);
+  assert.equal(publicApi.includes("`0.21.x` closed audio runtime primitives"), true);
   assert.equal(publicApi.includes("AudioRuntimeState"), true);
   assert.equal(publicApi.includes("AudioRuntimeSystem"), true);
   assert.equal(publicApi.includes("read-only audio runtime snapshots"), true);
-  assert.equal(readme.includes("`v0.21.3` Audio Runtime Tooling Visibility"), true);
+  assert.equal(readme.includes("`v0.21.4` Audio Runtime Example Consumption and Boundary Closeout"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -401,9 +401,30 @@ test("dodge-blocks example passes runtime debug context into tooling snapshots",
   const source = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
 
   assert.equal(source.includes("createToolingSnapshot(scene"), true);
+  assert.equal(source.includes("audio: true"), true, "boot should pass audio runtime state into tooling snapshots");
   assert.equal(source.includes("game: runtime.game"), true, "boot should pass Game time state into tooling snapshots");
   assert.equal(source.includes("renderScene: runtime.renderScene"), true, "boot should pass viewport state into tooling snapshots");
   assert.equal(source.includes("collisions: true"), true, "boot should pass collision pair state into tooling snapshots");
+});
+
+test("dodge-blocks example consumes audio runtime intent APIs without playback scope", async () => {
+  const sceneSource = await readFile(new URL("dodge-blocks-scene.ts", dodgeBlocksExampleUrl), "utf8");
+  const gameplaySource = await readFile(new URL("dodge-game-system.ts", dodgeBlocksExampleUrl), "utf8");
+  const bootSource = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
+  const docs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
+
+  assert.equal(sceneSource.includes("addAudioRuntime"), true);
+  assert.equal(sceneSource.includes("DODGE_BLOCKS_AUDIO_MANIFEST"), true);
+  assert.equal(sceneSource.includes('GameStart: "game:start"'), true);
+  assert.equal(sceneSource.includes('PlayerHit: "player:hit"'), true);
+  assert.equal(gameplaySource.includes("getAudioRuntime"), true);
+  assert.equal(gameplaySource.includes("playAudioCue"), true);
+  assert.equal(gameplaySource.includes('GamePause: "game:pause"'), true);
+  assert.equal(gameplaySource.includes('GameResume: "game:resume"'), true);
+  assert.equal(bootSource.includes("audio: true"), true);
+  assert.equal(docs.includes("semantic audio cue intent"), true);
+  assert.equal(docs.includes("不播放声音"), true);
+  assert.equal(docs.includes("不引入 Web Audio playback"), true);
 });
 
 test("dodge-blocks example consumes scene config bootstrap APIs", async () => {
@@ -439,5 +460,5 @@ test("dodge-blocks docs frame tooling as read-only runtime observability", async
   assert.equal(source.includes("system order"), true);
   assert.equal(source.includes("system lifecycle"), true);
   assert.equal(source.includes("current / enter / stay / exit collision pair summary"), true);
-  assert.equal(source.includes("不提供系统开关、组件改值、场景编辑或资产管理入口"), true);
+  assert.equal(source.includes("不提供系统开关、组件改值、场景编辑、音频编辑或资产管理入口"), true);
 });

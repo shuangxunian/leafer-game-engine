@@ -17,6 +17,7 @@ import {
   SpriteAnimationComponent,
   SpriteAnimationSystem,
   ViewComponent,
+  addAudioRuntime,
   bootstrapSceneFromConfig,
   createBrowserImageSpriteLoader
 } from "@shuangxunian/leafer-game-engine/framework";
@@ -36,6 +37,13 @@ const DODGE_HAZARD_SPAWN_REGION_ID = "hazard-spawn";
 const DODGE_LEVEL_PADDING = 18;
 const DODGE_HAZARD_SPAWN_PADDING = 24;
 const DODGE_TILE_SIZE = 64;
+
+const DODGE_AUDIO_CUE = {
+  GameStart: "game:start",
+  GamePause: "game:pause",
+  GameResume: "game:resume",
+  PlayerHit: "player:hit"
+} as const;
 
 const DODGE_BLOCKS_ASSET_MANIFEST = {
   sprites: [
@@ -86,6 +94,24 @@ const DODGE_BLOCKS_ASSET_MANIFEST = {
       frameIds: ["player-idle-1", "player-idle-2"],
       loop: true
     }
+  ]
+};
+
+const DODGE_BLOCKS_AUDIO_MANIFEST = {
+  assets: [
+    { id: "ui-confirm" },
+    { id: "ui-pause" },
+    { id: "player-hit" }
+  ],
+  channels: [
+    { id: "ui", volume: 0.7 },
+    { id: "sfx", volume: 0.85 }
+  ],
+  cues: [
+    { id: DODGE_AUDIO_CUE.GameStart, assetId: "ui-confirm", channelId: "ui" },
+    { id: DODGE_AUDIO_CUE.GamePause, assetId: "ui-pause", channelId: "ui" },
+    { id: DODGE_AUDIO_CUE.GameResume, assetId: "ui-confirm", channelId: "ui" },
+    { id: DODGE_AUDIO_CUE.PlayerHit, assetId: "player-hit", channelId: "sfx" }
   ]
 };
 
@@ -198,6 +224,9 @@ export class DodgeBlocksScene extends Scene {
     const levelRuntime = createDodgeLevelRuntime(bootstrapResult.level);
 
     this.addSystem(new InputSystem(this));
+    addAudioRuntime(this, {
+      manifest: DODGE_BLOCKS_AUDIO_MANIFEST
+    });
     this.addSystem(new SpriteAnimationSystem(this, this.assets));
     this.addSystem(new CollisionSystem(this));
 

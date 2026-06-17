@@ -35,6 +35,7 @@ export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<v
   const createSnapshot = () =>
     createToolingSnapshot(scene, {
       animations: true,
+      audio: true,
       assets: scene.assetRegistry,
       collisions: true,
       flow: gameSystem.gameFlow,
