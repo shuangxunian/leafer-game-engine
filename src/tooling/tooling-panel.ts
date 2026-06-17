@@ -6,6 +6,10 @@ export type ToolingPanelSection = {
   lines: string[];
 };
 
+export type ToolingPanelSelection = {
+  selectedEntityId?: number;
+};
+
 export function createRuntimeDebugPanelSection(snapshot: DebugSnapshot): ToolingPanelSection {
   return {
     title: "Runtime Debug",
@@ -13,10 +17,28 @@ export function createRuntimeDebugPanelSection(snapshot: DebugSnapshot): Tooling
   };
 }
 
-export function createEntityInspectorPanelSection(snapshot: SceneInspectorSnapshot): ToolingPanelSection {
+export function createEntityInspectorPanelSection(
+  snapshot: SceneInspectorSnapshot,
+  selection: ToolingPanelSelection = {}
+): ToolingPanelSection {
+  const lines = [`Scene ${snapshot.sceneName}`, ...formatSceneInspectorSnapshot(snapshot).slice(1)];
+
+  if (selection.selectedEntityId !== undefined) {
+    const selected = snapshot.entities.find((entity) => entity.id === selection.selectedEntityId);
+    lines.splice(2, 0, selected ? `Selected #${selected.id} ${selected.name}` : `Selected #${selection.selectedEntityId} missing`);
+
+    if (selected) {
+      const selectedRow = `- #${selected.id} `;
+      const rowIndex = lines.findIndex((line) => line.startsWith(selectedRow));
+      if (rowIndex >= 0) {
+        lines[rowIndex] = `>${lines[rowIndex].slice(1)}`;
+      }
+    }
+  }
+
   return {
     title: "Entity Inspector",
-    lines: [`Scene ${snapshot.sceneName}`, ...formatSceneInspectorSnapshot(snapshot).slice(1)]
+    lines
   };
 }
 
@@ -27,11 +49,11 @@ export function createComponentSchemasPanelSection(snapshot: ComponentSchemaSnap
   };
 }
 
-export function createToolingPanelSections(snapshot: ToolingSnapshot): ToolingPanelSection[] {
+export function createToolingPanelSections(snapshot: ToolingSnapshot, selection: ToolingPanelSelection = {}): ToolingPanelSection[] {
   const sections = [createRuntimeDebugPanelSection(snapshot.debug)];
 
   if (snapshot.inspector) {
-    sections.push(createEntityInspectorPanelSection(snapshot.inspector));
+    sections.push(createEntityInspectorPanelSection(snapshot.inspector, selection));
   }
 
   if (snapshot.schemas) {

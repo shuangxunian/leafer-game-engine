@@ -306,6 +306,38 @@ test("entity inspector panel section exposes entity rows without repeating the s
   });
 });
 
+test("entity inspector panel section can mark a selected entity", () => {
+  const scene = new Scene("SelectedEntityPanelScene");
+  const player = scene.world.createEntity("player");
+  scene.world.createEntity("hazard");
+
+  assert.deepEqual(createEntityInspectorPanelSection(createSceneInspectorSnapshot(scene), { selectedEntityId: player.id }), {
+    title: "Entity Inspector",
+    lines: [
+      "Scene SelectedEntityPanelScene",
+      "Entities 2/2",
+      `Selected #${player.id} player`,
+      `> #${player.id} player [active] components=0`,
+      `- #${scene.world.entities[1].id} hazard [active] components=0`
+    ]
+  });
+});
+
+test("entity inspector panel section reports missing selected entities", () => {
+  const scene = new Scene("MissingSelectionPanelScene");
+  const entity = scene.world.createEntity("player");
+
+  assert.deepEqual(createEntityInspectorPanelSection(createSceneInspectorSnapshot(scene), { selectedEntityId: 999 }), {
+    title: "Entity Inspector",
+    lines: [
+      "Scene MissingSelectionPanelScene",
+      "Entities 1/1",
+      "Selected #999 missing",
+      `- #${entity.id} player [active] components=0`
+    ]
+  });
+});
+
 test("tooling panel sections include inspector data when requested", () => {
   const scene = new Scene("PanelSectionsScene");
   scene.world.createEntity("player");
@@ -321,6 +353,27 @@ test("tooling panel sections include inspector data when requested", () => {
         "Scene PanelSectionsScene",
         "Entities 1/1",
         `- #${scene.world.entities[0].id} player [active] components=0`
+      ]
+    }
+  ]);
+});
+
+test("tooling panel sections pass selected entity state to inspector sections", () => {
+  const scene = new Scene("SelectedToolingSectionsScene");
+  const entity = scene.world.createEntity("player");
+
+  assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { inspector: true }), { selectedEntityId: entity.id }), [
+    {
+      title: "Runtime Debug",
+      lines: ["Scene SelectedToolingSectionsScene", "Entities 1/1", "Systems 0"]
+    },
+    {
+      title: "Entity Inspector",
+      lines: [
+        "Scene SelectedToolingSectionsScene",
+        "Entities 1/1",
+        `Selected #${entity.id} player`,
+        `> #${entity.id} player [active] components=0`
       ]
     }
   ]);
