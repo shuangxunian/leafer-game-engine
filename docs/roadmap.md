@@ -1091,3 +1091,14 @@
 - [v0.22.4](version/v0.22.4.md)
 
 `0.22.x` 已完成 audio playback adapter 阶段：Node-safe adapter contract、scene/system draining、browser runtime adapter、dodge-blocks opt-in playback consumption 和非编辑器/非 mixer 边界都已文档化并测试。
+
+完成 `0.22.x` 后，下一阶段建议进入：
+
+- [v0.23.0](version/v0.23.0.md)
+
+这一阶段建议优先补齐 camera runtime contract：
+
+- camera viewport/world coordinate conversion
+- camera bounds and follow clamping
+- read-only camera tooling visibility
+- dodge-blocks camera consumption and boundary closeout

@@ -304,6 +304,21 @@ test("audio playback adapter stage docs are discoverable from roadmap", async ()
   assert.equal(readme.includes("`0.22.x` audio playback adapter 阶段都已经收口"), true);
 });
 
+test("camera runtime contract stage docs are discoverable from roadmap", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.23.0.md", import.meta.url), "utf8");
+
+  assert.equal(roadmap.includes("version/v0.23.0.md"), true);
+  assert.equal(roadmap.includes("camera runtime contract"), true);
+  assert.equal(stage.includes("Camera Runtime Contract Hardening Sprint"), true);
+  assert.equal(stage.includes("CameraSystem"), true);
+  assert.equal(stage.includes("world/screen coordinate conversion"), true);
+  assert.equal(stage.includes("camera bounds/follow behavior is deterministic and tested"), true);
+  assert.equal(stage.includes("not an editor, cinematic timeline"), true);
+  assert.equal(stage.includes("visual scene editors"), true);
+  assert.equal(stage.includes("read-only camera tooling snapshots"), true);
+});
+
 test("core package subpath can be imported by package name in Node", async () => {
   const core = await import(`${packageJson.name}/core`);
 
