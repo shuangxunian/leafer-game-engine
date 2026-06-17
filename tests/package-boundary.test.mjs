@@ -262,18 +262,23 @@ test("audio playback adapter stage docs are discoverable from roadmap", async ()
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.22.0.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.22.1.md", import.meta.url), "utf8");
+  const systemPatch = await readFile(new URL("../docs/version/v0.22.2.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  for (const version of ["v0.22.0", "v0.22.1"]) {
+  for (const version of ["v0.22.0", "v0.22.1", "v0.22.2"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
   }
 
   assert.equal(stage.includes("Audio Playback Adapter Sprint"), true);
   assert.equal(stage.includes("not an editor, mixer, DAW, waveform UI, or content authoring workflow"), true);
   assert.equal(stage.includes("v0.22.1.md"), true);
+  assert.equal(stage.includes("v0.22.2.md"), true);
   assert.equal(patch.includes("Audio Playback Adapter Contract Baseline"), true);
   assert.equal(patch.includes("does not add Web Audio playback"), true);
   assert.equal(patch.includes("Node-safe adapter contract"), true);
+  assert.equal(systemPatch.includes("Audio Playback System Draining Integration"), true);
+  assert.equal(systemPatch.includes("does not add Web Audio playback"), true);
+  assert.equal(systemPatch.includes("opt-in scene/system draining integration"), true);
   assert.equal(readme.includes("`v0.22.1` Audio Playback Adapter Contract Baseline"), true);
 });
 
