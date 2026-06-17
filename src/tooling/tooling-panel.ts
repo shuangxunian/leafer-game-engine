@@ -10,6 +10,8 @@ export type ToolingPanelSelection = {
   selectedEntityId?: number;
 };
 
+const ENTITY_ROW_PATTERN = /^[->] #(\d+) /;
+
 export function createRuntimeDebugPanelSection(snapshot: DebugSnapshot): ToolingPanelSection {
   return {
     title: "Runtime Debug",
@@ -49,6 +51,13 @@ export function createComponentSchemasPanelSection(snapshot: ComponentSchemaSnap
   };
 }
 
+export function parseToolingPanelEntityRowId(line: string): number | undefined {
+  const match = ENTITY_ROW_PATTERN.exec(line);
+  if (!match) return undefined;
+
+  return Number(match[1]);
+}
+
 export function createToolingPanelSections(snapshot: ToolingSnapshot, selection: ToolingPanelSelection = {}): ToolingPanelSection[] {
   const sections = [createRuntimeDebugPanelSection(snapshot.debug)];
 
@@ -65,8 +74,24 @@ export function createToolingPanelSections(snapshot: ToolingSnapshot, selection:
 
 export class BrowserToolingPanel {
   private element?: HTMLDivElement;
+  private selectedEntityId?: number;
+  private snapshot?: ToolingSnapshot;
 
   constructor(private readonly target: HTMLElement = document.body) {}
+
+  getSelectedEntityId(): number | undefined {
+    return this.selectedEntityId;
+  }
+
+  selectEntity(entityId: number): void {
+    this.selectedEntityId = entityId;
+    this.renderCurrentSnapshot();
+  }
+
+  clearSelection(): void {
+    this.selectedEntityId = undefined;
+    this.renderCurrentSnapshot();
+  }
 
   mount(): void {
     if (this.element) return;
@@ -90,7 +115,7 @@ export class BrowserToolingPanel {
       fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
       fontSize: "12px",
       lineHeight: "1.5",
-      pointerEvents: "none",
+      pointerEvents: "auto",
       whiteSpace: "normal"
     });
 
@@ -102,12 +127,23 @@ export class BrowserToolingPanel {
     this.mount();
     if (!this.element) return;
 
-    this.renderSections(createToolingPanelSections(snapshot));
+    this.snapshot = snapshot;
+    this.renderCurrentSnapshot();
   }
 
   detach(): void {
     this.element?.remove();
     this.element = undefined;
+  }
+
+  private renderCurrentSnapshot(): void {
+    if (!this.snapshot) return;
+
+    this.renderSections(
+      createToolingPanelSections(this.snapshot, {
+        selectedEntityId: this.selectedEntityId
+      })
+    );
   }
 
   private renderSections(sections: ToolingPanelSection[]): void {
@@ -130,18 +166,50 @@ export class BrowserToolingPanel {
           textTransform: "uppercase"
         });
 
-        const bodyElement = document.createElement("pre");
-        bodyElement.textContent = section.lines.join("\n");
+        const bodyElement = document.createElement("div");
         Object.assign(bodyElement.style, {
           margin: "0",
           color: "#f6f3ea",
           font: "inherit",
           whiteSpace: "pre-wrap"
         });
+        bodyElement.append(...section.lines.map((line) => this.createLineElement(line)));
 
         sectionElement.append(titleElement, bodyElement);
         return sectionElement;
       })
     );
+  }
+
+  private createLineElement(line: string): HTMLDivElement {
+    const lineElement = document.createElement("div");
+    lineElement.textContent = line;
+
+    const entityId = parseToolingPanelEntityRowId(line);
+    if (entityId === undefined) return lineElement;
+
+    lineElement.setAttribute("role", "button");
+    lineElement.setAttribute("tabindex", "0");
+    lineElement.setAttribute("data-leafer-game-entity-id", String(entityId));
+    lineElement.title = `Select entity #${entityId}`;
+    Object.assign(lineElement.style, {
+      cursor: "pointer",
+      borderRadius: "6px",
+      padding: "1px 4px",
+      marginLeft: "-4px"
+    });
+    lineElement.addEventListener("click", (event) => {
+      event.stopPropagation();
+      this.selectEntity(entityId);
+    });
+    lineElement.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      this.selectEntity(entityId);
+    });
+
+    return lineElement;
   }
 }

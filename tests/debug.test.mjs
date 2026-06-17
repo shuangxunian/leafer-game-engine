@@ -15,7 +15,8 @@ import {
   formatComponentSchemaSnapshot,
   formatDebugSnapshot,
   formatSceneInspectorSnapshot,
-  formatToolingSnapshot
+  formatToolingSnapshot,
+  parseToolingPanelEntityRowId
 } from "../lib/tooling/index.js";
 
 class DebugSystem extends System {
@@ -377,6 +378,14 @@ test("tooling panel sections pass selected entity state to inspector sections", 
       ]
     }
   ]);
+});
+
+test("tooling panel entity row parser only matches top-level entity rows", () => {
+  assert.equal(parseToolingPanelEntityRowId("- #12 player [active] components=2"), 12);
+  assert.equal(parseToolingPanelEntityRowId("> #34 hazard [active] components=1"), 34);
+  assert.equal(parseToolingPanelEntityRowId("  - TransformComponent enabled=true started=true"), undefined);
+  assert.equal(parseToolingPanelEntityRowId("Selected #12 player"), undefined);
+  assert.equal(parseToolingPanelEntityRowId("Entities 1/1"), undefined);
 });
 
 test("tooling panel sections include schema data when requested", () => {
