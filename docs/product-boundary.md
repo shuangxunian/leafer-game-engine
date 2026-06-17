@@ -12,6 +12,14 @@
 
 换句话说，这里交付的是“被游戏项目 import 的引擎包”，不是“让用户打开以后拖拽制作内容的编辑器产品”。后续如果出现编辑器，它应该依赖本包，而不是和本包混在同一个产品边界里。
 
+## 当前产品决策
+
+当前项目继续按“前端游戏引擎依赖包”推进。
+
+编辑器不是当前仓库的产品方向。后续如果要做可视化编辑器、资源管理器、关卡制作器或内容发布系统，应该创建独立上层项目或独立 package，并把 `leaferGame` 当作底层 runtime/framework 依赖来消费。
+
+因此，本仓库内出现的 `tooling`、`inspector`、`debug panel`、`schema`、`scene config`、`level/map` 和 `audio` 相关能力，都必须优先解释为 package-facing runtime 能力、数据契约、校验逻辑、只读 runtime diagnostics 或示例消费验证，而不是编辑器功能的雏形。
+
 ## 本仓库要做什么
 
 本仓库应该持续沉淀这些通用引擎能力：
@@ -20,7 +28,7 @@
 - `framework`：输入、碰撞、相机、GameFlow、资源、sprite animation、实体工厂、场景配置和组件 schema。
 - `adapter`：把引擎抽象映射到具体渲染实现，例如 Leafer。
 - `runtime`：浏览器环境下的启动、挂载、帧循环和 scene lifecycle 装配。
-- `tooling`：runtime snapshot、debug overlay、inspector snapshot、panel section、schema/asset/game-flow/collision 状态展示等开发者辅助能力。
+- `tooling`：runtime snapshot、debug overlay、runtime inspection snapshot、panel section、schema/asset/game-flow/collision 状态展示等只读开发者诊断能力。
 - `examples`：作为下游消费者样例，验证引擎 API、包边界和集成方式。
 
 ## 本仓库不做什么
