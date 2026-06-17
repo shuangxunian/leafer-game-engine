@@ -7,6 +7,7 @@ export * from "./factory.js";
 export * from "./game-flow.js";
 export * from "./input.js";
 export * from "./keyboard.js";
+export * from "./level.js";
 export * from "./movement.js";
 export * from "./runtime-services.js";
 export * from "./scene-config.js";

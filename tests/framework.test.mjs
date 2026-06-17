@@ -32,7 +32,9 @@ import {
   pauseSpriteAnimationPlayback,
   resumeSpriteAnimationPlayback,
   stopSpriteAnimationPlayback,
+  createLevelLayout,
   createTileMap,
+  defineLevelLayout,
   defineTileMap
 } from "../lib/framework/index.js";
 
@@ -336,6 +338,158 @@ test("tile map validation reports invalid definitions clearly", () => {
       { id: "terrain", tiles: [null] }
     ]
   }), /Duplicate tile map layer id "terrain"/);
+});
+
+test("level layout copies spawn points and regions for safe lookup", () => {
+  const spawnMetadata = { team: "player" };
+  const regionMetadata = { music: "forest" };
+  const layoutDefinition = defineLevelLayout({
+    id: "level-1",
+    spawns: [
+      {
+        id: "player",
+        x: 16,
+        y: 24,
+        rotation: 90,
+        metadata: spawnMetadata
+      }
+    ],
+    regions: [
+      {
+        id: "safe-zone",
+        x: 0,
+        y: 0,
+        width: 64,
+        height: 48,
+        tags: ["safe", "music"],
+        metadata: regionMetadata
+      }
+    ]
+  });
+
+  spawnMetadata.team = "mutated";
+  regionMetadata.music = "mutated";
+  const layout = createLevelLayout(layoutDefinition);
+  layoutDefinition.spawns[0].metadata.team = "changed-after-create";
+  layoutDefinition.regions[0].tags.push("changed-after-create");
+
+  assert.equal(layout.id, "level-1");
+  assert.deepEqual(layout.getSpawnPoint("player"), {
+    id: "player",
+    x: 16,
+    y: 24,
+    rotation: 90,
+    metadata: { team: "player" }
+  });
+  assert.equal(layout.getSpawnPoint("missing"), undefined);
+  assert.deepEqual(layout.getRegion("safe-zone"), {
+    id: "safe-zone",
+    x: 0,
+    y: 0,
+    width: 64,
+    height: 48,
+    tags: ["safe", "music"],
+    metadata: { music: "forest" }
+  });
+
+  const region = layout.getRegion("safe-zone");
+  region.tags.push("outside");
+  region.metadata.music = "outside";
+
+  assert.deepEqual(layout.getRegion("safe-zone").tags, ["safe", "music"]);
+  assert.deepEqual(layout.getRegion("safe-zone").metadata, { music: "forest" });
+});
+
+test("level layout queries regions by point and tag", () => {
+  const layout = createLevelLayout({
+    id: "regions",
+    spawns: [
+      {
+        id: "default",
+        x: 4,
+        y: 8
+      }
+    ],
+    regions: [
+      {
+        id: "forest",
+        x: 0,
+        y: 0,
+        width: 32,
+        height: 32,
+        tags: ["biome", "safe"]
+      },
+      {
+        id: "danger",
+        x: 16,
+        y: 16,
+        width: 32,
+        height: 32,
+        tags: ["combat"]
+      }
+    ]
+  });
+
+  assert.deepEqual(layout.getSpawnPoint("default"), {
+    id: "default",
+    x: 4,
+    y: 8,
+    rotation: 0,
+    metadata: undefined
+  });
+  assert.equal(layout.containsPoint("forest", 0, 0), true);
+  assert.equal(layout.containsPoint("forest", 31.999, 31.999), true);
+  assert.equal(layout.containsPoint("forest", 32, 32), false);
+  assert.equal(layout.containsPoint("missing", 1, 1), false);
+  assert.deepEqual(layout.findRegionsContainingPoint(20, 20).map((region) => region.id), ["forest", "danger"]);
+  assert.deepEqual(layout.findRegionsByTag("safe").map((region) => region.id), ["forest"]);
+  assert.deepEqual(layout.findRegionsByTag("combat").map((region) => region.id), ["danger"]);
+});
+
+test("level layout validation reports invalid definitions clearly", () => {
+  assert.throws(() => defineLevelLayout({
+    id: "",
+    spawns: [],
+    regions: []
+  }), /Level layout id must be a non-empty string/);
+
+  assert.throws(() => defineLevelLayout({
+    id: "bad-spawn",
+    spawns: [
+      { id: "player", x: 0, y: 0 },
+      { id: "player", x: 1, y: 1 }
+    ],
+    regions: []
+  }), /Duplicate level spawn id "player"/);
+
+  assert.throws(() => defineLevelLayout({
+    id: "bad-region",
+    spawns: [],
+    regions: [
+      {
+        id: "zone",
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 10
+      }
+    ]
+  }), /Level region width must be greater than 0/);
+
+  assert.throws(() => defineLevelLayout({
+    id: "bad-tags",
+    spawns: [],
+    regions: [
+      {
+        id: "zone",
+        x: 0,
+        y: 0,
+        width: 10,
+        height: 10,
+        tags: ["safe", "safe"]
+      }
+    ]
+  }), /Duplicate level region tag "safe" on region "zone"/);
 });
 
 test("input action map can bind and unbind keyboard inputs", () => {
