@@ -1,7 +1,15 @@
 import { Component } from "../core/index.js";
-import type { RenderNode } from "../adapter/index.js";
+import type { RenderNode, RenderSpriteAsset } from "../adapter/index.js";
 import { SizeComponent } from "./size.js";
 import { TransformComponent } from "./transform.js";
+
+export type SpriteCapableRenderNode = RenderNode & {
+  setAsset(asset: string | RenderSpriteAsset): void;
+};
+
+export function isSpriteCapableRenderNode(node: unknown): node is SpriteCapableRenderNode {
+  return Boolean(node && typeof (node as Partial<SpriteCapableRenderNode>).setAsset === "function");
+}
 
 export class ViewComponent extends Component {
   constructor(public readonly node: RenderNode) {

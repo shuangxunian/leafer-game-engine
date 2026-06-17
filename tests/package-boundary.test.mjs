@@ -100,6 +100,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "getSpriteAnimationPlaybackFrameId",
     "getSpriteAnimationPlaybackFrameIndex",
     "getRuntimeServices",
+    "isSpriteCapableRenderNode",
     "loadAssetManifestAsync",
     "normalizeKeyboardKey",
     "validateSceneConfig"

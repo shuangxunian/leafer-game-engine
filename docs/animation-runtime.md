@@ -41,8 +41,9 @@ The framework ECS layer connects playback to entities:
 
 - `SpriteAnimationComponent` stores the active clip id, playback state, current frame id, and current sprite id.
 - `SpriteAnimationSystem` resolves clips/frames through `AssetRegistry`, advances playback, and can apply the current frame to a `ViewComponent` whose render node supports `setAsset(...)`.
+- `isSpriteCapableRenderNode(...)` is the shared framework guard for that structural render-node capability.
 
-The system can update animation state without a view component. If a view is present, it remains render-adapter agnostic and only depends on the existing sprite-capable render node contract.
+The system can update animation state without a view component. If a view is present, it remains render-adapter agnostic and only depends on the shared sprite-capable render node contract.
 
 ### Example Consumption
 
@@ -106,4 +107,3 @@ import {
 ```
 
 Keep game-specific animation choices in downstream manifests and scene setup. Move only reusable behavior back into the engine package.
-

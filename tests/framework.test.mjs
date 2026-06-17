@@ -27,6 +27,7 @@ import {
   getSpriteAnimationPlaybackFrameId,
   getSpriteAnimationPlaybackFrameIndex,
   getRuntimeServices,
+  isSpriteCapableRenderNode,
   normalizeKeyboardKey,
   pauseSpriteAnimationPlayback,
   resumeSpriteAnimationPlayback,
@@ -930,6 +931,16 @@ test("sprite animation system reports invalid animation setup clearly", () => {
     () => nonSpriteScene.lateUpdate(0),
     /ViewComponent node does not support sprite assets/
   );
+});
+
+test("sprite-capable render node guard detects setAsset support", () => {
+  const spriteNode = createFakeSpriteNode();
+  const containerNode = createFakeContainer();
+
+  assert.equal(isSpriteCapableRenderNode(spriteNode), true);
+  assert.equal(isSpriteCapableRenderNode(containerNode), false);
+  assert.equal(isSpriteCapableRenderNode(null), false);
+  assert.equal(isSpriteCapableRenderNode({ setAsset: "not-a-function" }), false);
 });
 
 test("view component can explicitly sync transform and optional size to render node", () => {

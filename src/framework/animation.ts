@@ -1,7 +1,6 @@
-import type { RenderSpriteAsset } from "../adapter/index.js";
 import { Component, System } from "../core/index.js";
 import type { AssetRegistry } from "./assets.js";
-import { ViewComponent } from "./view.js";
+import { isSpriteCapableRenderNode, ViewComponent } from "./view.js";
 
 export type SpriteFrame = {
   id: string;
@@ -277,7 +276,7 @@ export class SpriteAnimationSystem extends System {
     if (!view) return;
 
     const node = view.node;
-    if (!isRenderSpriteNode(node)) {
+    if (!isSpriteCapableRenderNode(node)) {
       throw new Error(
         `Cannot apply SpriteAnimationComponent on entity "${entity.name}" because its ViewComponent node does not support sprite assets.`
       );
@@ -316,12 +315,6 @@ type SpriteAnimationPlaybackResolution = {
   completed: boolean;
 };
 
-type RenderSpriteLikeNode = {
-  width?: number;
-  height?: number;
-  setAsset(asset: string | RenderSpriteAsset): void;
-};
-
 function createInitialSpriteAnimationPlayback(
   clipId: string,
   status: SpriteAnimationPlaybackStatus
@@ -333,10 +326,6 @@ function createInitialSpriteAnimationPlayback(
     frameIndex: 0,
     completedLoops: 0
   };
-}
-
-function isRenderSpriteNode(node: unknown): node is RenderSpriteLikeNode {
-  return Boolean(node && typeof (node as RenderSpriteLikeNode).setAsset === "function");
 }
 
 function resolveSpriteAnimationTiming(

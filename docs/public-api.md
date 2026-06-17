@@ -26,7 +26,7 @@ For the runtime-observability boundary across debug snapshots, system lifecycle 
 
 For the scene-config boundary across asset manifests, entity templates, validation diagnostics, safe bootstrap, example consumption, and non-editor data-contract limits, see [Scene Config Boundary](scene-config.md).
 
-`0.16.x` starts render/view contract hardening. The Node-safe `framework` entrypoint now exposes `ViewComponent.syncFromTransform(...)` as an explicit ECS-to-render-node sync method while preserving existing `lateUpdate(...)` behavior.
+`0.16.x` continues render/view contract hardening. The Node-safe `framework` entrypoint now exposes `ViewComponent.syncFromTransform(...)` as an explicit ECS-to-render-node sync method while preserving existing `lateUpdate(...)` behavior, and `isSpriteCapableRenderNode(...)` as a reusable guard for render nodes that can accept sprite assets.
 
 ---
 
@@ -65,6 +65,7 @@ import {
   createSpriteAnimationPlayback,
   defineKeyboardBinding,
   getRuntimeServices,
+  isSpriteCapableRenderNode,
   validateSceneConfig
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
@@ -106,6 +107,7 @@ import {
   createSpriteAnimationPlayback,
   defineKeyboardBinding,
   getRuntimeServices,
+  isSpriteCapableRenderNode,
   validateSceneConfig
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
@@ -153,7 +155,7 @@ They should be verified through browser/example builds until the package is spli
 ## Current Boundary Notes
 
 - `core` should stay independent from browser and rendering implementations.
-- `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, opt-in scene runtime service integration, data-driven scene config validation, safe scene config bootstrap, and render/view synchronization.
+- `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, opt-in scene runtime service integration, data-driven scene config validation, safe scene config bootstrap, render/view synchronization, and render-node capability checks.
 - `tooling` can expose structured snapshots and formatters in Node, including read-only system lifecycle state, sprite animation state, runtime services state, and input action state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
