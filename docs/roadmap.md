@@ -39,6 +39,8 @@
 
 如果未来要做编辑器，那应该是另一个上层项目或独立 package，`leaferGame` 只负责提供清晰、稳定、可调试的运行时与数据接口。
 
+完整边界说明见 [Product Boundary](product-boundary.md)。
+
 ---
 
 ## 产品愿景

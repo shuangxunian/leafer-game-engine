@@ -31,6 +31,8 @@
 
 后续如果要做编辑器，应该是另一个上层项目或独立 package；这个仓库只提供可被它消费的底层能力，例如 runtime、schema、snapshot、asset loading、scene config 和 tooling API。
 
+更完整的边界说明见 [Product Boundary](docs/product-boundary.md)。
+
 ## 发布信息
 
 包名：
