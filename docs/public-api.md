@@ -26,7 +26,7 @@ For the runtime-observability boundary across debug snapshots, system lifecycle 
 
 For the scene-config boundary across asset manifests, entity templates, validation diagnostics, safe bootstrap, example consumption, and non-editor data-contract limits, see [Scene Config Boundary](scene-config.md).
 
-`0.16.x` continues render/view contract hardening. The Node-safe `framework` entrypoint now exposes `ViewComponent.syncFromTransform(...)` as an explicit ECS-to-render-node sync method while preserving existing `lateUpdate(...)` behavior, and `isSpriteCapableRenderNode(...)` as a reusable guard for render nodes that can accept sprite assets. The Node-safe `adapter/render-types` entrypoint now also exposes `RENDER_SCENE_LAYER_ORDER` and `getRenderSceneLayerNames(...)` for stable render layer ordering.
+`0.16.x` closed render/view contract hardening. The Node-safe `framework` entrypoint exposes `ViewComponent.syncFromTransform(...)` as an explicit ECS-to-render-node sync method while preserving existing `lateUpdate(...)` behavior, and `isSpriteCapableRenderNode(...)` as a reusable guard for render nodes that can accept sprite assets. The Node-safe `adapter/render-types` entrypoint exposes `RENDER_SCENE_LAYER_ORDER` and `getRenderSceneLayerNames(...)` for stable render layer ordering.
 
 For the render/view boundary across render nodes, view synchronization, sprite-capable nodes, render scene layers, lifecycle, and read-only tooling visibility, see [Render/View Contract](render-view-contract.md).
 
@@ -164,7 +164,7 @@ They should be verified through browser/example builds until the package is spli
 - `tooling` can expose structured snapshots and formatters in Node, including read-only system lifecycle state, sprite animation state, runtime services state, and input action state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer. It owns render scene layer naming/order helpers.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
-- Future package-boundary work may split browser runtime APIs into more explicit entrypoints.
+- Future package-boundary work may split browser runtime APIs into more explicit entrypoints, but `0.16.x` render/view contracts are now documented and covered by package verification.
 
 ---
 
