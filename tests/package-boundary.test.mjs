@@ -59,11 +59,27 @@ test("package publish files include library output and docs", () => {
     "docs/input-actions.md",
     "docs/runtime-observability.md",
     "docs/scene-config.md",
+    "docs/level-map.md",
     "docs/render-view-contract.md",
     "docs/runtime-ownership.md",
     "README.md",
     "LICENSE"
   ]);
+});
+
+test("level map docs ship as package-facing non-editor guidance", async () => {
+  const source = await readFile(new URL("../docs/level-map.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  assert.equal(source.includes("frontend 2D game engine package"), true);
+  assert.equal(source.includes("TileMap"), true);
+  assert.equal(source.includes("LevelLayout"), true);
+  assert.equal(source.includes("Scene config can optionally declare level/map data"), true);
+  assert.equal(source.includes("not a visual tile map editor"), true);
+  assert.equal(source.includes("Tooling should not mutate tile maps"), true);
+  assert.equal(publicApi.includes("Level/Map Runtime Boundary"), true);
+  assert.equal(readme.includes("docs/level-map.md"), true);
 });
 
 test("runtime ownership docs ship as package-facing non-editor guidance", async () => {
@@ -92,7 +108,24 @@ test("runtime hardening stage docs are discoverable from roadmap and package doc
   assert.equal(stage.includes("The `0.17.x` stage is complete"), true);
   assert.equal(publicApi.includes("`0.17.x` closed runtime/game loop hardening"), true);
   assert.equal(publicApi.includes("Runtime Ownership Boundary"), true);
-  assert.equal(readme.includes("`0.17.x` runtime/game loop hardening 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.18.x` level/map runtime primitives 阶段都已经收口"), true);
+});
+
+test("level map stage docs are discoverable from roadmap and package docs", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.18.0.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  for (const version of ["v0.18.1", "v0.18.2", "v0.18.3", "v0.18.4", "v0.18.5"]) {
+    assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
+    assert.equal(stage.includes(`${version}.md`), true, `stage doc should link ${version}`);
+  }
+
+  assert.equal(stage.includes("The `0.18.x` stage is complete"), true);
+  assert.equal(publicApi.includes("`0.18.x` closed level/map runtime primitives"), true);
+  assert.equal(publicApi.includes("Level/Map Runtime Boundary"), true);
+  assert.equal(readme.includes("`v0.18.5` Level/Map Runtime Boundary Closeout"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {

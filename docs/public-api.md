@@ -34,7 +34,9 @@ For the render/view boundary across render nodes, view synchronization, sprite-c
 
 For the runtime ownership boundary across `Game`, `Scene`, browser runtime, render scene lifecycle, tooling, and downstream error policy, see [Runtime Ownership Boundary](runtime-ownership.md).
 
-`0.18.x` starts level/map runtime primitives. The Node-safe `framework` entrypoint now exposes `TileMap`, `defineTileMap(...)`, and `createTileMap(...)` for validated tile map data, defensive copying, tile lookup, and tile/world coordinate conversion. It also exposes `LevelLayout`, `defineLevelLayout(...)`, and `createLevelLayout(...)` for spawn point and rectangular region metadata. Scene config can now optionally declare `level.tileMap` and `level.layout`; successful bootstrap returns `TileMap` / `LevelLayout` helpers without generating entities, systems, render nodes, collisions, or editor state. `examples/dodge-blocks` consumes that path as a downstream-style package example by reading player spawn and playfield region metadata from the bootstrapped level layout.
+`0.18.x` closed level/map runtime primitives. The Node-safe `framework` entrypoint now exposes `TileMap`, `defineTileMap(...)`, and `createTileMap(...)` for validated tile map data, defensive copying, tile lookup, and tile/world coordinate conversion. It also exposes `LevelLayout`, `defineLevelLayout(...)`, and `createLevelLayout(...)` for spawn point and rectangular region metadata. Scene config can now optionally declare `level.tileMap` and `level.layout`; successful bootstrap returns `TileMap` / `LevelLayout` helpers without generating entities, systems, render nodes, collisions, or editor state. `examples/dodge-blocks` consumes that path as a downstream-style package example by reading player spawn and playfield region metadata from the bootstrapped level layout.
+
+For the level/map boundary across tile data, coordinate helpers, spawn/region metadata, scene config integration, example consumption, and non-editor data-contract limits, see [Level/Map Runtime Boundary](level-map.md).
 
 ---
 
@@ -206,6 +208,7 @@ This command builds the library through `npm pack --dry-run --json` and checks t
 - `docs/input-actions.md`
 - `docs/runtime-observability.md`
 - `docs/scene-config.md`
+- `docs/level-map.md`
 - `docs/render-view-contract.md`
 - all JS and type declaration targets from `package.json` exports
 
