@@ -77,6 +77,7 @@ test("product docs preserve engine-package instead of editor direction", async (
   assert.equal(boundary.includes("只读 runtime observability"), true);
   assert.equal(boundary.includes("当前项目继续按“前端游戏引擎依赖包”推进"), true);
   assert.equal(boundary.includes("编辑器不是当前仓库的产品方向"), true);
+  assert.equal(boundary.includes("不能表示这些产品会在本仓库内实现"), true);
   assert.equal(boundary.includes("只读 runtime diagnostics"), true);
   assert.equal(boundary.includes("创建、修改、保存、发布或管理内容资产"), true);
   assert.equal(boundary.includes("版本评审规则"), true);
@@ -84,6 +85,8 @@ test("product docs preserve engine-package instead of editor direction", async (
   assert.equal(boundary.includes("不允许把“未来编辑器可能需要”当成本仓库实现编辑器 UI 的理由"), true);
   assert.equal(roadmap.includes("只读 Runtime Observability 层"), true);
   assert.equal(roadmap.includes("数据驱动与运行时诊断基础"), true);
+  assert.equal(roadmap.includes("未来外部上层产品（非当前仓库目标）"), true);
+  assert.equal(roadmap.includes("这类项目不是当前仓库的直接目标用户，只是潜在的下游消费者"), true);
   assert.equal(roadmap.includes("当前仓库交付的是依赖包，不交付编辑器应用"), true);
   assert.equal(roadmap.includes("不写回 scene、entity、component、asset、level、input binding 或项目文件"), true);
   assert.equal(roadmap.includes("不代表当前仓库要进入编辑器、资源管理器、关卡制作器或内容发布系统"), true);
