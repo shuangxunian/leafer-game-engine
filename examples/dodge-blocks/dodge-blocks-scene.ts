@@ -1,5 +1,10 @@
 import { Scene } from "@shuangxunian/leafer-game-engine/core";
-import type { AsyncAssetManifestLoadResult, EntityTemplate } from "@shuangxunian/leafer-game-engine/framework";
+import type {
+  AsyncAssetManifestLoadResult,
+  EntityTemplate,
+  SceneConfig,
+  SceneConfigValidationResult
+} from "@shuangxunian/leafer-game-engine/framework";
 import {
   AssetRegistry,
   CollisionSystem,
@@ -7,8 +12,8 @@ import {
   SpriteAnimationComponent,
   SpriteAnimationSystem,
   ViewComponent,
+  bootstrapSceneFromConfig,
   createBrowserImageSpriteLoader,
-  instantiateEntityTemplate
 } from "@shuangxunian/leafer-game-engine/framework";
 import type { RenderAdapter, RenderScene } from "@shuangxunian/leafer-game-engine/adapter";
 import type { InputActionMap } from "@shuangxunian/leafer-game-engine/framework";
@@ -91,6 +96,29 @@ function createPlayerTemplate(x: number, y: number): EntityTemplate {
   };
 }
 
+type DodgeBlocksSceneConfigOptions = {
+  viewportHeight: number;
+  viewportWidth: number;
+};
+
+export function createDodgeBlocksSceneConfig({
+  viewportHeight
+}: DodgeBlocksSceneConfigOptions): SceneConfig {
+  return {
+    assets: DODGE_BLOCKS_ASSET_MANIFEST,
+    entities: [
+      createPlayerTemplate(
+        120,
+        clamp(
+          viewportHeight / 2 - DODGE_GAME_CONFIG.playerSize / 2,
+          18,
+          viewportHeight - DODGE_GAME_CONFIG.playerSize - 18
+        )
+      )
+    ]
+  };
+}
+
 export class DodgeBlocksScene extends Scene {
   private readonly assets = createDodgeBlocksAssets();
   private readonly inputActions = createDodgeInputActions();
@@ -111,8 +139,9 @@ export class DodgeBlocksScene extends Scene {
   }
 
   async preloadAssets(): Promise<AsyncAssetManifestLoadResult> {
+    const sceneConfig = this.createSceneConfig();
     const assetResult = await this.assets.loadManifestAsync(
-      DODGE_BLOCKS_ASSET_MANIFEST,
+      sceneConfig.assets ?? {},
       createBrowserImageSpriteLoader()
     );
     if (!assetResult.ok) {
@@ -125,11 +154,29 @@ export class DodgeBlocksScene extends Scene {
   }
 
   protected onStart(): void {
+    const viewportWidth = this.renderScene.width;
+    const viewportHeight = this.renderScene.height;
+    const sceneConfig = this.createSceneConfig();
+
+    const bootstrapResult = bootstrapSceneFromConfig(
+      this,
+      { entities: sceneConfig.entities },
+      { validateBeforeBootstrap: true }
+    );
+    if (bootstrapResult.validation && !bootstrapResult.validation.ok) {
+      throw new Error(
+        `Invalid dodge-blocks scene config: ${formatSceneConfigValidationFailure(bootstrapResult.validation)}`
+      );
+    }
+
+    const player = bootstrapResult.entities.find((entity) => entity.name === "Player");
+    if (!player) {
+      throw new Error("Dodge-blocks scene config did not create a Player entity.");
+    }
+
     this.addSystem(new InputSystem(this));
     this.addSystem(new SpriteAnimationSystem(this, this.assets));
     this.addSystem(new CollisionSystem(this));
-    const viewportWidth = this.renderScene.width;
-    const viewportHeight = this.renderScene.height;
 
     const titleNode = this.renderAdapter.createText("Dodge Blocks");
     titleNode.x = 24;
@@ -169,17 +216,6 @@ export class DodgeBlocksScene extends Scene {
     this.renderScene.layers.overlay.addChild(overlayActionNode);
 
     let dodgeSystem!: DodgeGameSystem;
-    const player = instantiateEntityTemplate(
-      this,
-      createPlayerTemplate(
-        120,
-        clamp(
-          viewportHeight / 2 - DODGE_GAME_CONFIG.playerSize / 2,
-          18,
-          viewportHeight - DODGE_GAME_CONFIG.playerSize - 18
-        )
-      )
-    );
     const playerNode = this.renderAdapter.createSprite("player");
     playerNode.setAsset(this.assets.requireSprite("player"));
     this.renderScene.layers.world.addChild(playerNode);
@@ -221,6 +257,13 @@ export class DodgeBlocksScene extends Scene {
     super.destroy();
     this.renderScene.destroy();
   }
+
+  private createSceneConfig(): SceneConfig {
+    return createDodgeBlocksSceneConfig({
+      viewportHeight: this.renderScene.height,
+      viewportWidth: this.renderScene.width
+    });
+  }
 }
 
 function createDodgeBlocksAssets(): AssetRegistry {
@@ -238,6 +281,12 @@ function formatAssetLoadFailure(result: AsyncAssetManifestLoadResult): string {
     .filter((loadResult) => loadResult.status === "failed")
     .map((loadResult) => `${loadResult.id}: ${loadResult.error ?? "Unknown error"}`);
   return [...validationErrors, ...loadErrors].join("; ") || "Unknown asset loading failure.";
+}
+
+function formatSceneConfigValidationFailure(validation: SceneConfigValidationResult): string {
+  return validation.errors
+    .map((error) => `${error.path}: ${error.message}`)
+    .join("; ") || "Unknown scene config validation failure.";
 }
 
 function clamp(value: number, min: number, max: number): number {

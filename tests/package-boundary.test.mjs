@@ -158,6 +158,16 @@ test("dodge-blocks example passes runtime debug context into tooling snapshots",
   assert.equal(source.includes("renderScene: runtime.renderScene"), true, "boot should pass viewport state into tooling snapshots");
 });
 
+test("dodge-blocks example consumes scene config bootstrap APIs", async () => {
+  const source = await readFile(new URL("dodge-blocks-scene.ts", dodgeBlocksExampleUrl), "utf8");
+
+  assert.equal(source.includes("createDodgeBlocksSceneConfig"), true);
+  assert.equal(source.includes("bootstrapSceneFromConfig"), true);
+  assert.equal(source.includes("validateBeforeBootstrap: true"), true);
+  assert.equal(source.includes("sceneConfig.assets"), true);
+  assert.equal(source.includes("instantiateEntityTemplate"), false, "example should bootstrap static player data from scene config");
+});
+
 test("dodge-blocks docs frame tooling as read-only runtime observability", async () => {
   const source = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
 

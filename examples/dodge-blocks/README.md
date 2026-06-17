@@ -8,11 +8,13 @@
 - scene 是否能装配 systems
 - entity factory 是否能创建可复用实体
 - asset manifest 是否能声明示例资源
+- scene config 是否能声明静态示例内容
 - async manifest loading 是否能在玩法启动前完成资源预加载
 - browser image sprite loader 是否能作为示例消费者接入
 - sprite frame / animation clip 是否能作为 manifest 数据接入
 - `SpriteAnimationComponent` / `SpriteAnimationSystem` 是否能作为示例消费者接入
 - entity template 是否能创建玩家基础数据组件
+- safe scene bootstrap 是否能在创建玩家前验证静态配置
 - transform / size / view 是否能同步到渲染层
 - input 是否能驱动玩家移动
 - input action mapping 是否能把物理键盘输入转换成语义玩法动作
@@ -73,9 +75,10 @@ npm run dev
   - 注册 input、collision、gameplay system
   - 创建并注入 dodge-blocks input action map
   - 创建 UI 文本节点
-  - 通过 asset manifest 声明 sprite assets、sprite frames 和 animation clips
-  - 通过 `loadManifestAsync(...)` 和 browser image sprite loader 预加载示例资源
-  - 通过 entity template 创建 player 的 transform / size / collider
+  - 通过 `createDodgeBlocksSceneConfig(...)` 声明静态示例内容
+  - 通过 scene config 的 assets section 声明 sprite assets、sprite frames 和 animation clips
+  - 通过 `loadManifestAsync(...)` 和 browser image sprite loader 预加载 scene config 里的示例资源
+  - 通过 `bootstrapSceneFromConfig(..., { validateBeforeBootstrap: true })` 创建 player 的 transform / size / collider
   - 在代码里补充 player controller、render view 和 sprite animation component
 
 - `dodge-game-system.ts`
@@ -143,18 +146,20 @@ browser runtime
 
 当前示例已经有一部分内容走数据驱动：
 
-- `DODGE_BLOCKS_ASSET_MANIFEST` 声明 player / hazard sprite assets，以及 player sprite frames / animation clip
-- 示例通过 `loadManifestAsync(...)` 在 gameplay 启动前完成资源加载
+- `createDodgeBlocksSceneConfig(...)` 声明静态示例内容
+- scene config 的 `assets` section 声明 player / hazard sprite assets，以及 player sprite frames / animation clip
+- 示例通过 `loadManifestAsync(...)` 在 gameplay 启动前加载 scene config 里的资源
 - 示例通过 `startSceneWithLifecycle(...)` 复用 runtime 层的 prepare / ready / running / failed 启动边界
 - tooling panel 的 `Assets` section 可以显示 player / hazard 的 loaded 状态
 - tooling panel 的 `Runtime Debug` section 可以显示 time / viewport / entity counts / system order / lifecycle 只读摘要
 - tooling panel 的 `Sprite Animations` section 可以显示 player 当前 clip / frame / sprite / playback 状态
 - tooling panel 的 `Input Actions` section 可以显示 action id、keyboard bindings、pressed 和 justPressed
-- player 的 `transform`、`size`、`collider` 来自 `EntityTemplate`
+- player 的 `transform`、`size`、`collider` 来自 scene config entity template
+- player 静态基础数据通过 `bootstrapSceneFromConfig(..., { validateBeforeBootstrap: true })` 创建
 - player 的 `ViewComponent`、`PlayerControllerComponent` 和 `SpriteAnimationComponent` 仍在代码中装配
 - player movement、start/restart 和 pause/resume 使用 `InputActionMap`，而不是在 gameplay 代码里硬编码物理键
 - gameplay phase 使用 framework `GameFlow`，而不是示例内的本地 phase state machine
 - tooling panel 的 `Game Flow` section 可以显示当前 ready / running / paused / ended 状态
-- hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度
+- hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度，不适合放进静态 scene config
 
 后续新增资源加载、数据驱动场景、关卡配置和 runtime tooling 能力时，这个示例可以继续作为集成验证样例。
