@@ -1,4 +1,11 @@
-import type { ComponentSchemaSnapshot, DebugSnapshot, InspectorComponentSnapshot, SceneInspectorSnapshot, ToolingSnapshot } from "./debug.js";
+import type {
+  ComponentSchemaSnapshot,
+  DebugSnapshot,
+  InspectorComponentSnapshot,
+  InspectorPrimitive,
+  SceneInspectorSnapshot,
+  ToolingSnapshot
+} from "./debug.js";
 import { formatComponentSchemaSnapshot, formatDebugSnapshot, formatSceneInspectorSnapshot } from "./debug.js";
 
 export type ToolingPanelSection = {
@@ -53,7 +60,8 @@ export function createComponentSchemasPanelSection(snapshot: ComponentSchemaSnap
 
 export function createSelectedEntityDetailPanelSection(
   snapshot: SceneInspectorSnapshot,
-  selection: Required<ToolingPanelSelection>
+  selection: Required<ToolingPanelSelection>,
+  schemas?: ComponentSchemaSnapshot
 ): ToolingPanelSection {
   const selected = snapshot.entities.find((entity) => entity.id === selection.selectedEntityId);
   if (!selected) {
@@ -71,7 +79,8 @@ export function createSelectedEntityDetailPanelSection(
   ];
 
   for (const component of selected.components) {
-    lines.push(formatSelectedComponentDetail(component));
+    lines.push(formatSelectedComponentDetail(component, schemas));
+    lines.push(...formatSelectedComponentSchemaFields(component, schemas));
   }
 
   return {
@@ -97,7 +106,7 @@ export function createToolingPanelSections(snapshot: ToolingSnapshot, selection:
       sections.push(
         createSelectedEntityDetailPanelSection(snapshot.inspector, {
           selectedEntityId: selection.selectedEntityId
-        })
+        }, snapshot.schemas)
       );
     }
   }
@@ -251,9 +260,36 @@ export class BrowserToolingPanel {
   }
 }
 
-function formatSelectedComponentDetail(component: InspectorComponentSnapshot): string {
+function formatSelectedComponentDetail(component: InspectorComponentSnapshot, schemas?: ComponentSchemaSnapshot): string {
+  const schema = findComponentSchema(component, schemas);
+  const label = schema?.label ? ` (${schema.label})` : "";
   const data = Object.entries(component.data);
   const dataText = data.length ? ` data=${data.map(([key, value]) => `${key}:${String(value)}`).join(",")}` : "";
 
-  return `- ${component.name} enabled=${component.enabled} started=${component.started} destroyed=${component.destroyed}${dataText}`;
+  return `- ${component.name}${label} enabled=${component.enabled} started=${component.started} destroyed=${component.destroyed}${dataText}`;
+}
+
+function formatSelectedComponentSchemaFields(component: InspectorComponentSnapshot, schemas?: ComponentSchemaSnapshot): string[] {
+  const schema = findComponentSchema(component, schemas);
+  if (!schema) return [];
+
+  return schema.fields.map((field) => {
+    const value = component.data[field.name];
+    const valueText = formatSchemaFieldValue(value, Boolean(field.required));
+    const requiredText = field.required ? " required" : "";
+    const defaultText = field.default === undefined ? "" : ` default=${String(field.default)}`;
+    const descriptionText = field.description ? ` - ${field.description}` : "";
+
+    return `  - ${field.name}: ${field.type}${requiredText}${defaultText} value=${valueText}${descriptionText}`;
+  });
+}
+
+function findComponentSchema(component: InspectorComponentSnapshot, schemas?: ComponentSchemaSnapshot) {
+  return schemas?.schemas.find((schema) => schema.component === component.name);
+}
+
+function formatSchemaFieldValue(value: InspectorPrimitive | undefined, required: boolean): string {
+  if (value !== undefined) return String(value);
+
+  return required ? "<missing>" : "<unset>";
 }

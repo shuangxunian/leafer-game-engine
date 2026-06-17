@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { Component, Game, Scene, System } from "../lib/core/index.js";
-import { AssetRegistry, ComponentSchemaRegistry, createDefaultComponentSchemaRegistry } from "../lib/framework/index.js";
+import { AssetRegistry, ComponentSchemaRegistry, TransformComponent, createDefaultComponentSchemaRegistry } from "../lib/framework/index.js";
 import {
   createComponentSchemasPanelSection,
   createComponentSchemaSnapshot,
@@ -385,6 +385,35 @@ test("tooling panel sections pass selected entity state to inspector sections", 
   ]);
 });
 
+test("tooling panel sections pass schema metadata to selected entity details", () => {
+  const scene = new Scene("SchemaSelectedToolingSectionsScene");
+  const entity = scene.world.createEntity("player");
+  entity.addComponent(new TransformComponent());
+
+  const sections = createToolingPanelSections(
+    createToolingSnapshot(scene, {
+      inspector: true,
+      schemas: createDefaultComponentSchemaRegistry()
+    }),
+    { selectedEntityId: entity.id }
+  );
+
+  assert.deepEqual(sections[2], {
+    title: "Selected Entity",
+    lines: [
+      `#${entity.id} player`,
+      "State active",
+      "Components 1",
+      "- TransformComponent (Transform) enabled=true started=true destroyed=false data=x:0,y:0,rotation:0,scaleX:1,scaleY:1",
+      "  - x: number default=0 value=0 - World x position.",
+      "  - y: number default=0 value=0 - World y position.",
+      "  - rotation: number default=0 value=0 - Rotation in degrees.",
+      "  - scaleX: number default=1 value=1 - Horizontal scale.",
+      "  - scaleY: number default=1 value=1 - Vertical scale."
+    ]
+  });
+});
+
 test("selected entity detail panel section exposes selected component summaries", () => {
   const scene = new Scene("SelectedEntityDetailScene");
   const entity = scene.world.createEntity("player");
@@ -399,6 +428,66 @@ test("selected entity detail panel section exposes selected component summaries"
       "- InspectorFixtureComponent enabled=true started=true destroyed=false data=label:hero,speed:12,visible:true,empty:null"
     ]
   });
+});
+
+test("selected entity detail panel section can use component schema metadata", () => {
+  const scene = new Scene("SchemaSelectedEntityDetailScene");
+  const entity = scene.world.createEntity("player");
+  const transform = entity.addComponent(new TransformComponent());
+  transform.x = 24;
+  transform.y = 48;
+
+  assert.deepEqual(
+    createSelectedEntityDetailPanelSection(
+      createSceneInspectorSnapshot(scene),
+      { selectedEntityId: entity.id },
+      createComponentSchemaSnapshot(createDefaultComponentSchemaRegistry())
+    ),
+    {
+      title: "Selected Entity",
+      lines: [
+        `#${entity.id} player`,
+        "State active",
+        "Components 1",
+        "- TransformComponent (Transform) enabled=true started=true destroyed=false data=x:24,y:48,rotation:0,scaleX:1,scaleY:1",
+        "  - x: number default=0 value=24 - World x position.",
+        "  - y: number default=0 value=48 - World y position.",
+        "  - rotation: number default=0 value=0 - Rotation in degrees.",
+        "  - scaleX: number default=1 value=1 - Horizontal scale.",
+        "  - scaleY: number default=1 value=1 - Vertical scale."
+      ]
+    }
+  );
+});
+
+test("selected entity detail panel section reports missing and unset schema field values", () => {
+  const scene = new Scene("MissingSchemaValueDetailScene");
+  const entity = scene.world.createEntity("player");
+  entity.addComponent(new InspectorFixtureComponent());
+  const schemas = new ComponentSchemaRegistry().register({
+    id: "fixture",
+    component: "InspectorFixtureComponent",
+    label: "Fixture",
+    fields: [
+      { name: "label", type: "string", required: true },
+      { name: "missingRequired", type: "number", required: true },
+      { name: "missingOptional", type: "boolean" }
+    ]
+  });
+
+  assert.deepEqual(
+    createSelectedEntityDetailPanelSection(
+      createSceneInspectorSnapshot(scene),
+      { selectedEntityId: entity.id },
+      createComponentSchemaSnapshot(schemas)
+    ).lines.slice(3),
+    [
+      "- InspectorFixtureComponent (Fixture) enabled=true started=true destroyed=false data=label:hero,speed:12,visible:true,empty:null",
+      "  - label: string required value=hero",
+      "  - missingRequired: number required value=<missing>",
+      "  - missingOptional: boolean value=<unset>"
+    ]
+  );
 });
 
 test("selected entity detail panel section reports missing selections", () => {
