@@ -14,7 +14,9 @@ For the animation-specific boundary across asset metadata, playback helpers, ECS
 
 For the runtime-services boundary across event dispatch, update-driven scheduling, scene integration, and read-only tooling visibility, see [Runtime Services Boundary](runtime-services.md).
 
-`0.13.x` starts the input actions baseline with a Node-safe `InputActionMap`, keyboard binding normalization helpers, action-state queries that work with the existing `InputSystem`, downstream-style example consumption in `examples/dodge-blocks`, and read-only input action visibility through `/tooling`.
+`0.13.x` closed the input actions baseline with a Node-safe `InputActionMap`, keyboard binding normalization helpers, action-state queries that work with the existing `InputSystem`, downstream-style example consumption in `examples/dodge-blocks`, and read-only input action visibility through `/tooling`.
+
+For the input-actions boundary across raw input state, keyboard bindings, action maps, example consumption, and read-only tooling visibility, see [Input Actions Boundary](input-actions.md).
 
 ---
 
@@ -162,6 +164,7 @@ This command builds the library through `npm pack --dry-run --json` and checks t
 - `docs/product-boundary.md`
 - `docs/animation-runtime.md`
 - `docs/runtime-services.md`
+- `docs/input-actions.md`
 - all JS and type declaration targets from `package.json` exports
 
 It also checks that development-only paths such as `src`, `tests`, `examples`, `dist`, `scripts`, and `node_modules` are not included.

@@ -44,6 +44,7 @@
 - component schema metadata
 - sprite animation playback/debug state
 - runtime services state
+- input action mapping and live action state
 
 它们不应该在当前仓库中变成：
 

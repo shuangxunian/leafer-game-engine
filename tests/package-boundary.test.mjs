@@ -55,6 +55,7 @@ test("package publish files include library output and docs", () => {
     "docs/product-boundary.md",
     "docs/animation-runtime.md",
     "docs/runtime-services.md",
+    "docs/input-actions.md",
     "README.md",
     "LICENSE"
   ]);
