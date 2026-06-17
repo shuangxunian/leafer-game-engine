@@ -44,6 +44,16 @@ export type SpriteLoadResult = {
   error?: string;
 };
 
+export type AsyncAssetManifestLoadResult = {
+  ok: boolean;
+  registeredSprites: string[];
+  loadedSprites: string[];
+  failedSprites: string[];
+  skippedSprites: string[];
+  errors: AssetLoadError[];
+  loadResults: SpriteLoadResult[];
+};
+
 export class AssetRegistry {
   private readonly sprites = new Map<string, SpriteAsset>();
   private readonly spriteLoadStates = new Map<string, AssetLoadState>();
@@ -118,6 +128,10 @@ export class AssetRegistry {
     return loadAssetManifest(this, manifest);
   }
 
+  async loadManifestAsync(manifest: AssetManifest, loader: SpriteAssetLoader): Promise<AsyncAssetManifestLoadResult> {
+    return loadAssetManifestAsync(this, manifest, loader);
+  }
+
   get(id: string): string | undefined {
     return this.getSprite(id)?.source;
   }
@@ -173,6 +187,52 @@ export function loadAssetManifest(registry: AssetRegistry, manifest: AssetManife
     ok: true,
     registeredSprites,
     errors: []
+  };
+}
+
+export async function loadAssetManifestAsync(
+  registry: AssetRegistry,
+  manifest: AssetManifest,
+  loader: SpriteAssetLoader
+): Promise<AsyncAssetManifestLoadResult> {
+  const sprites = manifest.sprites ?? [];
+  const errors = validateManifestSprites(sprites);
+
+  if (errors.length > 0) {
+    return {
+      ok: false,
+      registeredSprites: [],
+      loadedSprites: [],
+      failedSprites: [],
+      skippedSprites: [],
+      errors,
+      loadResults: []
+    };
+  }
+
+  const registeredSprites = sprites.map((sprite) => {
+    if (registry.hasSprite(sprite.id)) return sprite.id;
+
+    return registry.registerSprite(sprite).id;
+  });
+  const loadResults: SpriteLoadResult[] = [];
+
+  for (const id of registeredSprites) {
+    loadResults.push(await registry.loadSprite(id, loader));
+  }
+
+  const loadedSprites = loadResults.filter((result) => result.status === "loaded").map((result) => result.id);
+  const failedSprites = loadResults.filter((result) => result.status === "failed").map((result) => result.id);
+  const skippedSprites = loadResults.filter((result) => result.status === "skipped").map((result) => result.id);
+
+  return {
+    ok: failedSprites.length === 0,
+    registeredSprites,
+    loadedSprites,
+    failedSprites,
+    skippedSprites,
+    errors: [],
+    loadResults
   };
 }
 

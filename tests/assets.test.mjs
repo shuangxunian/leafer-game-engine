@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { AssetRegistry, loadAssetManifest } from "../lib/framework/index.js";
+import { AssetRegistry, loadAssetManifest, loadAssetManifestAsync } from "../lib/framework/index.js";
 
 test("asset registry registers and resolves sprite assets", () => {
   const assets = new AssetRegistry();
@@ -207,4 +207,152 @@ test("asset manifest reports duplicate sprite ids without mutating registry", ()
     ]
   });
   assert.deepEqual(assets.listSprites(), []);
+});
+
+test("async asset manifest loading registers and loads sprites", async () => {
+  const assets = new AssetRegistry();
+  const loaded = [];
+
+  const result = await assets.loadManifestAsync(
+    {
+      sprites: [
+        { id: "player", source: "/assets/player.png" },
+        { id: "hazard", source: "/assets/hazard.png" }
+      ]
+    },
+    async (asset) => {
+      loaded.push(asset.id);
+    }
+  );
+
+  assert.deepEqual(result, {
+    ok: true,
+    registeredSprites: ["player", "hazard"],
+    loadedSprites: ["player", "hazard"],
+    failedSprites: [],
+    skippedSprites: [],
+    errors: [],
+    loadResults: [
+      { id: "player", status: "loaded" },
+      { id: "hazard", status: "loaded" }
+    ]
+  });
+  assert.deepEqual(loaded, ["player", "hazard"]);
+  assert.equal(assets.getSpriteLoadState("player")?.status, "loaded");
+  assert.equal(assets.getSpriteLoadState("hazard")?.status, "loaded");
+});
+
+test("async asset manifest loading reports partial failures", async () => {
+  const assets = new AssetRegistry();
+
+  const result = await assets.loadManifestAsync(
+    {
+      sprites: [
+        { id: "player", source: "/assets/player.png" },
+        { id: "broken", source: "/assets/broken.png" },
+        { id: "hazard", source: "/assets/hazard.png" }
+      ]
+    },
+    async (asset) => {
+      if (asset.id === "broken") {
+        throw new Error("Broken image");
+      }
+    }
+  );
+
+  assert.deepEqual(result, {
+    ok: false,
+    registeredSprites: ["player", "broken", "hazard"],
+    loadedSprites: ["player", "hazard"],
+    failedSprites: ["broken"],
+    skippedSprites: [],
+    errors: [],
+    loadResults: [
+      { id: "player", status: "loaded" },
+      { id: "broken", status: "failed", error: "Broken image" },
+      { id: "hazard", status: "loaded" }
+    ]
+  });
+  assert.equal(assets.getSpriteLoadState("broken")?.status, "failed");
+  assert.equal(assets.getSpriteLoadState("hazard")?.status, "loaded");
+});
+
+test("async asset manifest loading can report skipped sprites", async () => {
+  const assets = new AssetRegistry();
+  assets.registerSprite({ id: "player", source: "/assets/player.png" });
+  await assets.loadSprite("player", async () => {});
+
+  const result = await assets.loadManifestAsync(
+    {
+      sprites: [
+        { id: "player", source: "/assets/player.png" },
+        { id: "coin", source: "/assets/coin.png" }
+      ]
+    },
+    async () => {}
+  );
+
+  assert.deepEqual(result, {
+    ok: true,
+    registeredSprites: ["player", "coin"],
+    loadedSprites: ["coin"],
+    failedSprites: [],
+    skippedSprites: ["player"],
+    errors: [],
+    loadResults: [
+      { id: "player", status: "skipped" },
+      { id: "coin", status: "loaded" }
+    ]
+  });
+});
+
+test("async asset manifest loading reports validation errors without registering or loading", async () => {
+  const assets = new AssetRegistry();
+  const loaded = [];
+
+  const result = await assets.loadManifestAsync(
+    {
+      sprites: [
+        { id: "valid", source: "/assets/valid.png" },
+        { id: "", source: "/assets/broken.png" }
+      ]
+    },
+    async (asset) => {
+      loaded.push(asset.id);
+    }
+  );
+
+  assert.deepEqual(result, {
+    ok: false,
+    registeredSprites: [],
+    loadedSprites: [],
+    failedSprites: [],
+    skippedSprites: [],
+    errors: [
+      {
+        assetId: "",
+        code: "invalid-sprite-id",
+        message: "Sprite asset id must be a non-empty string."
+      }
+    ],
+    loadResults: []
+  });
+  assert.deepEqual(loaded, []);
+  assert.equal(assets.hasSprite("valid"), false);
+});
+
+test("async asset manifest helper can load into a registry", async () => {
+  const assets = new AssetRegistry();
+
+  const result = await loadAssetManifestAsync(
+    assets,
+    {
+      sprites: [{ id: "coin", source: "/assets/coin.png" }]
+    },
+    async () => {}
+  );
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.loadedSprites, ["coin"]);
+  assert.equal(assets.getSpriteLoadState("coin")?.status, "loaded");
 });
