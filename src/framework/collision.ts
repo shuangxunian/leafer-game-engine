@@ -12,6 +12,19 @@ export type Rect = {
 
 export type CollisionLayer = string;
 
+export type CollisionPairEntrySnapshot = Readonly<{
+  entity: Entity;
+  entityId: number;
+  entityName: string;
+  layer: CollisionLayer;
+  rect: Rect;
+}>;
+
+export type CollisionPairSnapshot = Readonly<{
+  a: CollisionPairEntrySnapshot;
+  b: CollisionPairEntrySnapshot;
+}>;
+
 export function intersects(a: Rect, b: Rect): boolean {
   return (
     a.x < b.x + b.width &&
@@ -71,10 +84,16 @@ export class CollisionSystem extends System {
   private readonly entered = new Map<Entity, Set<Entity>>();
   private readonly stayed = new Map<Entity, Set<Entity>>();
   private readonly exited = new Map<Entity, Set<Entity>>();
+  private currentPairs: CollisionPairSnapshot[] = [];
+  private enteredPairs: CollisionPairSnapshot[] = [];
+  private stayedPairs: CollisionPairSnapshot[] = [];
+  private exitedPairs: CollisionPairSnapshot[] = [];
 
   override lateUpdate(): void {
     const previous = cloneCollisionMap(this.collisions);
+    const previousPairs = this.currentPairs;
     const next = new Map<Entity, Set<Entity>>();
+    const nextPairs: CollisionPairSnapshot[] = [];
 
     const colliders = this.scene.world
       .getEntitiesWith(ColliderComponent)
@@ -95,6 +114,7 @@ export class CollisionSystem extends System {
 
         link(next, current.entity, other.entity);
         link(next, other.entity, current.entity);
+        nextPairs.push(createCollisionPairSnapshot(current, currentRect, other, otherRect));
       }
     }
 
@@ -105,6 +125,10 @@ export class CollisionSystem extends System {
 
     copyCollisionMap(next, this.collisions);
     diffCollisionMaps(previous, next, this.entered, this.stayed, this.exited);
+    this.currentPairs = nextPairs;
+    this.enteredPairs = filterPairsByMap(nextPairs, this.entered);
+    this.stayedPairs = filterPairsByMap(nextPairs, this.stayed);
+    this.exitedPairs = filterPairsByMap(previousPairs, this.exited);
   }
 
   hasCollision(entity: Entity, layer?: CollisionLayer): boolean {
@@ -137,6 +161,22 @@ export class CollisionSystem extends System {
 
   getCollisionExit(entity: Entity, layer?: CollisionLayer): Entity[] {
     return this.getCollisionsFromMap(this.exited, entity, layer);
+  }
+
+  getCollisionPairs(layer?: CollisionLayer): CollisionPairSnapshot[] {
+    return copyCollisionPairs(this.currentPairs, layer);
+  }
+
+  getCollisionEnterPairs(layer?: CollisionLayer): CollisionPairSnapshot[] {
+    return copyCollisionPairs(this.enteredPairs, layer);
+  }
+
+  getCollisionStayPairs(layer?: CollisionLayer): CollisionPairSnapshot[] {
+    return copyCollisionPairs(this.stayedPairs, layer);
+  }
+
+  getCollisionExitPairs(layer?: CollisionLayer): CollisionPairSnapshot[] {
+    return copyCollisionPairs(this.exitedPairs, layer);
   }
 
   private hasCollisionInMap(
@@ -209,4 +249,68 @@ function link(target: Map<Entity, Set<Entity>>, from: Entity, to: Entity): void 
   }
 
   target.set(from, new Set([to]));
+}
+
+function createCollisionPairSnapshot(
+  a: { entity: Entity; collider: ColliderComponent },
+  aRect: Rect,
+  b: { entity: Entity; collider: ColliderComponent },
+  bRect: Rect
+): CollisionPairSnapshot {
+  return {
+    a: createCollisionPairEntrySnapshot(a.entity, a.collider, aRect),
+    b: createCollisionPairEntrySnapshot(b.entity, b.collider, bRect)
+  };
+}
+
+function createCollisionPairEntrySnapshot(
+  entity: Entity,
+  collider: ColliderComponent,
+  rect: Rect
+): CollisionPairEntrySnapshot {
+  return {
+    entity,
+    entityId: entity.id,
+    entityName: entity.name,
+    layer: collider.layer,
+    rect: copyRect(rect)
+  };
+}
+
+function filterPairsByMap(
+  pairs: readonly CollisionPairSnapshot[],
+  source: Map<Entity, Set<Entity>>
+): CollisionPairSnapshot[] {
+  return pairs.filter((pair) => source.get(pair.a.entity)?.has(pair.b.entity) === true);
+}
+
+function copyCollisionPairs(
+  pairs: readonly CollisionPairSnapshot[],
+  layer?: CollisionLayer
+): CollisionPairSnapshot[] {
+  const filtered = layer ? pairs.filter((pair) => pair.a.layer === layer || pair.b.layer === layer) : pairs;
+  return filtered.map(copyCollisionPair);
+}
+
+function copyCollisionPair(pair: CollisionPairSnapshot): CollisionPairSnapshot {
+  return {
+    a: copyCollisionPairEntry(pair.a),
+    b: copyCollisionPairEntry(pair.b)
+  };
+}
+
+function copyCollisionPairEntry(entry: CollisionPairEntrySnapshot): CollisionPairEntrySnapshot {
+  return {
+    ...entry,
+    rect: copyRect(entry.rect)
+  };
+}
+
+function copyRect(rect: Rect): Rect {
+  return {
+    x: rect.x,
+    y: rect.y,
+    width: rect.width,
+    height: rect.height
+  };
 }

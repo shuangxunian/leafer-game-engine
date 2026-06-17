@@ -175,8 +175,27 @@ test("pointer input stage docs are discoverable from roadmap and package docs", 
   assert.equal(publicApi.includes("`0.19.x` closed pointer/input runtime primitives"), true);
   assert.equal(publicApi.includes("BrowserPointerButtonBridge"), true);
   assert.equal(inputDocs.includes("The `0.19.x` pointer/input runtime primitives stage is complete."), true);
-  assert.equal(readme.includes("`v0.19.4` Pointer/Input Runtime Boundary Closeout"), true);
-  assert.equal(readme.includes("`0.19.x` pointer/input runtime primitives 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.19.x` pointer/input runtime primitives 阶段"), true);
+  assert.equal(readme.includes("都已经收口"), true);
+});
+
+test("collision query stage docs are discoverable from roadmap and package docs", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.20.0.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.20.1.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  for (const version of ["v0.20.0", "v0.20.1"]) {
+    assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
+  }
+
+  assert.equal(stage.includes("Collision Query Runtime Primitives Sprint"), true);
+  assert.equal(patch.includes("Collision Pair Query Baseline"), true);
+  assert.equal(patch.includes("does not add a physics engine"), true);
+  assert.equal(publicApi.includes("`0.20.x` starts collision query runtime primitives"), true);
+  assert.equal(publicApi.includes("structured collision pair query methods"), true);
+  assert.equal(readme.includes("`v0.20.1` Collision Pair Query Baseline"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -238,6 +257,10 @@ test("framework package subpath can be imported by package name in Node", async 
     "normalizePointerButton",
     "validateSceneConfig"
   ]);
+  assert.equal(typeof framework.CollisionSystem.prototype.getCollisionPairs, "function");
+  assert.equal(typeof framework.CollisionSystem.prototype.getCollisionEnterPairs, "function");
+  assert.equal(typeof framework.CollisionSystem.prototype.getCollisionStayPairs, "function");
+  assert.equal(typeof framework.CollisionSystem.prototype.getCollisionExitPairs, "function");
 });
 
 test("tooling package subpath can be imported by package name in Node", async () => {

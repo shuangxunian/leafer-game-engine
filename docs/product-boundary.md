@@ -10,6 +10,8 @@
 
 这个边界是当前项目的硬约束：`leaferGame` 可以为未来上层编辑器提供可消费的数据契约和 runtime snapshot，但不在本仓库里实现编辑器本体。
 
+换句话说，这里交付的是“被游戏项目 import 的引擎包”，不是“让用户打开以后拖拽制作内容的编辑器产品”。后续如果出现编辑器，它应该依赖本包，而不是和本包混在同一个产品边界里。
+
 ## 本仓库要做什么
 
 本仓库应该持续沉淀这些通用引擎能力：
@@ -34,6 +36,14 @@
 这些能力以后可以做，但应该属于另一个上层项目或独立 package，而不是当前引擎包本体。当前仓库不以编辑器为规划中心，也不为了编辑器提前引入会污染引擎包边界的 UI、存储或发布流程。
 
 特别需要避免的是把运行时能力逐步滑成编辑器能力。例如，`scene config` 可以声明可验证的实体、资源、地图和关卡数据，但不应该变成保存文件格式、拖拽编排状态或编辑器工程模型。`schema` 可以描述组件数据形状，但不应该在本仓库里演变成属性编辑器。`tooling` 可以展示 runtime snapshot，但不应该写回 scene、component、asset、level 或 input binding。
+
+## 硬边界规则
+
+后续评审需求时，优先按下面规则判断：
+
+- 可以进入本仓库：runtime API、framework primitive、adapter contract、package export、数据契约、校验逻辑、只读 snapshot、debug overlay、示例消费验证。
+- 不进入本仓库：编辑器 UI、属性编辑器、资源管理器、关卡编辑器、拖拽编排、内容保存/发布、项目管理、面向非开发者的 authoring workflow。
+- 需要谨慎命名：`inspector` 只能表示 runtime inspection data，不表示属性编辑面板；`tooling` 只能表示开发者只读辅助能力，不表示编辑器工具链。
 
 ## Tooling 和编辑器的边界
 
