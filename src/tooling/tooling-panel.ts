@@ -3,6 +3,7 @@ import type {
   DebugAssetSnapshot,
   DebugGameFlowSnapshot,
   DebugSnapshot,
+  InputActionSnapshot,
   InspectorComponentSnapshot,
   InspectorPrimitive,
   RuntimeServicesSnapshot,
@@ -15,6 +16,7 @@ import {
   formatDebugAssetSnapshot,
   formatDebugGameFlowSnapshot,
   formatDebugSnapshot,
+  formatInputActionSnapshot,
   formatRuntimeServicesSnapshot,
   formatSceneInspectorSnapshot,
   formatSpriteAnimationSnapshot
@@ -91,6 +93,13 @@ export function createSpriteAnimationsPanelSection(snapshot: SpriteAnimationSnap
   };
 }
 
+export function createInputActionsPanelSection(snapshot: InputActionSnapshot): ToolingPanelSection {
+  return {
+    title: "Input Actions",
+    lines: formatInputActionSnapshot(snapshot)
+  };
+}
+
 export function createRuntimeServicesPanelSection(snapshot: RuntimeServicesSnapshot): ToolingPanelSection {
   return {
     title: "Runtime Services",
@@ -149,6 +158,10 @@ export function createToolingPanelSections(snapshot: ToolingSnapshot, selection:
 
   if (snapshot.animations) {
     sections.push(createSpriteAnimationsPanelSection(snapshot.animations));
+  }
+
+  if (snapshot.inputActions) {
+    sections.push(createInputActionsPanelSection(snapshot.inputActions));
   }
 
   if (snapshot.runtimeServices) {

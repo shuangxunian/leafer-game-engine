@@ -14,7 +14,7 @@ For the animation-specific boundary across asset metadata, playback helpers, ECS
 
 For the runtime-services boundary across event dispatch, update-driven scheduling, scene integration, and read-only tooling visibility, see [Runtime Services Boundary](runtime-services.md).
 
-`0.13.x` starts the input actions baseline with a Node-safe `InputActionMap`, keyboard binding normalization helpers, action-state queries that work with the existing `InputSystem`, and downstream-style example consumption in `examples/dodge-blocks`.
+`0.13.x` starts the input actions baseline with a Node-safe `InputActionMap`, keyboard binding normalization helpers, action-state queries that work with the existing `InputSystem`, downstream-style example consumption in `examples/dodge-blocks`, and read-only input action visibility through `/tooling`.
 
 ---
 
@@ -54,7 +54,9 @@ import {
   getRuntimeServices
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
+  createInputActionSnapshot,
   createToolingSnapshot,
+  formatInputActionSnapshot,
   formatRuntimeServicesSnapshot,
   formatSpriteAnimationSnapshot
 } from "@shuangxunian/leafer-game-engine/tooling";
@@ -91,7 +93,9 @@ import {
   getRuntimeServices
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
+  createInputActionSnapshot,
   createToolingSnapshot,
+  formatInputActionSnapshot,
   formatRuntimeServicesSnapshot,
   formatSpriteAnimationSnapshot
 } from "@shuangxunian/leafer-game-engine/tooling";
@@ -134,7 +138,7 @@ They should be verified through browser/example builds until the package is spli
 
 - `core` should stay independent from browser and rendering implementations.
 - `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, and opt-in scene runtime service integration.
-- `tooling` can expose structured snapshots and formatters in Node, including read-only sprite animation state and runtime services state, but browser panel classes should only be constructed in a DOM environment.
+- `tooling` can expose structured snapshots and formatters in Node, including read-only sprite animation state, runtime services state, and input action state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
 - Future package-boundary work may split browser runtime APIs into more explicit entrypoints.

@@ -21,6 +21,7 @@
 - 玩家是否能被限制在当前 viewport 内移动
 - tooling panel 是否能分区显示 runtime debug + assets + game flow + entity inspector + component schema 数据
 - tooling panel 是否能显示 sprite animation runtime 状态
+- tooling panel 是否能显示 input action mappings 和当前 action state
 - tooling panel 是否能点击 entity 行并显示选中状态
 - tooling panel 是否能显示 selected entity detail 摘要
 - tooling panel 是否能用 component schema 辅助展示 selected component 字段
@@ -60,7 +61,7 @@ npm run dev
   - 通过 `startSceneWithLifecycle(...)` 在 runtime start 前预加载 asset manifest
   - 挂载 keyboard bridge
   - 挂载 browser tooling panel
-  - 分区显示 runtime debug、assets、game flow、sprite animations、entity inspector 和 component schema 信息
+  - 分区显示 runtime debug、assets、game flow、sprite animations、input actions、entity inspector 和 component schema 信息
   - 支持在 panel 中点击 entity 行进行选择
   - 选择 entity 后显示 selected entity detail section
   - selected detail 会结合 component schema metadata 展示字段类型、默认值和当前值
@@ -143,6 +144,7 @@ browser runtime
 - 示例通过 `startSceneWithLifecycle(...)` 复用 runtime 层的 prepare / ready / running / failed 启动边界
 - tooling panel 的 `Assets` section 可以显示 player / hazard 的 loaded 状态
 - tooling panel 的 `Sprite Animations` section 可以显示 player 当前 clip / frame / sprite / playback 状态
+- tooling panel 的 `Input Actions` section 可以显示 action id、keyboard bindings、pressed 和 justPressed
 - player 的 `transform`、`size`、`collider` 来自 `EntityTemplate`
 - player 的 `ViewComponent`、`PlayerControllerComponent` 和 `SpriteAnimationComponent` 仍在代码中装配
 - player movement、start/restart 和 pause/resume 使用 `InputActionMap`，而不是在 gameplay 代码里硬编码物理键

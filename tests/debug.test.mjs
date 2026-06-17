@@ -6,11 +6,14 @@ import {
   AssetRegistry,
   ComponentSchemaRegistry,
   GameFlow,
+  InputActionMap,
+  InputSystem,
   RuntimeServicesSystem,
   SpriteAnimationComponent,
   TransformComponent,
   addRuntimeServices,
-  createDefaultComponentSchemaRegistry
+  createDefaultComponentSchemaRegistry,
+  defineKeyboardBinding
 } from "../lib/framework/index.js";
 import {
   createAssetsPanelSection,
@@ -19,6 +22,8 @@ import {
   createDebugSnapshot,
   createEntityInspectorPanelSection,
   createGameFlowPanelSection,
+  createInputActionSnapshot,
+  createInputActionsPanelSection,
   createRuntimeDebugPanelSection,
   createRuntimeServicesPanelSection,
   createRuntimeServicesSnapshot,
@@ -32,6 +37,7 @@ import {
   formatDebugAssetSnapshot,
   formatDebugGameFlowSnapshot,
   formatDebugSnapshot,
+  formatInputActionSnapshot,
   formatRuntimeServicesSnapshot,
   formatSceneInspectorSnapshot,
   formatSpriteAnimationSnapshot,
@@ -349,6 +355,65 @@ test("tooling snapshot can include sprite animation state", () => {
   });
 });
 
+test("tooling snapshot can include input action state", () => {
+  const scene = new Scene("InputActionToolingScene");
+  const input = new InputSystem(scene);
+  const inputActions = new InputActionMap([
+    {
+      id: "move:left",
+      bindings: [defineKeyboardBinding("A"), defineKeyboardBinding("ArrowLeft")]
+    },
+    {
+      id: "confirm",
+      bindings: [defineKeyboardBinding(" "), defineKeyboardBinding("Enter")]
+    }
+  ]);
+  input.press("a");
+
+  assert.deepEqual(createToolingSnapshot(scene, { input, inputActions }).inputActions, {
+    count: 2,
+    actions: [
+      {
+        id: "move:left",
+        bindings: [
+          { type: "keyboard", key: "a" },
+          { type: "keyboard", key: "arrowleft" }
+        ],
+        pressed: true,
+        justPressed: true
+      },
+      {
+        id: "confirm",
+        bindings: [
+          { type: "keyboard", key: " " },
+          { type: "keyboard", key: "enter" }
+        ],
+        pressed: false,
+        justPressed: false
+      }
+    ]
+  });
+});
+
+test("input action snapshot can omit live input state", () => {
+  const inputActions = new InputActionMap([
+    {
+      id: "pause",
+      bindings: [defineKeyboardBinding("Escape")]
+    }
+  ]);
+
+  assert.deepEqual(createInputActionSnapshot(inputActions), {
+    count: 1,
+    actions: [
+      {
+        id: "pause",
+        bindings: [{ type: "keyboard", key: "escape" }]
+      }
+    ]
+  });
+});
+
 test("tooling snapshot can include runtime services state", () => {
   const scene = new Scene("RuntimeServicesToolingScene");
   const system = addRuntimeServices(scene);
@@ -567,6 +632,41 @@ test("runtime services snapshot formatting is stable and readable", () => {
   ]);
 });
 
+test("input action snapshot formatting is stable and readable", () => {
+  assert.deepEqual(formatInputActionSnapshot({
+    count: 3,
+    actions: [
+      {
+        id: "move:left",
+        bindings: [
+          { type: "keyboard", key: "a" },
+          { type: "keyboard", key: "arrowleft" }
+        ],
+        pressed: true,
+        justPressed: false
+      },
+      {
+        id: "confirm",
+        bindings: [
+          { type: "keyboard", key: " " },
+          { type: "keyboard", key: "enter" }
+        ],
+        pressed: false,
+        justPressed: true
+      },
+      {
+        id: "unbound",
+        bindings: []
+      }
+    ]
+  }), [
+    "Input Actions 3",
+    "- move:left bindings=keyboard:a,keyboard:arrowleft pressed=true justPressed=false",
+    "- confirm bindings=keyboard:<space>,keyboard:enter pressed=false justPressed=true",
+    "- unbound bindings=<none>"
+  ]);
+});
+
 test("tooling snapshot formatting appends runtime services data when present", () => {
   const scene = new Scene("RuntimeServicesToolingFormatScene");
   addRuntimeServices(scene, {
@@ -587,6 +687,27 @@ test("tooling snapshot formatting appends runtime services data when present", (
     "Scheduler updates=disabled clearOnDestroy=false",
     "EventBus listeners=0 emitted=0",
     "Scheduler elapsed=0.000s tasks=0"
+  ]);
+});
+
+test("tooling snapshot formatting appends input action data when present", () => {
+  const scene = new Scene("InputActionToolingFormatScene");
+  const input = new InputSystem(scene);
+  const inputActions = new InputActionMap([
+    {
+      id: "pause",
+      bindings: [defineKeyboardBinding("Escape")]
+    }
+  ]);
+  input.press("escape");
+
+  assert.deepEqual(formatToolingSnapshot(createToolingSnapshot(scene, { input, inputActions })), [
+    "Scene InputActionToolingFormatScene",
+    "Entities 0/0",
+    "Systems 0",
+    "",
+    "Input Actions 1",
+    "- pause bindings=keyboard:escape pressed=true justPressed=true"
   ]);
 });
 
@@ -643,6 +764,26 @@ test("runtime services panel section exposes read-only service state", () => {
   }), {
     title: "Runtime Services",
     lines: ["Runtime Services missing"]
+  });
+});
+
+test("input actions panel section exposes read-only action state", () => {
+  assert.deepEqual(createInputActionsPanelSection({
+    count: 1,
+    actions: [
+      {
+        id: "confirm",
+        bindings: [{ type: "keyboard", key: "enter" }],
+        pressed: false,
+        justPressed: true
+      }
+    ]
+  }), {
+    title: "Input Actions",
+    lines: [
+      "Input Actions 1",
+      "- confirm bindings=keyboard:enter pressed=false justPressed=true"
+    ]
   });
 });
 
@@ -778,6 +919,32 @@ test("tooling panel sections include animation data when requested", () => {
       lines: [
         "Sprite Animations 1",
         `- #${entity.id} player clip=player-idle status=playing frame=<unset> sprite=<unset> index=0 elapsed=0.000s loops=0`
+      ]
+    }
+  ]);
+});
+
+test("tooling panel sections include input action data when requested", () => {
+  const scene = new Scene("InputActionSectionsScene");
+  const input = new InputSystem(scene);
+  const inputActions = new InputActionMap([
+    {
+      id: "move:right",
+      bindings: [defineKeyboardBinding("D")]
+    }
+  ]);
+  input.press("d");
+
+  assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { input, inputActions })), [
+    {
+      title: "Runtime Debug",
+      lines: ["Scene InputActionSectionsScene", "Entities 0/0", "Systems 0"]
+    },
+    {
+      title: "Input Actions",
+      lines: [
+        "Input Actions 1",
+        "- move:right bindings=keyboard:d pressed=true justPressed=true"
       ]
     }
   ]);

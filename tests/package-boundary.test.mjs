@@ -106,6 +106,8 @@ test("tooling package subpath can be imported by package name in Node", async ()
 
   assertExports(tooling, [
     "createDebugSnapshot",
+    "createInputActionSnapshot",
+    "createInputActionsPanelSection",
     "createRuntimeServicesPanelSection",
     "createRuntimeServicesSnapshot",
     "createSpriteAnimationSnapshot",
@@ -113,6 +115,7 @@ test("tooling package subpath can be imported by package name in Node", async ()
     "createToolingSnapshot",
     "createToolingPanelSections",
     "formatDebugSnapshot",
+    "formatInputActionSnapshot",
     "formatRuntimeServicesSnapshot",
     "formatSpriteAnimationSnapshot",
     "formatToolingSnapshot"

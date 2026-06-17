@@ -11,6 +11,7 @@ import {
   instantiateEntityTemplate
 } from "@shuangxunian/leafer-game-engine/framework";
 import type { RenderAdapter, RenderScene } from "@shuangxunian/leafer-game-engine/adapter";
+import type { InputActionMap } from "@shuangxunian/leafer-game-engine/framework";
 import { DODGE_GAME_CONFIG, DodgeGameSystem } from "./dodge-game-system.js";
 import { createDodgeInputActions } from "./input-actions.js";
 import { PlayerControllerComponent } from "./player-controller.js";
@@ -96,6 +97,10 @@ export class DodgeBlocksScene extends Scene {
 
   get assetRegistry(): AssetRegistry {
     return this.assets;
+  }
+
+  get inputActionMap(): InputActionMap {
+    return this.inputActions;
   }
 
   constructor(

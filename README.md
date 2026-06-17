@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.13.2` Input Action Example Integration，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段、`0.10.x` package-facing API boundary 阶段、`0.11.x` sprite animation / asset runtime 阶段和 `0.12.x` runtime services / event pipeline 阶段都已经收口，`0.13.x` input actions / control mapping 阶段正在推进。
+当前项目已经推进到 `v0.13.3` Input Action Tooling Visibility，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段、`0.10.x` package-facing API boundary 阶段、`0.11.x` sprite animation / asset runtime 阶段和 `0.12.x` runtime services / event pipeline 阶段都已经收口，`0.13.x` input actions / control mapping 阶段正在推进。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -14,10 +14,10 @@
 - `framework` 已具备输入、input action mapping、变换、尺寸、视图同步、速度运动、碰撞、状态机、GameFlow、EventBus、RuntimeScheduler、RuntimeServicesSystem、相机、资源注册、异步资源加载状态、sprite frame / animation clip 数据契约、animation playback timing helpers、SpriteAnimationComponent/System、实体工厂、场景配置和组件 schema 等基础能力。
 - `adapter` 已经通过渲染抽象接入 Leafer，并把显示层和游戏规则层分开。
 - `runtime` 已经可以在浏览器里装配渲染、场景、动画帧循环和 scene lifecycle start helper。
-- `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、asset load state snapshot、GameFlow snapshot、sprite animation snapshot、runtime services snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail、assets/game flow/sprite animations/runtime services panel section 和 schema-assisted component detail 展示。
+- `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、asset load state snapshot、GameFlow snapshot、sprite animation snapshot、runtime services snapshot、input action snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail、assets/game flow/sprite animations/runtime services/input actions panel section 和 schema-assisted component detail 展示。
 - `examples/dodge-blocks` 作为集成样例，用来验证引擎分层、异步资源加载、sprite animation 和运行时 tooling 能力。
 
-当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + runtime observability / developer tooling”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程、scene lifecycle 启动边界、sprite animation 数据契约、deterministic playback timing helpers、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、第一版 runtime event bus、deterministic scheduler、scene-level runtime services integration、runtime services 只读 tooling 可见性、runtime services 边界文档、第一版 input action mapping 和示例级 input action 集成。
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + runtime observability / developer tooling”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程、scene lifecycle 启动边界、sprite animation 数据契约、deterministic playback timing helpers、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、第一版 runtime event bus、deterministic scheduler、scene-level runtime services integration、runtime services 只读 tooling 可见性、runtime services 边界文档、第一版 input action mapping、示例级 input action 集成和 input action 只读 tooling 可见性。
 
 ## 产品边界
 
@@ -566,7 +566,7 @@ import {
 
 - `src/tooling`
   - 调试和开发辅助能力
-  - 当前已经包含 debug snapshot、browser overlay、collider visualization、scene inspector snapshot、asset load state snapshot、GameFlow snapshot、sprite animation snapshot、runtime services snapshot、聚合 tooling snapshot、browser tooling panel、assets/game flow/sprite animations/runtime services panel section 和 component schema panel section
+  - 当前已经包含 debug snapshot、browser overlay、collider visualization、scene inspector snapshot、asset load state snapshot、GameFlow snapshot、sprite animation snapshot、runtime services snapshot、input action snapshot、聚合 tooling snapshot、browser tooling panel、assets/game flow/sprite animations/runtime services/input actions panel section 和 component schema panel section
   - 这一层是引擎包内置开发体验的一部分，用来服务调试面板、场景检查和 runtime 可观测性，不承载可视化编辑器职责
 
 - `examples`
@@ -577,7 +577,7 @@ import {
 
 ## 当前已经实现了什么
 
-当前已经完成了 `0.1.x` 到 `0.12.x` 的连续整理，`0.13.x` input actions 和 control mapping 阶段正在推进。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过 runtime observability 辅助开发、可作为 package 被消费”，并补齐了资源加载基线、GameFlow、scene lifecycle 启动边界、package-facing API 边界、sprite animation playback timing 基础、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、deterministic event bus 基线、update-driven scheduler 基线、opt-in scene runtime services 集成模式、runtime services 只读 tooling snapshot、runtime services 边界文档、input action mapping 基线和 dodge-blocks input action 集成。
+当前已经完成了 `0.1.x` 到 `0.12.x` 的连续整理，`0.13.x` input actions 和 control mapping 阶段正在推进。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过 runtime observability 辅助开发、可作为 package 被消费”，并补齐了资源加载基线、GameFlow、scene lifecycle 启动边界、package-facing API 边界、sprite animation playback timing 基础、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、deterministic event bus 基线、update-driven scheduler 基线、opt-in scene runtime services 集成模式、runtime services 只读 tooling snapshot、runtime services 边界文档、input action mapping 基线、dodge-blocks input action 集成和 input action 只读 tooling snapshot。
 
 - Core 稳定性
   - `Game`、`Time`、`Scene`、`World`、`Entity`、`Component`、`System` 已经形成基础骨架。
@@ -618,6 +618,7 @@ import {
   - 已有 GameFlow snapshot 和 `Game Flow` panel section，可以展示当前 gameplay phase。
   - 已有 sprite animation snapshot 和 `Sprite Animations` panel section，可以展示 entity、clip、status、frame、sprite、elapsed 和 loops。
   - 已有 runtime services snapshot 和 `Runtime Services` panel section，可以只读展示 EventBus listener/emitted count、scheduler elapsed/task count 和 latest scheduler update。
+  - 已有 input action snapshot 和 `Input Actions` panel section，可以只读展示 action id、keyboard bindings、pressed 和 justPressed。
   - 已有 `BrowserToolingPanel`，可以分区展示 runtime debug、assets、game flow、entity inspector 和 component schema metadata。
   - 已有 entity row selection，可以在浏览器 tooling panel 中选择 entity。
   - 已有 selected entity detail section，可以显示选中实体的状态、组件和 primitive data。
@@ -625,7 +626,7 @@ import {
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
-  - 当前测试数为 147 个。
+  - 当前测试数为 153 个。
   - `npm run check`、`npm test`、`npm run build:example`、`npm run verify:package` 是当前主要验证入口。
 
 ## 当前 demo 的意义

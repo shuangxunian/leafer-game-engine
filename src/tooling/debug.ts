@@ -7,6 +7,9 @@ import type {
   ComponentSchemaRegistry,
   GameFlow,
   GameFlowPhase,
+  InputActionMap,
+  InputBinding,
+  InputSystem,
   SpriteAnimationPlaybackStatus
 } from "../framework/index.js";
 import { RuntimeServicesSystem, SpriteAnimationComponent } from "../framework/index.js";
@@ -76,6 +79,8 @@ export type DebugSnapshotOptions = {
 
 export type ToolingSnapshotOptions = DebugSnapshotOptions & {
   animations?: boolean;
+  input?: InputSystem;
+  inputActions?: InputActionMap;
   inspector?: boolean;
   runtimeServices?: boolean;
   schemas?: ComponentSchemaRegistry;
@@ -111,6 +116,7 @@ export type InspectorComponentSnapshot = {
 export type ToolingSnapshot = {
   debug: DebugSnapshot;
   animations?: SpriteAnimationSnapshot;
+  inputActions?: InputActionSnapshot;
   inspector?: SceneInspectorSnapshot;
   runtimeServices?: RuntimeServicesSnapshot;
   schemas?: ComponentSchemaSnapshot;
@@ -175,6 +181,18 @@ export type SpriteAnimationEntitySnapshot = {
   currentSpriteId?: string;
 };
 
+export type InputActionSnapshot = {
+  count: number;
+  actions: InputActionEntrySnapshot[];
+};
+
+export type InputActionEntrySnapshot = {
+  id: string;
+  bindings: InputBinding[];
+  pressed?: boolean;
+  justPressed?: boolean;
+};
+
 const COMPONENT_LIFECYCLE_FIELDS = new Set(["entity", "enabled", "started", "destroyed"]);
 
 export function createDebugSnapshot(scene: Scene, options: DebugSnapshotOptions = {}): DebugSnapshot {
@@ -224,6 +242,7 @@ export function createToolingSnapshot(scene: Scene, options: ToolingSnapshotOpti
   return {
     debug: createDebugSnapshot(scene, options),
     animations: options.animations ? createSpriteAnimationSnapshot(scene) : undefined,
+    inputActions: options.inputActions ? createInputActionSnapshot(options.inputActions, options.input) : undefined,
     inspector: options.inspector ? createSceneInspectorSnapshot(scene) : undefined,
     runtimeServices: options.runtimeServices ? createRuntimeServicesSnapshot(scene) : undefined,
     schemas: options.schemas ? createComponentSchemaSnapshot(options.schemas) : undefined
@@ -291,6 +310,10 @@ export function formatToolingSnapshot(snapshot: ToolingSnapshot): string[] {
 
   if (snapshot.animations) {
     lines.push("", ...formatSpriteAnimationSnapshot(snapshot.animations));
+  }
+
+  if (snapshot.inputActions) {
+    lines.push("", ...formatInputActionSnapshot(snapshot.inputActions));
   }
 
   if (snapshot.runtimeServices) {
@@ -378,6 +401,30 @@ export function createRuntimeServicesSnapshot(scene: Scene): RuntimeServicesSnap
   };
 }
 
+export function createInputActionSnapshot(
+  actionMap: InputActionMap,
+  input?: InputSystem
+): InputActionSnapshot {
+  const actions = actionMap.listActions().map((action): InputActionEntrySnapshot => {
+    const entry: InputActionEntrySnapshot = {
+      id: action.id,
+      bindings: action.bindings.map((binding) => ({ ...binding }))
+    };
+
+    if (input) {
+      entry.pressed = actionMap.isPressed(input, action.id);
+      entry.justPressed = actionMap.wasPressed(input, action.id);
+    }
+
+    return entry;
+  });
+
+  return {
+    count: actions.length,
+    actions
+  };
+}
+
 export function formatRuntimeServicesSnapshot(snapshot: RuntimeServicesSnapshot): string[] {
   if (!snapshot.installed) {
     return ["Runtime Services missing"];
@@ -395,6 +442,20 @@ export function formatRuntimeServicesSnapshot(snapshot: RuntimeServicesSnapshot)
     lines.push(
       `Last Update dt=${snapshot.scheduler.lastUpdate.deltaSeconds.toFixed(3)}s fired=${snapshot.scheduler.lastUpdate.firedCount} tasks=${snapshot.scheduler.lastUpdate.taskCount}`
     );
+  }
+
+  return lines;
+}
+
+export function formatInputActionSnapshot(snapshot: InputActionSnapshot): string[] {
+  const lines = [`Input Actions ${snapshot.count}`];
+
+  for (const action of snapshot.actions) {
+    const bindings = action.bindings.map(formatInputBinding).join(",");
+    const state = action.pressed === undefined
+      ? ""
+      : ` pressed=${action.pressed} justPressed=${Boolean(action.justPressed)}`;
+    lines.push(`- ${action.id} bindings=${bindings || "<none>"}${state}`);
   }
 
   return lines;
@@ -494,6 +555,18 @@ function createGameFlowSnapshot(flow: GameFlow): DebugGameFlowSnapshot {
     phase: flow.getPhase(),
     canUpdateGameplay: flow.canUpdateGameplay()
   };
+}
+
+function formatInputBinding(binding: InputBinding): string {
+  if (binding.type === "keyboard") {
+    return `keyboard:${formatInputBindingKey(binding.key)}`;
+  }
+
+  return `${binding.type}:<unknown>`;
+}
+
+function formatInputBindingKey(key: string): string {
+  return key === " " ? "<space>" : key;
 }
 
 export function createSpriteAnimationSnapshot(scene: Scene): SpriteAnimationSnapshot {

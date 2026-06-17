@@ -31,6 +31,8 @@ export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<v
       assets: scene.assetRegistry,
       flow: gameSystem.gameFlow,
       game: runtime.game,
+      input,
+      inputActions: scene.inputActionMap,
       inspector: true,
       renderScene: runtime.renderScene,
       schemas
