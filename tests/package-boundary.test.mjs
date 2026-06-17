@@ -67,6 +67,21 @@ test("package publish files include library output and docs", () => {
   ]);
 });
 
+test("product docs preserve engine-package instead of editor direction", async () => {
+  const boundary = await readFile(new URL("../docs/product-boundary.md", import.meta.url), "utf8");
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  assert.equal(boundary.includes("轻量 2D 游戏引擎依赖包"), true);
+  assert.equal(boundary.includes("不在本仓库里实现编辑器本体"), true);
+  assert.equal(boundary.includes("只读 runtime observability"), true);
+  assert.equal(boundary.includes("创建、修改、保存、发布或管理内容资产"), true);
+  assert.equal(roadmap.includes("只读 Runtime Observability 层"), true);
+  assert.equal(roadmap.includes("不写回 scene、entity、component、asset、level、input binding 或项目文件"), true);
+  assert.equal(readme.includes("一个可以被前端项目安装和接入的 2D 游戏引擎依赖包"), true);
+  assert.equal(readme.includes("不承载编辑器本体、编辑器 UI、资源管理器或内容生产工作流"), true);
+});
+
 test("level map docs ship as package-facing non-editor guidance", async () => {
   const source = await readFile(new URL("../docs/level-map.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
@@ -125,7 +140,24 @@ test("level map stage docs are discoverable from roadmap and package docs", asyn
   assert.equal(stage.includes("The `0.18.x` stage is complete"), true);
   assert.equal(publicApi.includes("`0.18.x` closed level/map runtime primitives"), true);
   assert.equal(publicApi.includes("Level/Map Runtime Boundary"), true);
-  assert.equal(readme.includes("`v0.18.5` Level/Map Runtime Boundary Closeout"), true);
+  assert.equal(readme.includes("`0.18.x` level/map runtime primitives 阶段都已经收口"), true);
+});
+
+test("pointer input stage docs are discoverable from roadmap and package docs", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.19.0.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.19.1.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  for (const version of ["v0.19.0", "v0.19.1"]) {
+    assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
+  }
+
+  assert.equal(stage.includes("Pointer/Input Runtime Primitives Sprint"), true);
+  assert.equal(patch.includes("Pointer Button Action Binding Baseline"), true);
+  assert.equal(publicApi.includes("`0.19.x` starts pointer/input runtime primitives"), true);
+  assert.equal(readme.includes("`v0.19.1` Pointer Button Action Binding Baseline"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -173,14 +205,17 @@ test("framework package subpath can be imported by package name in Node", async 
     "defineLevelLayout",
     "defineTileMap",
     "defineKeyboardBinding",
+    "definePointerButtonBinding",
     "defineSpriteAnimationClip",
     "defineSpriteFrame",
+    "getPointerButtonInputId",
     "getSpriteAnimationPlaybackFrameId",
     "getSpriteAnimationPlaybackFrameIndex",
     "getRuntimeServices",
     "isSpriteCapableRenderNode",
     "loadAssetManifestAsync",
     "normalizeKeyboardKey",
+    "normalizePointerButton",
     "validateSceneConfig"
   ]);
 });

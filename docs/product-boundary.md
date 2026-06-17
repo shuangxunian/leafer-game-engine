@@ -94,3 +94,5 @@
 - `schema`：组件数据契约、默认值和校验元信息，不是属性面板编辑系统。
 - `tooling/inspector/debug panel`：只读 runtime observability，不是可视化编辑器。
 - `examples`：引擎包消费者和集成测试样例，不是内容生产项目。
+
+后续拆版本时，如果一个需求需要创建、修改、保存、发布或管理内容资产，它默认不进入当前仓库；只有当它能被表达为可复用 runtime API、数据契约、校验逻辑、只读 snapshot 或示例消费验证时，才应该纳入 `leaferGame` 引擎包。

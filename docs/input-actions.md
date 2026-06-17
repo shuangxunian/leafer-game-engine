@@ -4,7 +4,7 @@
 
 `leaferGame` input action support is part of the frontend 2D game engine package.
 
-It lets downstream games describe gameplay intent such as `move:left`, `confirm`, or `pause` separately from physical keyboard keys.
+It lets downstream games describe gameplay intent such as `move:left`, `confirm`, `select`, or `pause` separately from physical keyboard keys or pointer buttons.
 
 It is not a keybinding settings screen, visual editor UI, profile persistence system, gamepad adapter, touch gesture system, or browser control panel.
 
@@ -22,7 +22,7 @@ It is not a keybinding settings screen, visual editor UI, profile persistence sy
 - `wasPressed(...)`
 - `lateUpdate(...)` cleanup for just-pressed state
 
-The browser keyboard bridge writes into this system by normalizing `KeyboardEvent.key` values through the same lowercase helper used by action bindings.
+The browser keyboard bridge writes into this system by normalizing `KeyboardEvent.key` values through the same lowercase helper used by action bindings. Pointer button bindings use deterministic raw input ids such as `pointer:primary`.
 
 ### Keyboard Bindings
 
@@ -36,7 +36,25 @@ const left = defineKeyboardBinding("ArrowLeft");
 
 `defineKeyboardBinding(...)` normalizes keys consistently with `BrowserKeyboardBridge`.
 
-The current binding model intentionally supports keyboard bindings only. Future stages can add gamepad or touch bindings if they remain reusable package APIs.
+### Pointer Button Bindings
+
+Pointer button bindings are small data objects:
+
+```ts
+import { definePointerButtonBinding } from "@shuangxunian/leafer-game-engine/framework";
+
+const select = definePointerButtonBinding("primary");
+```
+
+Supported pointer buttons are:
+
+- `primary`
+- `secondary`
+- `auxiliary`
+
+`definePointerButtonBinding(...)` normalizes button names, and `getPointerButtonInputId(...)` exposes the matching raw input id shape used by `InputSystem`.
+
+The current pointer model intentionally covers button state only. Future stages can add browser pointer bridges, pointer position, touch gestures, or gamepad bindings if they remain reusable package APIs.
 
 ### Action Map
 
@@ -45,7 +63,8 @@ The current binding model intentionally supports keyboard bindings only. Future 
 ```ts
 import {
   InputActionMap,
-  defineKeyboardBinding
+  defineKeyboardBinding,
+  definePointerButtonBinding
 } from "@shuangxunian/leafer-game-engine/framework";
 
 const actions = new InputActionMap([
@@ -60,7 +79,8 @@ const actions = new InputActionMap([
     id: "confirm",
     bindings: [
       defineKeyboardBinding(" "),
-      defineKeyboardBinding("Enter")
+      defineKeyboardBinding("Enter"),
+      definePointerButtonBinding("primary")
     ]
   }
 ]);
@@ -104,7 +124,7 @@ Tooling exposes read-only input action observability:
 - `formatInputActionSnapshot(...)`
 - `createInputActionsPanelSection(...)`
 
-The snapshot can show action id, keyboard bindings, pressed state, and just-pressed state.
+The snapshot can show action id, keyboard bindings, pointer button bindings, pressed state, and just-pressed state.
 
 If no live `InputSystem` is provided, tooling still shows the action map and omits live pressed state.
 
@@ -118,6 +138,8 @@ The current sprint intentionally does not include:
 - runtime rebinding controls in tooling
 - local storage or user profile persistence
 - gamepad bindings
+- browser pointer bridge
+- pointer position tracking
 - touch gestures
 - input recording or replay
 - accessibility preset management
@@ -133,7 +155,8 @@ Use `@shuangxunian/leafer-game-engine/framework` for action mapping:
 import {
   InputActionMap,
   InputSystem,
-  defineKeyboardBinding
+  defineKeyboardBinding,
+  definePointerButtonBinding
 } from "@shuangxunian/leafer-game-engine/framework";
 ```
 

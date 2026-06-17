@@ -583,7 +583,12 @@ function formatInputBinding(binding: InputBinding): string {
     return `keyboard:${formatInputBindingKey(binding.key)}`;
   }
 
-  return `${binding.type}:<unknown>`;
+  if (binding.type === "pointer-button") {
+    return `pointer:${binding.button}`;
+  }
+
+  const unknownBinding = binding as { type?: unknown };
+  return `${String(unknownBinding.type)}:<unknown>`;
 }
 
 function formatInputBindingKey(key: string): string {

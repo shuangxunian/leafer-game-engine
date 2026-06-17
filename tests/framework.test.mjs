@@ -22,13 +22,16 @@ import {
   createRuntimeServices,
   createSpriteAnimationPlayback,
   defineKeyboardBinding,
+  definePointerButtonBinding,
   defineSpriteAnimationClip,
   defineSpriteFrame,
+  getPointerButtonInputId,
   getSpriteAnimationPlaybackFrameId,
   getSpriteAnimationPlaybackFrameIndex,
   getRuntimeServices,
   isSpriteCapableRenderNode,
   normalizeKeyboardKey,
+  normalizePointerButton,
   pauseSpriteAnimationPlayback,
   resumeSpriteAnimationPlayback,
   stopSpriteAnimationPlayback,
@@ -234,6 +237,40 @@ test("input action map queries pressed and just-pressed input state", () => {
   input.release("space");
 
   assert.equal(actions.isPressed(input, "jump"), false);
+});
+
+test("input action map supports pointer button bindings", () => {
+  const input = new InputSystem();
+  const actions = new InputActionMap([
+    {
+      id: "select",
+      bindings: [
+        definePointerButtonBinding("Primary"),
+        definePointerButtonBinding("primary"),
+        defineKeyboardBinding("Enter")
+      ]
+    }
+  ]);
+
+  assert.deepEqual(actions.getAction("select"), {
+    id: "select",
+    bindings: [
+      { type: "pointer-button", button: "primary" },
+      { type: "keyboard", key: "enter" }
+    ]
+  });
+  assert.equal(normalizePointerButton(" Secondary "), "secondary");
+  assert.equal(getPointerButtonInputId("Auxiliary"), "pointer:auxiliary");
+
+  input.press("pointer:primary");
+  assert.equal(actions.isPressed(input, "select"), true);
+  assert.equal(actions.wasPressed(input, "select"), true);
+
+  input.lateUpdate();
+  assert.equal(actions.wasPressed(input, "select"), false);
+
+  assert.throws(() => definePointerButtonBinding("tertiary"), /Unsupported pointer button "tertiary"/);
+  assert.throws(() => definePointerButtonBinding(""), /Pointer button input binding must be a non-empty string/);
 });
 
 test("tile map data contract copies layers and supports tile lookup", () => {
@@ -498,12 +535,17 @@ test("input action map can bind and unbind keyboard inputs", () => {
   actions
     .bind("pause", defineKeyboardBinding("Escape"))
     .bind("pause", defineKeyboardBinding("escape"))
+    .bind("pause", definePointerButtonBinding("primary"))
+    .bind("pause", definePointerButtonBinding("Primary"))
     .bind("confirm", defineKeyboardBinding("Enter"));
 
   assert.deepEqual(actions.listActions(), [
     {
       id: "pause",
-      bindings: [{ type: "keyboard", key: "escape" }]
+      bindings: [
+        { type: "keyboard", key: "escape" },
+        { type: "pointer-button", button: "primary" }
+      ]
     },
     {
       id: "confirm",
@@ -511,8 +553,11 @@ test("input action map can bind and unbind keyboard inputs", () => {
     }
   ]);
   assert.deepEqual(actions.getActionIdsForBinding(defineKeyboardBinding("ESCAPE")), ["pause"]);
+  assert.deepEqual(actions.getActionIdsForBinding(definePointerButtonBinding("PRIMARY")), ["pause"]);
   assert.equal(actions.unbind("pause", defineKeyboardBinding("Escape")), true);
   assert.equal(actions.unbind("pause", defineKeyboardBinding("Escape")), false);
+  assert.deepEqual(actions.getBindings("pause"), [{ type: "pointer-button", button: "primary" }]);
+  assert.equal(actions.unbind("pause", definePointerButtonBinding("primary")), true);
   assert.deepEqual(actions.getBindings("pause"), []);
   assert.equal(actions.removeAction("confirm"), true);
   assert.equal(actions.hasAction("confirm"), false);

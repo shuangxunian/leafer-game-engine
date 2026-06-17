@@ -5,7 +5,14 @@ export type KeyboardInputBinding = Readonly<{
   key: string;
 }>;
 
-export type InputBinding = KeyboardInputBinding;
+export type PointerButton = "primary" | "secondary" | "auxiliary";
+
+export type PointerButtonInputBinding = Readonly<{
+  type: "pointer-button";
+  button: PointerButton;
+}>;
+
+export type InputBinding = KeyboardInputBinding | PointerButtonInputBinding;
 
 export type InputActionDefinition = Readonly<{
   id: string;
@@ -145,12 +152,36 @@ export function defineKeyboardBinding(key: string): KeyboardInputBinding {
   };
 }
 
+export function definePointerButtonBinding(button: string): PointerButtonInputBinding {
+  return {
+    type: "pointer-button",
+    button: normalizePointerButton(button)
+  };
+}
+
 export function normalizeKeyboardKey(key: string): string {
   if (typeof key !== "string" || key.length === 0) {
     throw new Error("Keyboard input binding key must be a non-empty string.");
   }
 
   return key.toLowerCase();
+}
+
+export function normalizePointerButton(button: string): PointerButton {
+  if (typeof button !== "string" || button.trim().length === 0) {
+    throw new Error("Pointer button input binding must be a non-empty string.");
+  }
+
+  const normalized = button.trim().toLowerCase();
+  if (normalized === "primary" || normalized === "secondary" || normalized === "auxiliary") {
+    return normalized;
+  }
+
+  throw new Error(`Unsupported pointer button "${button}".`);
+}
+
+export function getPointerButtonInputId(button: string): string {
+  return `pointer:${normalizePointerButton(button)}`;
 }
 
 function normalizeActionId(id: string): string {
@@ -178,22 +209,39 @@ function normalizeBindings(bindings: readonly InputBinding[]): InputBinding[] {
 }
 
 function normalizeBinding(binding: InputBinding): InputBinding {
-  if (binding.type !== "keyboard") {
-    throw new Error(`Unsupported input binding type "${String(binding.type)}".`);
+  if (binding.type === "keyboard") {
+    return defineKeyboardBinding(binding.key);
   }
 
-  return defineKeyboardBinding(binding.key);
+  if (binding.type === "pointer-button") {
+    return definePointerButtonBinding(binding.button);
+  }
+
+  const unsupported = binding as { type?: unknown };
+  throw new Error(`Unsupported input binding type "${String(unsupported.type)}".`);
 }
 
 function getBindingKey(binding: InputBinding): string {
-  return `${binding.type}:${binding.key}`;
+  if (binding.type === "keyboard") {
+    return `${binding.type}:${binding.key}`;
+  }
+
+  return `${binding.type}:${binding.button}`;
 }
 
 function isBindingPressed(input: InputSystem, binding: InputBinding): boolean {
+  if (binding.type === "pointer-button") {
+    return input.isPressed(getPointerButtonInputId(binding.button));
+  }
+
   return input.isPressed(binding.key);
 }
 
 function wasBindingPressed(input: InputSystem, binding: InputBinding): boolean {
+  if (binding.type === "pointer-button") {
+    return input.wasPressed(getPointerButtonInputId(binding.button));
+  }
+
   return input.wasPressed(binding.key);
 }
 

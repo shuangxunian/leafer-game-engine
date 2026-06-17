@@ -730,7 +730,8 @@ test("input action snapshot formatting is stable and readable", () => {
         id: "confirm",
         bindings: [
           { type: "keyboard", key: " " },
-          { type: "keyboard", key: "enter" }
+          { type: "keyboard", key: "enter" },
+          { type: "pointer-button", button: "primary" }
         ],
         pressed: false,
         justPressed: true
@@ -743,7 +744,7 @@ test("input action snapshot formatting is stable and readable", () => {
   }), [
     "Input Actions 3",
     "- move:left bindings=keyboard:a,keyboard:arrowleft pressed=true justPressed=false",
-    "- confirm bindings=keyboard:<space>,keyboard:enter pressed=false justPressed=true",
+    "- confirm bindings=keyboard:<space>,keyboard:enter,pointer:primary pressed=false justPressed=true",
     "- unbound bindings=<none>"
   ]);
 });
@@ -859,7 +860,7 @@ test("input actions panel section exposes read-only action state", () => {
     actions: [
       {
         id: "confirm",
-        bindings: [{ type: "keyboard", key: "enter" }],
+        bindings: [{ type: "pointer-button", button: "primary" }],
         pressed: false,
         justPressed: true
       }
@@ -868,7 +869,7 @@ test("input actions panel section exposes read-only action state", () => {
     title: "Input Actions",
     lines: [
       "Input Actions 1",
-      "- confirm bindings=keyboard:enter pressed=false justPressed=true"
+      "- confirm bindings=pointer:primary pressed=false justPressed=true"
     ]
   });
 });
