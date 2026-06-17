@@ -9,12 +9,15 @@
 - entity factory 是否能创建可复用实体
 - asset manifest 是否能声明示例资源
 - scene config 是否能声明静态示例内容
+- scene config 是否能声明并 bootstrap level/map runtime data
 - async manifest loading 是否能在玩法启动前完成资源预加载
 - browser image sprite loader 是否能作为示例消费者接入
 - sprite frame / animation clip 是否能作为 manifest 数据接入
 - `SpriteAnimationComponent` / `SpriteAnimationSystem` 是否能作为示例消费者接入
 - entity template 是否能创建玩家基础数据组件
 - safe scene bootstrap 是否能在创建玩家前验证静态配置
+- level layout 是否能声明 player spawn、playfield bounds 和 hazard spawn region
+- tile map 是否能作为最小运行时数据契约被示例消费
 - transform / size / view 是否能同步到渲染层
 - input 是否能驱动玩家移动
 - input action mapping 是否能把物理键盘输入转换成语义玩法动作
@@ -77,8 +80,9 @@ npm run dev
   - 创建 UI 文本节点
   - 通过 `createDodgeBlocksSceneConfig(...)` 声明静态示例内容
   - 通过 scene config 的 assets section 声明 sprite assets、sprite frames 和 animation clips
+  - 通过 scene config 的 `level.tileMap` 和 `level.layout` 声明最小 map 数据、player spawn、playfield bounds 和 hazard spawn region
   - 通过 `loadManifestAsync(...)` 和 browser image sprite loader 预加载 scene config 里的示例资源
-  - 通过 `bootstrapSceneFromConfig(..., { validateBeforeBootstrap: true })` 创建 player 的 transform / size / collider
+  - 通过 `bootstrapSceneFromConfig(..., { validateBeforeBootstrap: true })` 创建 player 的 transform / size / collider，并读取 bootstrapped level helpers
   - 在代码里补充 player controller、render view 和 sprite animation component
 
 - `dodge-game-system.ts`
@@ -95,7 +99,7 @@ npm run dev
 - `player-controller.ts`
   - 读取 `InputSystem` 和 input action map
   - 更新玩家位置
-  - 把玩家限制在 playfield 内
+  - 把玩家限制在 scene config level layout 声明的 playfield 内
 
 - `input-actions.ts`
   - 定义示例级语义动作
@@ -148,6 +152,8 @@ browser runtime
 
 - `createDodgeBlocksSceneConfig(...)` 声明静态示例内容
 - scene config 的 `assets` section 声明 player / hazard sprite assets，以及 player sprite frames / animation clip
+- scene config 的 `level.tileMap` 声明最小 playfield tile map，用来证明 tile map runtime data 可以被示例 bootstrap 和读取
+- scene config 的 `level.layout` 声明 `player-start` spawn、`playfield` region 和 `hazard-spawn` region
 - 示例通过 `loadManifestAsync(...)` 在 gameplay 启动前加载 scene config 里的资源
 - 示例通过 `startSceneWithLifecycle(...)` 复用 runtime 层的 prepare / ready / running / failed 启动边界
 - tooling panel 的 `Assets` section 可以显示 player / hazard 的 loaded 状态
@@ -156,10 +162,14 @@ browser runtime
 - tooling panel 的 `Input Actions` section 可以显示 action id、keyboard bindings、pressed 和 justPressed
 - player 的 `transform`、`size`、`collider` 来自 scene config entity template
 - player 静态基础数据通过 `bootstrapSceneFromConfig(..., { validateBeforeBootstrap: true })` 创建
+- player 初始位置和重置位置读取 scene config level layout 的 `player-start` spawn
+- player movement bounds 读取 scene config level layout 的 `playfield` region
 - player 的 `ViewComponent`、`PlayerControllerComponent` 和 `SpriteAnimationComponent` 仍在代码中装配
 - player movement、start/restart 和 pause/resume 使用 `InputActionMap`，而不是在 gameplay 代码里硬编码物理键
 - gameplay phase 使用 framework `GameFlow`，而不是示例内的本地 phase state machine
 - tooling panel 的 `Game Flow` section 可以显示当前 ready / running / paused / ended 状态
-- hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度，不适合放进静态 scene config
+- hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度，不适合放进静态 scene config；scene config 只声明 `hazard-spawn` region 作为运行时参考数据
+
+这个示例不会把 level/map 声明变成编辑器、地图渲染器或自动生成器。它只是证明下游游戏可以显式读取引擎返回的 `TileMap` / `LevelLayout` helper，并由游戏代码决定如何使用这些运行时数据。
 
 后续新增资源加载、数据驱动场景、关卡配置和 runtime tooling 能力时，这个示例可以继续作为集成验证样例。

@@ -1,9 +1,14 @@
 import { Scene } from "@shuangxunian/leafer-game-engine/core";
 import type {
   AsyncAssetManifestLoadResult,
+  DefinedLevelRegion,
+  DefinedLevelSpawnPoint,
   EntityTemplate,
+  LevelLayout,
   SceneConfig,
-  SceneConfigValidationResult
+  SceneConfigLevel,
+  SceneConfigValidationResult,
+  TileMap
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
   AssetRegistry,
@@ -13,13 +18,24 @@ import {
   SpriteAnimationSystem,
   ViewComponent,
   bootstrapSceneFromConfig,
-  createBrowserImageSpriteLoader,
+  createBrowserImageSpriteLoader
 } from "@shuangxunian/leafer-game-engine/framework";
 import type { RenderAdapter, RenderScene } from "@shuangxunian/leafer-game-engine/adapter";
 import type { InputActionMap } from "@shuangxunian/leafer-game-engine/framework";
 import { DODGE_GAME_CONFIG, DodgeGameSystem } from "./dodge-game-system.js";
 import { createDodgeInputActions } from "./input-actions.js";
 import { PlayerControllerComponent } from "./player-controller.js";
+
+const DODGE_LEVEL_ID = "dodge-blocks-level";
+const DODGE_TILE_MAP_ID = "dodge-blocks-map";
+const DODGE_TILE_LAYER_ID = "playfield";
+const DODGE_PLAYFIELD_TILE_ID = "playfield";
+const DODGE_PLAYER_SPAWN_ID = "player-start";
+const DODGE_PLAYFIELD_REGION_ID = "playfield";
+const DODGE_HAZARD_SPAWN_REGION_ID = "hazard-spawn";
+const DODGE_LEVEL_PADDING = 18;
+const DODGE_HAZARD_SPAWN_PADDING = 24;
+const DODGE_TILE_SIZE = 64;
 
 const DODGE_BLOCKS_ASSET_MANIFEST = {
   sprites: [
@@ -101,19 +117,25 @@ type DodgeBlocksSceneConfigOptions = {
   viewportWidth: number;
 };
 
+type DodgeLevelRuntime = {
+  playerSpawn: DefinedLevelSpawnPoint;
+  playfield: DefinedLevelRegion;
+  hazardSpawnRegion?: DefinedLevelRegion;
+};
+
 export function createDodgeBlocksSceneConfig({
+  viewportWidth,
   viewportHeight
 }: DodgeBlocksSceneConfigOptions): SceneConfig {
+  const playerStart = createPlayerStart(viewportWidth, viewportHeight);
+
   return {
     assets: DODGE_BLOCKS_ASSET_MANIFEST,
+    level: createDodgeBlocksLevelConfig(viewportWidth, viewportHeight, playerStart),
     entities: [
       createPlayerTemplate(
-        120,
-        clamp(
-          viewportHeight / 2 - DODGE_GAME_CONFIG.playerSize / 2,
-          18,
-          viewportHeight - DODGE_GAME_CONFIG.playerSize - 18
-        )
+        playerStart.x,
+        playerStart.y
       )
     ]
   };
@@ -160,7 +182,7 @@ export class DodgeBlocksScene extends Scene {
 
     const bootstrapResult = bootstrapSceneFromConfig(
       this,
-      { entities: sceneConfig.entities },
+      { level: sceneConfig.level, entities: sceneConfig.entities },
       { validateBeforeBootstrap: true }
     );
     if (bootstrapResult.validation && !bootstrapResult.validation.ok) {
@@ -173,6 +195,7 @@ export class DodgeBlocksScene extends Scene {
     if (!player) {
       throw new Error("Dodge-blocks scene config did not create a Player entity.");
     }
+    const levelRuntime = createDodgeLevelRuntime(bootstrapResult.level);
 
     this.addSystem(new InputSystem(this));
     this.addSystem(new SpriteAnimationSystem(this, this.assets));
@@ -224,9 +247,10 @@ export class DodgeBlocksScene extends Scene {
         260,
         this.inputActions,
         {
-          width: viewportWidth,
-          height: viewportHeight,
-          padding: 18
+          x: levelRuntime.playfield.x,
+          y: levelRuntime.playfield.y,
+          width: levelRuntime.playfield.width,
+          height: levelRuntime.playfield.height
         },
         () => dodgeSystem.isGameplayActive()
       )
@@ -248,7 +272,12 @@ export class DodgeBlocksScene extends Scene {
           overlayAction: overlayActionNode
         },
         this.inputActions,
-        this.assets
+        this.assets,
+        {
+          playerSpawn: levelRuntime.playerSpawn,
+          playfield: levelRuntime.playfield,
+          hazardSpawnRegion: levelRuntime.hazardSpawnRegion
+        }
       )
     );
   }
@@ -268,6 +297,118 @@ export class DodgeBlocksScene extends Scene {
 
 function createDodgeBlocksAssets(): AssetRegistry {
   return new AssetRegistry();
+}
+
+function createDodgeBlocksLevelConfig(
+  viewportWidth: number,
+  viewportHeight: number,
+  playerStart: { x: number; y: number }
+): SceneConfigLevel {
+  const columns = Math.max(1, Math.ceil(viewportWidth / DODGE_TILE_SIZE));
+  const rows = Math.max(1, Math.ceil(viewportHeight / DODGE_TILE_SIZE));
+  const tileCount = columns * rows;
+  const playfield = createPlayfieldRegion(viewportWidth, viewportHeight);
+
+  return {
+    tileMap: {
+      id: DODGE_TILE_MAP_ID,
+      width: columns,
+      height: rows,
+      tileWidth: DODGE_TILE_SIZE,
+      tileHeight: DODGE_TILE_SIZE,
+      layers: [
+        {
+          id: DODGE_TILE_LAYER_ID,
+          tiles: Array.from({ length: tileCount }, () => DODGE_PLAYFIELD_TILE_ID)
+        }
+      ]
+    },
+    layout: {
+      id: DODGE_LEVEL_ID,
+      spawns: [
+        {
+          id: DODGE_PLAYER_SPAWN_ID,
+          x: playerStart.x,
+          y: playerStart.y
+        }
+      ],
+      regions: [
+        {
+          id: DODGE_PLAYFIELD_REGION_ID,
+          ...playfield,
+          tags: ["playfield"]
+        },
+        {
+          id: DODGE_HAZARD_SPAWN_REGION_ID,
+          x: DODGE_HAZARD_SPAWN_PADDING,
+          y: -120,
+          width: Math.max(1, viewportWidth - DODGE_HAZARD_SPAWN_PADDING * 2),
+          height: 120,
+          tags: ["hazard-spawn"]
+        }
+      ]
+    }
+  };
+}
+
+function createDodgeLevelRuntime(level: {
+  tileMap?: TileMap;
+  layout?: LevelLayout;
+} | undefined): DodgeLevelRuntime {
+  if (!level?.tileMap) {
+    throw new Error("Dodge-blocks scene config did not create a TileMap.");
+  }
+
+  if (!level.layout) {
+    throw new Error("Dodge-blocks scene config did not create a LevelLayout.");
+  }
+
+  if (level.tileMap.getTile(DODGE_TILE_LAYER_ID, 0, 0) !== DODGE_PLAYFIELD_TILE_ID) {
+    throw new Error("Dodge-blocks tile map did not expose the expected playfield tile.");
+  }
+
+  const playerSpawn = level.layout.getSpawnPoint(DODGE_PLAYER_SPAWN_ID);
+  if (!playerSpawn) {
+    throw new Error(`Dodge-blocks level layout is missing spawn "${DODGE_PLAYER_SPAWN_ID}".`);
+  }
+
+  const playfield = level.layout.getRegion(DODGE_PLAYFIELD_REGION_ID);
+  if (!playfield) {
+    throw new Error(`Dodge-blocks level layout is missing region "${DODGE_PLAYFIELD_REGION_ID}".`);
+  }
+
+  return {
+    playerSpawn,
+    playfield,
+    hazardSpawnRegion: level.layout.getRegion(DODGE_HAZARD_SPAWN_REGION_ID)
+  };
+}
+
+function createPlayerStart(viewportWidth: number, viewportHeight: number): { x: number; y: number } {
+  const playfield = createPlayfieldRegion(viewportWidth, viewportHeight);
+
+  return {
+    x: clamp(120, playfield.x, playfield.x + playfield.width - DODGE_GAME_CONFIG.playerSize),
+    y: clamp(
+      viewportHeight / 2 - DODGE_GAME_CONFIG.playerSize / 2,
+      playfield.y,
+      playfield.y + playfield.height - DODGE_GAME_CONFIG.playerSize
+    )
+  };
+}
+
+function createPlayfieldRegion(viewportWidth: number, viewportHeight: number): {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+} {
+  return {
+    x: DODGE_LEVEL_PADDING,
+    y: DODGE_LEVEL_PADDING,
+    width: Math.max(DODGE_GAME_CONFIG.playerSize, viewportWidth - DODGE_LEVEL_PADDING * 2),
+    height: Math.max(DODGE_GAME_CONFIG.playerSize, viewportHeight - DODGE_LEVEL_PADDING * 2)
+  };
 }
 
 function createSpriteDataUri(fill: string, width: number, height: number, radius: number): string {

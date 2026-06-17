@@ -102,8 +102,11 @@ Default bootstrap behavior remains compatible for callers that do not opt into v
 
 - `createDodgeBlocksSceneConfig(...)` declares static boot-time content.
 - The config's `assets` section is used for async browser resource preloading.
+- The config's `level.tileMap` section declares minimal map-shaped runtime data.
+- The config's `level.layout` section declares player spawn, playfield bounds, and hazard spawn metadata.
 - The config's `entities` section creates the player's `transform`, `size`, and `collider` components.
 - The example opts into safe bootstrap through `validateBeforeBootstrap: true`.
+- The example explicitly reads the returned level helpers to configure player movement bounds and reset position.
 - Player render view, input controller, sprite animation component, and dynamic hazard spawning remain code-driven.
 
 This split is intentional. Scene config should carry stable static data; gameplay behavior and runtime-generated content should stay in code until a reusable engine abstraction emerges.

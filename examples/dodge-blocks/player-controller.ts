@@ -8,6 +8,8 @@ import {
 import { DODGE_INPUT_ACTION } from "./input-actions.js";
 
 type Bounds = {
+  x?: number;
+  y?: number;
   width: number;
   height: number;
   padding?: number;
@@ -50,9 +52,11 @@ export class PlayerControllerComponent extends Component {
     const width = size?.width ?? 0;
     const height = size?.height ?? 0;
     const padding = this.bounds.padding ?? 0;
+    const boundsX = this.bounds.x ?? 0;
+    const boundsY = this.bounds.y ?? 0;
 
-    transform.x = clamp(transform.x, padding, this.bounds.width - width - padding);
-    transform.y = clamp(transform.y, padding, this.bounds.height - height - padding);
+    transform.x = clamp(transform.x, boundsX + padding, boundsX + this.bounds.width - width - padding);
+    transform.y = clamp(transform.y, boundsY + padding, boundsY + this.bounds.height - height - padding);
   }
 }
 

@@ -34,7 +34,7 @@ For the render/view boundary across render nodes, view synchronization, sprite-c
 
 For the runtime ownership boundary across `Game`, `Scene`, browser runtime, render scene lifecycle, tooling, and downstream error policy, see [Runtime Ownership Boundary](runtime-ownership.md).
 
-`0.18.x` starts level/map runtime primitives. The Node-safe `framework` entrypoint now exposes `TileMap`, `defineTileMap(...)`, and `createTileMap(...)` for validated tile map data, defensive copying, tile lookup, and tile/world coordinate conversion. It also exposes `LevelLayout`, `defineLevelLayout(...)`, and `createLevelLayout(...)` for spawn point and rectangular region metadata. Scene config can now optionally declare `level.tileMap` and `level.layout`; successful bootstrap returns `TileMap` / `LevelLayout` helpers without generating entities, systems, render nodes, collisions, or editor state.
+`0.18.x` starts level/map runtime primitives. The Node-safe `framework` entrypoint now exposes `TileMap`, `defineTileMap(...)`, and `createTileMap(...)` for validated tile map data, defensive copying, tile lookup, and tile/world coordinate conversion. It also exposes `LevelLayout`, `defineLevelLayout(...)`, and `createLevelLayout(...)` for spawn point and rectangular region metadata. Scene config can now optionally declare `level.tileMap` and `level.layout`; successful bootstrap returns `TileMap` / `LevelLayout` helpers without generating entities, systems, render nodes, collisions, or editor state. `examples/dodge-blocks` consumes that path as a downstream-style package example by reading player spawn and playfield region metadata from the bootstrapped level layout.
 
 ---
 

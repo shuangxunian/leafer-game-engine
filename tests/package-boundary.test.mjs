@@ -215,6 +215,21 @@ test("dodge-blocks example consumes scene config bootstrap APIs", async () => {
   assert.equal(source.includes("instantiateEntityTemplate"), false, "example should bootstrap static player data from scene config");
 });
 
+test("dodge-blocks example consumes scene config level declarations", async () => {
+  const source = await readFile(new URL("dodge-blocks-scene.ts", dodgeBlocksExampleUrl), "utf8");
+  const docs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
+
+  assert.equal(source.includes("level: createDodgeBlocksLevelConfig"), true);
+  assert.equal(source.includes("{ level: sceneConfig.level, entities: sceneConfig.entities }"), true);
+  assert.equal(source.includes("getTile(DODGE_TILE_LAYER_ID, 0, 0)"), true);
+  assert.equal(source.includes("getSpawnPoint(DODGE_PLAYER_SPAWN_ID)"), true);
+  assert.equal(source.includes("getRegion(DODGE_PLAYFIELD_REGION_ID)"), true);
+  assert.equal(source.includes("createDodgeLevelRuntime"), true);
+  assert.equal(docs.includes("level.tileMap"), true);
+  assert.equal(docs.includes("level.layout"), true);
+  assert.equal(docs.includes("不会把 level/map 声明变成编辑器、地图渲染器或自动生成器"), true);
+});
+
 test("dodge-blocks docs frame tooling as read-only runtime observability", async () => {
   const source = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
 

@@ -29,6 +29,25 @@ type Hud = {
   overlayAction: RenderText;
 };
 
+type DodgeLevelRuntime = {
+  playerSpawn: {
+    x: number;
+    y: number;
+  };
+  playfield: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  hazardSpawnRegion?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+};
+
 export class DodgeGameSystem extends System {
   override priority = 200;
   private spawnTimer = 0;
@@ -44,7 +63,8 @@ export class DodgeGameSystem extends System {
     private readonly player: Entity,
     private readonly hud: Hud,
     private readonly inputActions: InputActionMap,
-    private readonly assets?: AssetRegistry
+    private readonly assets?: AssetRegistry,
+    private readonly level?: DodgeLevelRuntime
   ) {
     super(scene);
     this.flow = new GameFlow({
@@ -133,19 +153,32 @@ export class DodgeGameSystem extends System {
 
     const transform = this.player.getComponent(TransformComponent);
     if (transform) {
-      transform.x = clamp(120, 18, this.renderScene.width - PLAYER_SIZE - 18);
-      transform.y = clamp(
-        this.renderScene.height / 2 - PLAYER_SIZE / 2,
-        18,
-        this.renderScene.height - PLAYER_SIZE - 18
-      );
+      const playfield = this.level?.playfield;
+      const minX = playfield?.x ?? 18;
+      const minY = playfield?.y ?? 18;
+      const maxX = playfield
+        ? playfield.x + playfield.width - PLAYER_SIZE
+        : this.renderScene.width - PLAYER_SIZE - 18;
+      const maxY = playfield
+        ? playfield.y + playfield.height - PLAYER_SIZE
+        : this.renderScene.height - PLAYER_SIZE - 18;
+      const startX = this.level?.playerSpawn.x ?? 120;
+      const startY = this.level?.playerSpawn.y ?? this.renderScene.height / 2 - PLAYER_SIZE / 2;
+
+      transform.x = clamp(startX, minX, maxX);
+      transform.y = clamp(startY, minY, maxY);
     }
   }
 
   private spawnHazard(): void {
     const size = randomBetween(HAZARD_MIN_SIZE, HAZARD_MAX_SIZE);
-    const minX = 24;
-    const maxX = Math.max(minX, this.renderScene.width - size - 24);
+    const spawnRegion = this.level?.hazardSpawnRegion;
+    const minX = spawnRegion?.x ?? 24;
+    const maxX = spawnRegion
+      ? Math.max(minX, spawnRegion.x + spawnRegion.width - size)
+      : Math.max(minX, this.renderScene.width - size - 24);
+    const minY = spawnRegion ? spawnRegion.y - size : -size - 120;
+    const maxY = spawnRegion ? spawnRegion.y + spawnRegion.height - size : -size - 20;
     const hazard = hazardFactory.create(
       {
         scene: this.scene,
@@ -159,7 +192,7 @@ export class DodgeGameSystem extends System {
         size,
         speedY: randomBetween(HAZARD_MIN_SPEED, HAZARD_MAX_SPEED),
         x: randomBetween(minX, maxX),
-        y: -size - randomBetween(20, 120)
+        y: randomBetween(minY, maxY)
       }
     );
 
