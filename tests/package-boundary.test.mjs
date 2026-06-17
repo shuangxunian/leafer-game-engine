@@ -267,12 +267,13 @@ test("audio playback adapter stage docs are discoverable from roadmap", async ()
   const patch = await readFile(new URL("../docs/version/v0.22.1.md", import.meta.url), "utf8");
   const systemPatch = await readFile(new URL("../docs/version/v0.22.2.md", import.meta.url), "utf8");
   const browserPatch = await readFile(new URL("../docs/version/v0.22.3.md", import.meta.url), "utf8");
+  const examplePatch = await readFile(new URL("../docs/version/v0.22.4.md", import.meta.url), "utf8");
   const runtimeIndex = await readFile(new URL("../src/runtime/index.ts", import.meta.url), "utf8");
   const browserAudio = await readFile(new URL("../src/runtime/browser-audio.ts", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  for (const version of ["v0.22.0", "v0.22.1", "v0.22.2", "v0.22.3"]) {
+  for (const version of ["v0.22.0", "v0.22.1", "v0.22.2", "v0.22.3", "v0.22.4"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
   }
 
@@ -286,9 +287,14 @@ test("audio playback adapter stage docs are discoverable from roadmap", async ()
   assert.equal(systemPatch.includes("Audio Playback System Draining Integration"), true);
   assert.equal(systemPatch.includes("does not add Web Audio playback"), true);
   assert.equal(systemPatch.includes("opt-in scene/system draining integration"), true);
+  assert.equal(stage.includes("v0.22.4.md"), true);
   assert.equal(browserPatch.includes("Browser Audio Playback Adapter Baseline"), true);
   assert.equal(browserPatch.includes("opt-in browser runtime adapter"), true);
   assert.equal(browserPatch.includes("not audio authoring"), true);
+  assert.equal(examplePatch.includes("Audio Playback Example Consumption and Boundary Closeout"), true);
+  assert.equal(examplePatch.includes("downstream-style browser example"), true);
+  assert.equal(examplePatch.includes("does not add an audio editor"), true);
+  assert.equal(examplePatch.includes("playback buttons, volume sliders, mixer controls"), true);
   assert.equal(runtimeIndex.includes('export * from "./browser-audio.js"'), true);
   assert.equal(browserAudio.includes("class BrowserAudioPlaybackAdapter"), true);
   assert.equal(browserAudio.includes("new Audio(source)"), true);
