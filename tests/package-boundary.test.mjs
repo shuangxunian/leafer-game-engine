@@ -76,10 +76,15 @@ test("product docs preserve engine-package instead of editor direction", async (
   assert.equal(boundary.includes("不在本仓库里实现编辑器本体"), true);
   assert.equal(boundary.includes("只读 runtime observability"), true);
   assert.equal(boundary.includes("创建、修改、保存、发布或管理内容资产"), true);
+  assert.equal(boundary.includes("版本评审规则"), true);
+  assert.equal(boundary.includes("这是不是一个可以被前端游戏项目通过 package API 消费的运行时/框架能力"), true);
+  assert.equal(boundary.includes("不允许把“未来编辑器可能需要”当成本仓库实现编辑器 UI 的理由"), true);
   assert.equal(roadmap.includes("只读 Runtime Observability 层"), true);
   assert.equal(roadmap.includes("不写回 scene、entity、component、asset、level、input binding 或项目文件"), true);
+  assert.equal(roadmap.includes("不代表当前仓库要进入编辑器、资源管理器、关卡制作器或内容发布系统"), true);
   assert.equal(readme.includes("一个可以被前端项目安装和接入的 2D 游戏引擎依赖包"), true);
   assert.equal(readme.includes("不承载编辑器本体、编辑器 UI、资源管理器或内容生产工作流"), true);
+  assert.equal(readme.includes("后续版本评审时也按这个规则执行"), true);
 });
 
 test("level map docs ship as package-facing non-editor guidance", async () => {
@@ -205,8 +210,8 @@ test("collision query stage docs are discoverable from roadmap and package docs"
   assert.equal(publicApi.includes("`0.20.x` closed collision query runtime primitives"), true);
   assert.equal(publicApi.includes("structured collision pair query methods"), true);
   assert.equal(publicApi.includes("read-only collision snapshots"), true);
-  assert.equal(readme.includes("`v0.20.3` Collision Query Runtime Boundary Closeout"), true);
-  assert.equal(readme.includes("`0.20.x` collision query runtime primitives 阶段"), true);
+  assert.equal(readme.includes("collision query runtime boundary closeout"), true);
+  assert.equal(readme.includes("`0.20.x` collision query runtime primitives 阶段都已经收口"), true);
   assert.equal(readme.includes("都已经收口"), true);
 });
 
@@ -214,6 +219,8 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.21.0.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.21.1.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
   for (const version of ["v0.21.0", "v0.21.1"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
@@ -223,7 +230,10 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   assert.equal(stage.includes("not as a visual audio editor"), true);
   assert.equal(stage.includes("v0.21.1.md"), true);
   assert.equal(patch.includes("Audio Data Contract Baseline"), true);
-  assert.equal(patch.includes("should not add Web Audio playback"), true);
+  assert.equal(patch.includes("does not add Web Audio playback"), true);
+  assert.equal(publicApi.includes("`0.21.x` starts audio runtime primitives"), true);
+  assert.equal(publicApi.includes("AudioRuntimeState"), true);
+  assert.equal(readme.includes("`v0.21.1` Audio Data Contract Baseline"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -243,6 +253,7 @@ test("framework package subpath can be imported by package name in Node", async 
   const framework = await import(`${packageJson.name}/framework`);
 
   assertExports(framework, [
+    "AudioRuntimeState",
     "AssetRegistry",
     "BrowserPointerButtonBridge",
     "CameraSystem",
@@ -264,11 +275,16 @@ test("framework package subpath can be imported by package name in Node", async 
     "advanceSpriteAnimationPlayback",
     "addRuntimeServices",
     "bootstrapSceneFromConfig",
+    "createAudioRuntimeState",
     "createLevelLayout",
     "createTileMap",
     "createSpriteAnimationPlayback",
     "createDefaultComponentSchemaRegistry",
     "createRuntimeServices",
+    "defineAudioAsset",
+    "defineAudioChannel",
+    "defineAudioCue",
+    "defineAudioManifest",
     "defineLevelLayout",
     "defineTileMap",
     "defineKeyboardBinding",
@@ -289,6 +305,8 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.CollisionSystem.prototype.getCollisionEnterPairs, "function");
   assert.equal(typeof framework.CollisionSystem.prototype.getCollisionStayPairs, "function");
   assert.equal(typeof framework.CollisionSystem.prototype.getCollisionExitPairs, "function");
+  assert.equal(typeof framework.AudioRuntimeState.prototype.playCue, "function");
+  assert.equal(typeof framework.AudioRuntimeState.prototype.setChannelVolume, "function");
 });
 
 test("tooling package subpath can be imported by package name in Node", async () => {

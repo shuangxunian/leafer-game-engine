@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import { Scene } from "../lib/core/index.js";
 import {
+  AudioRuntimeState,
   AssetRegistry,
   BrowserPointerButtonBridge,
   CameraSystem,
@@ -20,8 +21,13 @@ import {
   ViewComponent,
   addRuntimeServices,
   advanceSpriteAnimationPlayback,
+  createAudioRuntimeState,
   createRuntimeServices,
   createSpriteAnimationPlayback,
+  defineAudioAsset,
+  defineAudioChannel,
+  defineAudioCue,
+  defineAudioManifest,
   defineKeyboardBinding,
   definePointerButtonBinding,
   defineSpriteAnimationClip,
@@ -41,6 +47,234 @@ import {
   defineLevelLayout,
   defineTileMap
 } from "../lib/framework/index.js";
+
+test("audio manifest definitions copy assets, cues and channels", () => {
+  const assetMetadata = { group: "sfx" };
+  const cueMetadata = { event: "confirm" };
+  const channelMetadata = { bus: "ui" };
+  const manifest = defineAudioManifest({
+    assets: [
+      {
+        id: "confirm-sound",
+        source: "/audio/confirm.ogg",
+        durationSeconds: 0.25,
+        preload: true,
+        metadata: assetMetadata
+      }
+    ],
+    channels: [
+      {
+        id: "ui",
+        volume: 0.8,
+        muted: false,
+        metadata: channelMetadata
+      }
+    ],
+    cues: [
+      {
+        id: "confirm",
+        assetId: "confirm-sound",
+        channelId: "ui",
+        volume: 0.7,
+        loop: false,
+        metadata: cueMetadata
+      }
+    ]
+  });
+
+  assetMetadata.group = "mutated";
+  cueMetadata.event = "mutated";
+  channelMetadata.bus = "mutated";
+
+  assert.deepEqual(manifest, {
+    assets: [
+      {
+        id: "confirm-sound",
+        source: "/audio/confirm.ogg",
+        durationSeconds: 0.25,
+        preload: true,
+        metadata: { group: "sfx" }
+      }
+    ],
+    cues: [
+      {
+        id: "confirm",
+        assetId: "confirm-sound",
+        channelId: "ui",
+        volume: 0.7,
+        loop: false,
+        metadata: { event: "confirm" }
+      }
+    ],
+    channels: [
+      {
+        id: "master",
+        volume: 1,
+        muted: false,
+        metadata: undefined
+      },
+      {
+        id: "ui",
+        volume: 0.8,
+        muted: false,
+        metadata: { bus: "ui" }
+      }
+    ]
+  });
+});
+
+test("audio definition helpers apply defaults and copy metadata", () => {
+  const metadata = { kind: "music" };
+
+  assert.deepEqual(defineAudioAsset({ id: "theme", metadata }), {
+    id: "theme",
+    preload: false,
+    metadata: { kind: "music" }
+  });
+  assert.deepEqual(defineAudioCue({ id: "theme:start", assetId: "theme" }), {
+    id: "theme:start",
+    assetId: "theme",
+    channelId: "master",
+    volume: 1,
+    loop: false,
+    metadata: undefined
+  });
+  assert.deepEqual(defineAudioChannel({ id: "music" }), {
+    id: "music",
+    volume: 1,
+    muted: false,
+    metadata: undefined
+  });
+
+  metadata.kind = "mutated";
+  assert.deepEqual(defineAudioAsset({ id: "theme", metadata }).metadata, { kind: "mutated" });
+});
+
+test("audio manifest validation reports duplicate ids and missing references", () => {
+  assert.throws(
+    () => defineAudioManifest({
+      assets: [{ id: "hit" }, { id: "hit" }]
+    }),
+    /Duplicate audio asset id "hit"/
+  );
+  assert.throws(
+    () => defineAudioManifest({
+      assets: [{ id: "hit" }],
+      cues: [{ id: "missing", assetId: "missing-asset" }]
+    }),
+    /Audio cue "missing" references missing asset "missing-asset"/
+  );
+  assert.throws(
+    () => defineAudioManifest({
+      assets: [{ id: "hit" }],
+      channels: [{ id: "sfx" }],
+      cues: [{ id: "bad-channel", assetId: "hit", channelId: "music" }]
+    }),
+    /Audio cue "bad-channel" references missing channel "music"/
+  );
+  assert.throws(
+    () => defineAudioCue({ id: "too-loud", assetId: "hit", volume: 2 }),
+    /Audio cue "too-loud" volume must be a finite number between 0 and 1/
+  );
+  assert.throws(
+    () => defineAudioAsset({ id: "silent", durationSeconds: 0 }),
+    /Audio asset "silent" durationSeconds must be greater than 0/
+  );
+});
+
+test("audio runtime state records deterministic play and stop intent", () => {
+  const audio = createAudioRuntimeState({
+    assets: [{ id: "hit", source: "/audio/hit.ogg" }],
+    channels: [{ id: "sfx", volume: 0.75 }],
+    cues: [{ id: "player:hit", assetId: "hit", channelId: "sfx", volume: 0.5 }]
+  });
+
+  assert.deepEqual(audio.playCue("player:hit"), {
+    sequence: 1,
+    type: "play",
+    cueId: "player:hit",
+    assetId: "hit",
+    channelId: "sfx",
+    volume: 0.5,
+    loop: false
+  });
+  assert.deepEqual(audio.stopCue("player:hit"), {
+    sequence: 2,
+    type: "stop",
+    cueId: "player:hit",
+    assetId: "hit",
+    channelId: "sfx"
+  });
+  assert.deepEqual(audio.stop({ channelId: "sfx" }), {
+    sequence: 3,
+    type: "stop",
+    channelId: "sfx"
+  });
+  assert.deepEqual(audio.listOperations().map((operation) => operation.sequence), [1, 2, 3]);
+  assert.throws(
+    () => audio.stop({ cueId: "player:hit", channelId: "missing" }),
+    /Audio channel "missing" is not registered/
+  );
+});
+
+test("audio runtime state tracks channel volume, mute and pause intent", () => {
+  const audio = new AudioRuntimeState({
+    assets: [{ id: "theme" }],
+    channels: [{ id: "music", volume: 0.5 }],
+    cues: [{ id: "theme:start", assetId: "theme", channelId: "music", loop: true }]
+  });
+
+  assert.deepEqual(audio.setChannelVolume("music", 0.25), {
+    sequence: 1,
+    type: "set-volume",
+    channelId: "music",
+    volume: 0.25
+  });
+  assert.deepEqual(audio.setChannelMuted("music", true), {
+    sequence: 2,
+    type: "set-muted",
+    channelId: "music",
+    muted: true
+  });
+  assert.deepEqual(audio.pauseChannel("music"), {
+    sequence: 3,
+    type: "pause",
+    channelId: "music"
+  });
+  assert.deepEqual(audio.resumeChannel("music"), {
+    sequence: 4,
+    type: "resume",
+    channelId: "music"
+  });
+  assert.deepEqual(audio.getChannel("music"), {
+    id: "music",
+    volume: 0.25,
+    muted: true
+  });
+  assert.throws(() => audio.setChannelVolume("music", -0.1), /Audio channel volume must be a finite number between 0 and 1/);
+  assert.throws(() => audio.pauseChannel("missing"), /Audio channel "missing" is not registered/);
+});
+
+test("audio runtime state returns defensive manifest, channel and operation copies", () => {
+  const audio = createAudioRuntimeState({
+    assets: [{ id: "hit", metadata: { kind: "sfx" } }],
+    cues: [{ id: "hit:play", assetId: "hit" }]
+  });
+
+  const manifest = audio.manifest;
+  const channels = audio.listChannels();
+  const play = audio.playCue("hit:play");
+  const operations = audio.listOperations();
+
+  manifest.assets[0].metadata.kind = "mutated";
+  channels[0].volume = 0;
+  play.sequence = 999;
+  operations[0].sequence = 888;
+
+  assert.deepEqual(audio.manifest.assets[0].metadata, { kind: "sfx" });
+  assert.equal(audio.getChannel("master")?.volume, 1);
+  assert.equal(audio.getLastOperation()?.sequence, 1);
+});
 
 test("state machine transitions call exit, enter and transition hooks in order", () => {
   const log = [];

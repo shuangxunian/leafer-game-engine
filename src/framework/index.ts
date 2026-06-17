@@ -1,4 +1,5 @@
 export * from "./animation.js";
+export * from "./audio.js";
 export * from "./assets.js";
 export * from "./camera.js";
 export * from "./collision.js";

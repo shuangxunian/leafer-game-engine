@@ -45,6 +45,21 @@
 - 不进入本仓库：编辑器 UI、属性编辑器、资源管理器、关卡编辑器、拖拽编排、内容保存/发布、项目管理、面向非开发者的 authoring workflow。
 - 需要谨慎命名：`inspector` 只能表示 runtime inspection data，不表示属性编辑面板；`tooling` 只能表示开发者只读辅助能力，不表示编辑器工具链。
 
+## 版本评审规则
+
+每个后续版本在进入实现前，都应该先回答一个边界问题：
+
+**这是不是一个可以被前端游戏项目通过 package API 消费的运行时/框架能力？**
+
+如果答案是否定的，或者需求主要依赖可视化创建、修改、保存、发布内容，那么它默认不属于当前仓库。
+
+具体执行时：
+
+- `docs/version/*` 里的新版本必须先说明它属于 runtime、framework、adapter、package API、只读 observability、数据契约、校验或示例消费验证中的哪一类。
+- 如果能力看起来像工具面板、检查器、schema、资源、地图、音频、动画或配置系统，文档必须显式说明它是否只读、是否会写回 runtime、是否会引入 authoring workflow。
+- 不允许把“未来编辑器可能需要”当成本仓库实现编辑器 UI 的理由；最多只能沉淀稳定数据契约、runtime snapshot 和包 API。
+- 示例项目只能证明引擎包如何被消费，不能成为编辑器、资源管理器或关卡制作项目。
+
 ## Tooling 和编辑器的边界
 
 `tooling`、`inspector`、`debug panel` 在本仓库中的定义是：
