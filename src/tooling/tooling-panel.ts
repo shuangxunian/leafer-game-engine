@@ -1,4 +1,4 @@
-import type { ComponentSchemaSnapshot, DebugSnapshot, SceneInspectorSnapshot, ToolingSnapshot } from "./debug.js";
+import type { ComponentSchemaSnapshot, DebugSnapshot, InspectorComponentSnapshot, SceneInspectorSnapshot, ToolingSnapshot } from "./debug.js";
 import { formatComponentSchemaSnapshot, formatDebugSnapshot, formatSceneInspectorSnapshot } from "./debug.js";
 
 export type ToolingPanelSection = {
@@ -51,6 +51,35 @@ export function createComponentSchemasPanelSection(snapshot: ComponentSchemaSnap
   };
 }
 
+export function createSelectedEntityDetailPanelSection(
+  snapshot: SceneInspectorSnapshot,
+  selection: Required<ToolingPanelSelection>
+): ToolingPanelSection {
+  const selected = snapshot.entities.find((entity) => entity.id === selection.selectedEntityId);
+  if (!selected) {
+    return {
+      title: "Selected Entity",
+      lines: [`Entity #${selection.selectedEntityId} missing`]
+    };
+  }
+
+  const state = selected.destroyed ? "destroyed" : selected.active ? "active" : "inactive";
+  const lines = [
+    `#${selected.id} ${selected.name}`,
+    `State ${state}`,
+    `Components ${selected.componentCount}`
+  ];
+
+  for (const component of selected.components) {
+    lines.push(formatSelectedComponentDetail(component));
+  }
+
+  return {
+    title: "Selected Entity",
+    lines
+  };
+}
+
 export function parseToolingPanelEntityRowId(line: string): number | undefined {
   const match = ENTITY_ROW_PATTERN.exec(line);
   if (!match) return undefined;
@@ -63,6 +92,14 @@ export function createToolingPanelSections(snapshot: ToolingSnapshot, selection:
 
   if (snapshot.inspector) {
     sections.push(createEntityInspectorPanelSection(snapshot.inspector, selection));
+
+    if (selection.selectedEntityId !== undefined) {
+      sections.push(
+        createSelectedEntityDetailPanelSection(snapshot.inspector, {
+          selectedEntityId: selection.selectedEntityId
+        })
+      );
+    }
   }
 
   if (snapshot.schemas) {
@@ -212,4 +249,11 @@ export class BrowserToolingPanel {
 
     return lineElement;
   }
+}
+
+function formatSelectedComponentDetail(component: InspectorComponentSnapshot): string {
+  const data = Object.entries(component.data);
+  const dataText = data.length ? ` data=${data.map(([key, value]) => `${key}:${String(value)}`).join(",")}` : "";
+
+  return `- ${component.name} enabled=${component.enabled} started=${component.started} destroyed=${component.destroyed}${dataText}`;
 }

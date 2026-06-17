@@ -9,6 +9,7 @@ import {
   createDebugSnapshot,
   createEntityInspectorPanelSection,
   createRuntimeDebugPanelSection,
+  createSelectedEntityDetailPanelSection,
   createSceneInspectorSnapshot,
   createToolingPanelSections,
   createToolingSnapshot,
@@ -376,8 +377,49 @@ test("tooling panel sections pass selected entity state to inspector sections", 
         `Selected #${entity.id} player`,
         `> #${entity.id} player [active] components=0`
       ]
+    },
+    {
+      title: "Selected Entity",
+      lines: [`#${entity.id} player`, "State active", "Components 0"]
     }
   ]);
+});
+
+test("selected entity detail panel section exposes selected component summaries", () => {
+  const scene = new Scene("SelectedEntityDetailScene");
+  const entity = scene.world.createEntity("player");
+  entity.addComponent(new InspectorFixtureComponent());
+
+  assert.deepEqual(createSelectedEntityDetailPanelSection(createSceneInspectorSnapshot(scene), { selectedEntityId: entity.id }), {
+    title: "Selected Entity",
+    lines: [
+      `#${entity.id} player`,
+      "State active",
+      "Components 1",
+      "- InspectorFixtureComponent enabled=true started=true destroyed=false data=label:hero,speed:12,visible:true,empty:null"
+    ]
+  });
+});
+
+test("selected entity detail panel section reports missing selections", () => {
+  const scene = new Scene("MissingEntityDetailScene");
+
+  assert.deepEqual(createSelectedEntityDetailPanelSection(createSceneInspectorSnapshot(scene), { selectedEntityId: 404 }), {
+    title: "Selected Entity",
+    lines: ["Entity #404 missing"]
+  });
+});
+
+test("tooling panel sections omit selected detail when no entity is selected", () => {
+  const scene = new Scene("UnselectedDetailScene");
+  scene.world.createEntity("player");
+
+  assert.equal(
+    createToolingPanelSections(createToolingSnapshot(scene, { inspector: true })).some(
+      (section) => section.title === "Selected Entity"
+    ),
+    false
+  );
 });
 
 test("tooling panel entity row parser only matches top-level entity rows", () => {
