@@ -5,6 +5,7 @@ import { Scene } from "../lib/core/index.js";
 import {
   AssetRegistry,
   CameraSystem,
+  EventBus,
   GameFlow,
   StateMachine,
   SpriteAnimationComponent,
@@ -168,6 +169,120 @@ test("game flow rejects invalid transitions without mutating state", () => {
     error: 'Cannot resume game flow from "ready" to "running".'
   });
   assert.equal(flow.getPhase(), "ready");
+});
+
+test("event bus dispatches events in subscription order with stable envelopes", () => {
+  const bus = new EventBus();
+  const log = [];
+
+  bus.on("damage", (payload, event) => {
+    log.push(`first:${payload.amount}:${event.type}:${event.sequence}`);
+  });
+  bus.on("damage", (payload, event) => {
+    log.push(`second:${payload.amount}:${event.type}:${event.sequence}`);
+  });
+
+  const firstEvent = bus.emit("damage", { amount: 3 });
+  const secondEvent = bus.emit("damage", { amount: 5 });
+
+  assert.equal(Object.isFrozen(firstEvent), true);
+  assert.deepEqual(firstEvent, {
+    type: "damage",
+    payload: { amount: 3 },
+    sequence: 1
+  });
+  assert.deepEqual(secondEvent, {
+    type: "damage",
+    payload: { amount: 5 },
+    sequence: 2
+  });
+  assert.deepEqual(log, [
+    "first:3:damage:1",
+    "second:3:damage:1",
+    "first:5:damage:2",
+    "second:5:damage:2"
+  ]);
+  assert.equal(bus.listenerCount("damage"), 2);
+  assert.equal(bus.listenerCount(), 2);
+});
+
+test("event bus supports once listeners and explicit unsubscribe handles", () => {
+  const bus = new EventBus();
+  const log = [];
+
+  const persistent = bus.on("ready", () => log.push("persistent"));
+  const once = bus.once("ready", () => log.push("once"));
+
+  assert.equal(persistent.active, true);
+  assert.equal(once.active, true);
+  assert.equal(bus.listenerCount("ready"), 2);
+
+  bus.emit("ready", undefined);
+  bus.emit("ready", undefined);
+
+  assert.deepEqual(log, ["persistent", "once", "persistent"]);
+  assert.equal(persistent.active, true);
+  assert.equal(once.active, false);
+  assert.equal(bus.listenerCount("ready"), 1);
+
+  assert.equal(persistent.unsubscribe(), true);
+  assert.equal(persistent.unsubscribe(), false);
+  assert.equal(persistent.active, false);
+  assert.equal(bus.listenerCount("ready"), 0);
+});
+
+test("event bus can remove listeners by handler and clear listeners", () => {
+  const bus = new EventBus();
+  const log = [];
+  const handler = () => log.push("handler");
+
+  bus.on("tick", handler);
+  bus.on("tick", handler);
+  bus.on("done", () => log.push("done"));
+
+  assert.equal(bus.off("tick", handler), 2);
+  assert.equal(bus.listenerCount("tick"), 0);
+  assert.equal(bus.listenerCount(), 1);
+
+  bus.emit("tick", undefined);
+  bus.emit("done", undefined);
+
+  assert.deepEqual(log, ["done"]);
+  assert.equal(bus.clear("done"), 1);
+  assert.equal(bus.clear("done"), 0);
+  assert.equal(bus.listenerCount(), 0);
+
+  bus.on("a", () => {});
+  bus.on("b", () => {});
+  assert.equal(bus.clear(), 2);
+  assert.equal(bus.listenerCount(), 0);
+});
+
+test("event bus handles listener mutation during dispatch deterministically", () => {
+  const bus = new EventBus();
+  const log = [];
+  let secondSubscription;
+
+  bus.on("tick", () => {
+    log.push("first");
+    secondSubscription.unsubscribe();
+    bus.on("tick", () => log.push("late"));
+  });
+
+  secondSubscription = bus.on("tick", () => log.push("second"));
+
+  bus.emit("tick", undefined);
+  bus.emit("tick", undefined);
+
+  assert.deepEqual(log, ["first", "first", "late"]);
+});
+
+test("event bus reports invalid listener configuration clearly", () => {
+  const bus = new EventBus();
+
+  assert.throws(() => bus.on("", () => {}), /Event type must be a non-empty string/);
+  assert.throws(() => bus.on("tick", undefined), /Event listener for "tick" must be a function/);
+  assert.throws(() => bus.emit(" ", undefined), /Event type must be a non-empty string/);
 });
 
 test("sprite frame and animation clip helpers return isolated data contracts", () => {

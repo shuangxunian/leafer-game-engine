@@ -10,6 +10,8 @@ The project is a frontend 2D game engine dependency package. It is not an editor
 
 For the animation-specific boundary across asset metadata, playback helpers, ECS behavior, render application, example consumption, and read-only tooling visibility, see [Sprite Animation Runtime Boundary](animation-runtime.md).
 
+`0.12.x` starts the runtime services baseline with a Node-safe `EventBus` for deterministic gameplay/runtime event dispatch.
+
 ---
 
 ## Package Entrypoints
@@ -20,7 +22,7 @@ Current package exports are defined in `package.json`:
 | --- | --- | --- |
 | `@shuangxunian/leafer-game-engine` | Browser-facing convenience root that re-exports engine layers | Not Node-safe yet |
 | `@shuangxunian/leafer-game-engine/core` | Engine core: game loop, scene, world, entity, component, system, time | Yes |
-| `@shuangxunian/leafer-game-engine/framework` | Reusable gameplay/framework primitives: input, collision, assets, sprite animation, schema, game flow | Yes |
+| `@shuangxunian/leafer-game-engine/framework` | Reusable gameplay/framework primitives: input, collision, assets, sprite animation, schema, game flow, event bus | Yes |
 | `@shuangxunian/leafer-game-engine/tooling` | Runtime snapshots, formatting, and panel section builders | Yes for import; DOM panel classes require browser usage |
 | `@shuangxunian/leafer-game-engine/adapter` | Browser/render adapter integration, including Leafer adapter | Browser-facing |
 | `@shuangxunian/leafer-game-engine/runtime` | Browser runtime assembly plus runtime helpers | Browser-facing today |
@@ -34,6 +36,7 @@ These imports are expected to work in Node-side tests:
 ```ts
 import { Scene } from "@shuangxunian/leafer-game-engine/core";
 import {
+  EventBus,
   GameFlow,
   SpriteAnimationComponent,
   SpriteAnimationSystem,
@@ -59,6 +62,7 @@ Use subpath entrypoints for pure engine logic, framework primitives, and Node-si
 ```ts
 import { Scene } from "@shuangxunian/leafer-game-engine/core";
 import {
+  EventBus,
   GameFlow,
   SpriteAnimationComponent,
   SpriteAnimationSystem,
@@ -67,7 +71,7 @@ import {
 import { createToolingSnapshot, formatSpriteAnimationSnapshot } from "@shuangxunian/leafer-game-engine/tooling";
 ```
 
-This keeps browser runtime dependencies out of tests that only need ECS, gameplay flow, assets, sprite animation playback/system behavior, scene config, or snapshot formatting.
+This keeps browser runtime dependencies out of tests that only need ECS, gameplay flow, event dispatch, assets, sprite animation playback/system behavior, scene config, or snapshot formatting.
 
 ---
 
@@ -103,7 +107,7 @@ They should be verified through browser/example builds until the package is spli
 ## Current Boundary Notes
 
 - `core` should stay independent from browser and rendering implementations.
-- `framework` should stay usable for logic tests and reusable gameplay primitives, including sprite animation timing helpers and component/system behavior.
+- `framework` should stay usable for logic tests and reusable gameplay primitives, including sprite animation timing helpers, component/system behavior, and deterministic runtime event dispatch.
 - `tooling` can expose structured snapshots and formatters in Node, including read-only sprite animation state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
