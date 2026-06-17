@@ -34,6 +34,8 @@ import {
   definePointerButtonBinding,
   defineSpriteAnimationClip,
   defineSpriteFrame,
+  dispatchAudioRuntimeOperation,
+  drainAudioRuntimeOperations,
   getAudioRuntime,
   getPointerButtonInputId,
   getSpriteAnimationPlaybackFrameId,
@@ -346,6 +348,107 @@ test("audio runtime system can use injected state and preserve operations", () =
 
   assert.equal(audio.listOperations().length, 1);
   assert.equal(getAudioRuntime(new Scene("NoAudioRuntimeScene")), undefined);
+});
+
+test("audio playback adapter drains runtime operations in deterministic order", async () => {
+  const audio = createAudioRuntimeState({
+    assets: [{ id: "hit" }],
+    channels: [{ id: "sfx" }],
+    cues: [{ id: "hit:play", assetId: "hit", channelId: "sfx" }]
+  });
+  const calls = [];
+  const adapter = {
+    play: (operation) => calls.push(`play:${operation.sequence}:${operation.cueId}`),
+    stop: (operation) => calls.push(`stop:${operation.sequence}:${operation.channelId}`),
+    pause: (operation) => calls.push(`pause:${operation.sequence}:${operation.channelId}`),
+    resume: (operation) => calls.push(`resume:${operation.sequence}:${operation.channelId}`),
+    setVolume: (operation) => calls.push(`setVolume:${operation.sequence}:${operation.volume}`),
+    setMuted: (operation) => calls.push(`setMuted:${operation.sequence}:${operation.muted}`)
+  };
+
+  audio.playCue("hit:play");
+  audio.stop({ channelId: "sfx" });
+  audio.pauseChannel("sfx");
+  audio.resumeChannel("sfx");
+  audio.setChannelVolume("sfx", 0.25);
+  audio.setChannelMuted("sfx", true);
+
+  assert.deepEqual(await drainAudioRuntimeOperations(audio, adapter), [
+    { sequence: 1, type: "play", status: "ok" },
+    { sequence: 2, type: "stop", status: "ok" },
+    { sequence: 3, type: "pause", status: "ok" },
+    { sequence: 4, type: "resume", status: "ok" },
+    { sequence: 5, type: "set-volume", status: "ok" },
+    { sequence: 6, type: "set-muted", status: "ok" }
+  ]);
+  assert.deepEqual(calls, [
+    "play:1:hit:play",
+    "stop:2:sfx",
+    "pause:3:sfx",
+    "resume:4:sfx",
+    "setVolume:5:0.25",
+    "setMuted:6:true"
+  ]);
+  assert.deepEqual(audio.listOperations(), []);
+});
+
+test("audio playback adapter drain reports failures and can preserve operation records", async () => {
+  const audio = createAudioRuntimeState({
+    assets: [{ id: "hit" }],
+    cues: [{ id: "hit:play", assetId: "hit" }]
+  });
+  const calls = [];
+  const adapter = {
+    play: async (operation) => {
+      calls.push(`play:${operation.sequence}`);
+    },
+    stop: (operation) => {
+      calls.push(`stop:${operation.sequence}`);
+      throw new Error("stop failed");
+    },
+    pause: () => {},
+    resume: () => {},
+    setVolume: () => {},
+    setMuted: () => {}
+  };
+
+  audio.playCue("hit:play");
+  audio.stopCue("hit:play");
+
+  assert.deepEqual(await drainAudioRuntimeOperations(audio, adapter, { clearOperations: false }), [
+    { sequence: 1, type: "play", status: "ok" },
+    { sequence: 2, type: "stop", status: "error", error: "stop failed" }
+  ]);
+  assert.deepEqual(calls, ["play:1", "stop:2"]);
+  assert.deepEqual(audio.listOperations().map((operation) => operation.sequence), [1, 2]);
+});
+
+test("audio playback dispatch helper routes operation types to adapter methods", async () => {
+  const calls = [];
+  const adapter = {
+    play: (operation) => calls.push(`play:${operation.sequence}`),
+    stop: (operation) => calls.push(`stop:${operation.sequence}`),
+    pause: (operation) => calls.push(`pause:${operation.sequence}`),
+    resume: (operation) => calls.push(`resume:${operation.sequence}`),
+    setVolume: (operation) => calls.push(`setVolume:${operation.sequence}`),
+    setMuted: (operation) => calls.push(`setMuted:${operation.sequence}`)
+  };
+
+  await dispatchAudioRuntimeOperation(adapter, { sequence: 1, type: "play" });
+  await dispatchAudioRuntimeOperation(adapter, { sequence: 2, type: "stop" });
+  await dispatchAudioRuntimeOperation(adapter, { sequence: 3, type: "pause" });
+  await dispatchAudioRuntimeOperation(adapter, { sequence: 4, type: "resume" });
+  await dispatchAudioRuntimeOperation(adapter, { sequence: 5, type: "set-volume", volume: 0.5 });
+  await dispatchAudioRuntimeOperation(adapter, { sequence: 6, type: "set-muted", muted: true });
+
+  assert.deepEqual(calls, [
+    "play:1",
+    "stop:2",
+    "pause:3",
+    "resume:4",
+    "setVolume:5",
+    "setMuted:6"
+  ]);
 });
 
 test("state machine transitions call exit, enter and transition hooks in order", () => {

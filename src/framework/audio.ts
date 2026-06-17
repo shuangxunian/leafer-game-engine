@@ -82,6 +82,28 @@ export type AudioRuntimeOperation = {
   loop?: boolean;
 };
 
+export type AudioPlaybackDispatch = void | Promise<void>;
+
+export type AudioPlaybackAdapter = {
+  play(operation: AudioRuntimeOperation): AudioPlaybackDispatch;
+  stop(operation: AudioRuntimeOperation): AudioPlaybackDispatch;
+  pause(operation: AudioRuntimeOperation): AudioPlaybackDispatch;
+  resume(operation: AudioRuntimeOperation): AudioPlaybackDispatch;
+  setVolume(operation: AudioRuntimeOperation): AudioPlaybackDispatch;
+  setMuted(operation: AudioRuntimeOperation): AudioPlaybackDispatch;
+};
+
+export type AudioPlaybackOperationResult = {
+  sequence: number;
+  type: AudioRuntimeOperationType;
+  status: "ok" | "error";
+  error?: string;
+};
+
+export type AudioPlaybackDrainOptions = {
+  clearOperations?: boolean;
+};
+
 export type AudioRuntimePlayOptions = {
   channelId?: string;
   volume?: number;
@@ -303,6 +325,39 @@ export function createAudioRuntimeState(definition: AudioManifestDefinition = {}
   return new AudioRuntimeState(definition);
 }
 
+export async function drainAudioRuntimeOperations(
+  audio: AudioRuntimeState,
+  adapter: AudioPlaybackAdapter,
+  options: AudioPlaybackDrainOptions = {}
+): Promise<AudioPlaybackOperationResult[]> {
+  const operations = audio.listOperations().sort((a, b) => a.sequence - b.sequence);
+  const results: AudioPlaybackOperationResult[] = [];
+
+  for (const operation of operations) {
+    try {
+      await dispatchAudioRuntimeOperation(adapter, operation);
+      results.push({
+        sequence: operation.sequence,
+        type: operation.type,
+        status: "ok"
+      });
+    } catch (error) {
+      results.push({
+        sequence: operation.sequence,
+        type: operation.type,
+        status: "error",
+        error: normalizeAudioPlaybackError(error)
+      });
+    }
+  }
+
+  if (options.clearOperations ?? true) {
+    audio.clearOperations();
+  }
+
+  return results;
+}
+
 export class AudioRuntimeSystem extends System {
   public readonly audio: AudioRuntimeState;
   private readonly clearOperationsOnDestroy: boolean;
@@ -338,6 +393,26 @@ export function addAudioRuntime(
 
 export function getAudioRuntime(scene: Scene): AudioRuntimeState | undefined {
   return scene.getSystem(AudioRuntimeSystem)?.audio;
+}
+
+export function dispatchAudioRuntimeOperation(
+  adapter: AudioPlaybackAdapter,
+  operation: AudioRuntimeOperation
+): AudioPlaybackDispatch {
+  switch (operation.type) {
+    case "play":
+      return adapter.play(operation);
+    case "stop":
+      return adapter.stop(operation);
+    case "pause":
+      return adapter.pause(operation);
+    case "resume":
+      return adapter.resume(operation);
+    case "set-volume":
+      return adapter.setVolume(operation);
+    case "set-muted":
+      return adapter.setMuted(operation);
+  }
 }
 
 export function defineAudioAsset(definition: AudioAssetDefinition): DefinedAudioAsset {
@@ -525,6 +600,14 @@ function copyOperation(operation: AudioRuntimeOperation): AudioRuntimeOperation 
 
 function copyMetadata(metadata: AudioMetadata | undefined): AudioMetadata | undefined {
   return metadata ? { ...metadata } : undefined;
+}
+
+function normalizeAudioPlaybackError(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
 }
 
 function assertUniqueId(id: string, seenIds: Set<string>, message: string): void {

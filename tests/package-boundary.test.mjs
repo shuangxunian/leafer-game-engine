@@ -255,13 +255,14 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   assert.equal(publicApi.includes("AudioRuntimeState"), true);
   assert.equal(publicApi.includes("AudioRuntimeSystem"), true);
   assert.equal(publicApi.includes("read-only audio runtime snapshots"), true);
-  assert.equal(readme.includes("`v0.21.4` Audio Runtime Example Consumption and Boundary Closeout"), true);
+  assert.equal(readme.includes("`0.21.x` audio runtime primitives 阶段都已经收口"), true);
 });
 
 test("audio playback adapter stage docs are discoverable from roadmap", async () => {
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.22.0.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.22.1.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
   for (const version of ["v0.22.0", "v0.22.1"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
@@ -273,6 +274,7 @@ test("audio playback adapter stage docs are discoverable from roadmap", async ()
   assert.equal(patch.includes("Audio Playback Adapter Contract Baseline"), true);
   assert.equal(patch.includes("does not add Web Audio playback"), true);
   assert.equal(patch.includes("Node-safe adapter contract"), true);
+  assert.equal(readme.includes("`v0.22.1` Audio Playback Adapter Contract Baseline"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -332,6 +334,8 @@ test("framework package subpath can be imported by package name in Node", async 
     "definePointerButtonBinding",
     "defineSpriteAnimationClip",
     "defineSpriteFrame",
+    "dispatchAudioRuntimeOperation",
+    "drainAudioRuntimeOperations",
     "getAudioRuntime",
     "getPointerButtonInputId",
     "getSpriteAnimationPlaybackFrameId",
@@ -351,6 +355,8 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.AudioRuntimeState.prototype.setChannelVolume, "function");
   assert.equal(typeof framework.AudioRuntimeSystem.prototype.destroy, "function");
   assert.equal(typeof framework.addAudioRuntime, "function");
+  assert.equal(typeof framework.dispatchAudioRuntimeOperation, "function");
+  assert.equal(typeof framework.drainAudioRuntimeOperations, "function");
   assert.equal(typeof framework.getAudioRuntime, "function");
 });
 
