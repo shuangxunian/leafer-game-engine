@@ -104,6 +104,14 @@ export type AudioPlaybackDrainOptions = {
   clearOperations?: boolean;
 };
 
+export type AudioPlaybackSystemOptions = {
+  adapter: AudioPlaybackAdapter;
+  audio?: AudioRuntimeState;
+  clearOperations?: boolean;
+  drainOnUpdate?: boolean;
+  priority?: number;
+};
+
 export type AudioRuntimePlayOptions = {
   channelId?: string;
   volume?: number;
@@ -124,6 +132,7 @@ export type AudioRuntimeSystemOptions = {
 
 export const DEFAULT_AUDIO_CHANNEL_ID = "master";
 export const DEFAULT_AUDIO_RUNTIME_SYSTEM_PRIORITY = -240;
+export const DEFAULT_AUDIO_PLAYBACK_SYSTEM_PRIORITY = -230;
 
 export class AudioRuntimeState {
   private readonly definition: DefinedAudioManifest;
@@ -384,6 +393,85 @@ export class AudioRuntimeSystem extends System {
   }
 }
 
+export class AudioPlaybackSystem extends System {
+  public readonly adapter: AudioPlaybackAdapter;
+  public readonly audio?: AudioRuntimeState;
+  private readonly clearOperations: boolean;
+  private readonly drainOnUpdate: boolean;
+  private pendingDrain?: Promise<AudioPlaybackOperationResult[]>;
+  private lastResults: AudioPlaybackOperationResult[] = [];
+
+  get clearsOperations(): boolean {
+    return this.clearOperations;
+  }
+
+  get drainsOnUpdate(): boolean {
+    return this.drainOnUpdate;
+  }
+
+  get isDraining(): boolean {
+    return this.pendingDrain !== undefined;
+  }
+
+  constructor(
+    scene: Scene,
+    options: AudioPlaybackSystemOptions
+  ) {
+    super(scene);
+
+    this.priority = options.priority ?? DEFAULT_AUDIO_PLAYBACK_SYSTEM_PRIORITY;
+    this.adapter = options.adapter;
+    this.audio = options.audio;
+    this.clearOperations = options.clearOperations ?? true;
+    this.drainOnUpdate = options.drainOnUpdate ?? true;
+  }
+
+  override update(): void {
+    if (this.drainOnUpdate) {
+      void this.drain();
+    }
+  }
+
+  drain(): Promise<AudioPlaybackOperationResult[]> {
+    if (this.pendingDrain) {
+      return this.pendingDrain;
+    }
+
+    const audio = this.resolveAudio();
+    if (!audio) {
+      this.lastResults = [];
+      return Promise.resolve([]);
+    }
+
+    const pending = drainAudioRuntimeOperations(audio, this.adapter, {
+      clearOperations: this.clearOperations
+    }).then((results) => {
+      this.lastResults = results.map(copyPlaybackResult);
+      return this.listLastResults();
+    }).finally(() => {
+      if (this.pendingDrain === pending) {
+        this.pendingDrain = undefined;
+      }
+    });
+
+    this.pendingDrain = pending;
+    return pending;
+  }
+
+  listLastResults(): AudioPlaybackOperationResult[] {
+    return this.lastResults.map(copyPlaybackResult);
+  }
+
+  override destroy(): void {
+    this.lastResults = [];
+    this.pendingDrain = undefined;
+  }
+
+  private resolveAudio(): AudioRuntimeState | undefined {
+    return this.audio ?? getAudioRuntime(this.scene);
+  }
+}
+
 export function addAudioRuntime(
   scene: Scene,
   options: AudioRuntimeSystemOptions = {}
@@ -391,8 +479,19 @@ export function addAudioRuntime(
   return scene.addSystem(new AudioRuntimeSystem(scene, options));
 }
 
+export function addAudioPlayback(
+  scene: Scene,
+  options: AudioPlaybackSystemOptions
+): AudioPlaybackSystem {
+  return scene.addSystem(new AudioPlaybackSystem(scene, options));
+}
+
 export function getAudioRuntime(scene: Scene): AudioRuntimeState | undefined {
   return scene.getSystem(AudioRuntimeSystem)?.audio;
+}
+
+export function getAudioPlayback(scene: Scene): AudioPlaybackSystem | undefined {
+  return scene.getSystem(AudioPlaybackSystem);
 }
 
 export function dispatchAudioRuntimeOperation(
@@ -600,6 +699,15 @@ function copyOperation(operation: AudioRuntimeOperation): AudioRuntimeOperation 
 
 function copyMetadata(metadata: AudioMetadata | undefined): AudioMetadata | undefined {
   return metadata ? { ...metadata } : undefined;
+}
+
+function copyPlaybackResult(result: AudioPlaybackOperationResult): AudioPlaybackOperationResult {
+  return {
+    sequence: result.sequence,
+    type: result.type,
+    status: result.status,
+    ...(result.error !== undefined ? { error: result.error } : {})
+  };
 }
 
 function normalizeAudioPlaybackError(error: unknown): string {

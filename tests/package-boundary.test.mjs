@@ -279,7 +279,7 @@ test("audio playback adapter stage docs are discoverable from roadmap", async ()
   assert.equal(systemPatch.includes("Audio Playback System Draining Integration"), true);
   assert.equal(systemPatch.includes("does not add Web Audio playback"), true);
   assert.equal(systemPatch.includes("opt-in scene/system draining integration"), true);
-  assert.equal(readme.includes("`v0.22.1` Audio Playback Adapter Contract Baseline"), true);
+  assert.equal(readme.includes("`v0.22.2` Audio Playback System Draining Integration"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -301,6 +301,7 @@ test("framework package subpath can be imported by package name in Node", async 
   assertExports(framework, [
     "AudioRuntimeState",
     "AudioRuntimeSystem",
+    "AudioPlaybackSystem",
     "AssetRegistry",
     "BrowserPointerButtonBridge",
     "CameraSystem",
@@ -319,6 +320,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "TileMap",
     "TransformComponent",
     "ViewComponent",
+    "addAudioPlayback",
     "addAudioRuntime",
     "advanceSpriteAnimationPlayback",
     "addRuntimeServices",
@@ -341,6 +343,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "defineSpriteFrame",
     "dispatchAudioRuntimeOperation",
     "drainAudioRuntimeOperations",
+    "getAudioPlayback",
     "getAudioRuntime",
     "getPointerButtonInputId",
     "getSpriteAnimationPlaybackFrameId",
@@ -359,9 +362,12 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.AudioRuntimeState.prototype.playCue, "function");
   assert.equal(typeof framework.AudioRuntimeState.prototype.setChannelVolume, "function");
   assert.equal(typeof framework.AudioRuntimeSystem.prototype.destroy, "function");
+  assert.equal(typeof framework.AudioPlaybackSystem.prototype.drain, "function");
+  assert.equal(typeof framework.addAudioPlayback, "function");
   assert.equal(typeof framework.addAudioRuntime, "function");
   assert.equal(typeof framework.dispatchAudioRuntimeOperation, "function");
   assert.equal(typeof framework.drainAudioRuntimeOperations, "function");
+  assert.equal(typeof framework.getAudioPlayback, "function");
   assert.equal(typeof framework.getAudioRuntime, "function");
 });
 

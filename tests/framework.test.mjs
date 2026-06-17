@@ -5,6 +5,7 @@ import { Scene } from "../lib/core/index.js";
 import {
   AudioRuntimeState,
   AudioRuntimeSystem,
+  AudioPlaybackSystem,
   AssetRegistry,
   BrowserPointerButtonBridge,
   CameraSystem,
@@ -21,6 +22,7 @@ import {
   TransformComponent,
   ViewComponent,
   addAudioRuntime,
+  addAudioPlayback,
   addRuntimeServices,
   advanceSpriteAnimationPlayback,
   createAudioRuntimeState,
@@ -37,6 +39,7 @@ import {
   dispatchAudioRuntimeOperation,
   drainAudioRuntimeOperations,
   getAudioRuntime,
+  getAudioPlayback,
   getPointerButtonInputId,
   getSpriteAnimationPlaybackFrameId,
   getSpriteAnimationPlaybackFrameIndex,
@@ -449,6 +452,122 @@ test("audio playback dispatch helper routes operation types to adapter methods",
     "setVolume:5",
     "setMuted:6"
   ]);
+});
+
+test("audio playback system drains scene-owned runtime operations during update", async () => {
+  const scene = new Scene("AudioPlaybackScene");
+  const runtime = addAudioRuntime(scene, {
+    manifest: {
+      assets: [{ id: "hit" }],
+      channels: [{ id: "sfx" }],
+      cues: [{ id: "hit:play", assetId: "hit", channelId: "sfx" }]
+    }
+  });
+  const calls = [];
+  const playback = addAudioPlayback(scene, {
+    adapter: {
+      play: (operation) => calls.push(`play:${operation.sequence}:${operation.cueId}`),
+      stop: (operation) => calls.push(`stop:${operation.sequence}:${operation.channelId}`),
+      pause: () => {},
+      resume: () => {},
+      setVolume: () => {},
+      setMuted: () => {}
+    }
+  });
+
+  assert.equal(playback.priority, -230);
+  assert.equal(playback.clearsOperations, true);
+  assert.equal(playback.drainsOnUpdate, true);
+  assert.equal(getAudioPlayback(scene), playback);
+
+  scene.start();
+  runtime.audio.playCue("hit:play");
+  runtime.audio.stop({ channelId: "sfx" });
+
+  scene.update(1 / 60);
+  assert.equal(playback.isDraining, true);
+  assert.deepEqual(await playback.drain(), [
+    { sequence: 1, type: "play", status: "ok" },
+    { sequence: 2, type: "stop", status: "ok" }
+  ]);
+  assert.deepEqual(calls, ["play:1:hit:play", "stop:2:sfx"]);
+  assert.deepEqual(runtime.audio.listOperations(), []);
+  assert.deepEqual(playback.listLastResults(), [
+    { sequence: 1, type: "play", status: "ok" },
+    { sequence: 2, type: "stop", status: "ok" }
+  ]);
+});
+
+test("audio playback system can use injected audio state and preserve operations", async () => {
+  const scene = new Scene("InjectedAudioPlaybackScene");
+  const audio = createAudioRuntimeState({
+    assets: [{ id: "confirm" }],
+    cues: [{ id: "confirm:play", assetId: "confirm" }]
+  });
+  const calls = [];
+  const playback = scene.addSystem(new AudioPlaybackSystem(scene, {
+    audio,
+    clearOperations: false,
+    drainOnUpdate: false,
+    priority: -111,
+    adapter: {
+      play: (operation) => calls.push(`play:${operation.sequence}`),
+      stop: () => {},
+      pause: () => {},
+      resume: () => {},
+      setVolume: () => {},
+      setMuted: () => {}
+    }
+  }));
+
+  assert.equal(playback.priority, -111);
+  assert.equal(playback.clearsOperations, false);
+  assert.equal(playback.drainsOnUpdate, false);
+
+  audio.playCue("confirm:play");
+  scene.start();
+  scene.update(1 / 60);
+
+  assert.deepEqual(calls, []);
+  assert.deepEqual(await playback.drain(), [
+    { sequence: 1, type: "play", status: "ok" }
+  ]);
+  assert.deepEqual(calls, ["play:1"]);
+  assert.deepEqual(audio.listOperations().map((operation) => operation.sequence), [1]);
+});
+
+test("audio playback system records adapter failures as copied result history", async () => {
+  const scene = new Scene("AudioPlaybackFailureScene");
+  const audio = createAudioRuntimeState({
+    assets: [{ id: "hit" }],
+    cues: [{ id: "hit:play", assetId: "hit" }]
+  });
+  const playback = addAudioPlayback(scene, {
+    audio,
+    adapter: {
+      play: () => {
+        throw new Error("play failed");
+      },
+      stop: () => {},
+      pause: () => {},
+      resume: () => {},
+      setVolume: () => {},
+      setMuted: () => {}
+    }
+  });
+
+  audio.playCue("hit:play");
+  const results = await playback.drain();
+  results[0].error = "mutated";
+
+  assert.deepEqual(playback.listLastResults(), [
+    { sequence: 1, type: "play", status: "error", error: "play failed" }
+  ]);
+
+  scene.destroy();
+
+  assert.deepEqual(playback.listLastResults(), []);
+  assert.equal(getAudioPlayback(new Scene("NoAudioPlaybackScene")), undefined);
 });
 
 test("state machine transitions call exit, enter and transition hooks in order", () => {
