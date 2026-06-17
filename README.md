@@ -31,6 +31,8 @@
 
 后续如果要做编辑器，应该是另一个上层项目或独立 package；这个仓库只提供可被前端游戏项目消费的底层能力，例如 runtime、schema、snapshot、asset loading、scene config 和 tooling API。换句话说，本仓库可以产出“未来上层工具可能会消费的数据契约”，但不承载编辑器本体、编辑器 UI、资源管理器或内容生产工作流。
 
+因此，后续版本里如果出现 `level`、`map`、`scene config`、`schema` 或 `tooling` 相关能力，它们都应先被理解为运行时数据契约、校验能力、只读观测能力或示例消费验证，而不是编辑器功能。任何需要创建、修改、保存、发布内容的 authoring workflow，都应该拆到未来独立的编辑器项目里。
+
 更完整的边界说明见 [Product Boundary](docs/product-boundary.md)。
 
 ## 发布信息
