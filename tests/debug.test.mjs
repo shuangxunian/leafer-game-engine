@@ -784,7 +784,11 @@ test("tooling panel sections expose runtime debug output", () => {
 
   assert.deepEqual(createRuntimeDebugPanelSection(createDebugSnapshot(scene)), {
     title: "Runtime Debug",
-    lines: ["Scene RuntimePanelScene", "Entities 0/0", "Systems 0"]
+    lines: [
+      "Scene RuntimePanelScene",
+      "Entities active=0 total=0 destroyed=0",
+      "Systems total=0"
+    ]
   });
 });
 
@@ -910,7 +914,11 @@ test("tooling panel sections include inspector data when requested", () => {
   assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { inspector: true })), [
     {
       title: "Runtime Debug",
-      lines: ["Scene PanelSectionsScene", "Entities 1/1", "Systems 0"]
+      lines: [
+        "Scene PanelSectionsScene",
+        "Entities active=1 total=1 destroyed=0",
+        "Systems total=0"
+      ]
     },
     {
       title: "Entity Inspector",
@@ -933,9 +941,9 @@ test("tooling panel sections include asset data when requested", () => {
       title: "Runtime Debug",
       lines: [
         "Scene AssetSectionsScene",
-        "Entities 0/0",
-        "Systems 0",
-        "Sprites 1 registered=1 loading=0 loaded=0 failed=0"
+        "Entities active=0 total=0 destroyed=0",
+        "Systems total=0",
+        "Assets sprites=1 registered=1 loading=0 loaded=0 failed=0"
       ]
     },
     {
@@ -957,8 +965,8 @@ test("tooling panel sections include flow data when requested", () => {
       title: "Runtime Debug",
       lines: [
         "Scene FlowSectionsScene",
-        "Entities 0/0",
-        "Systems 0",
+        "Entities active=0 total=0 destroyed=0",
+        "Systems total=0",
         "Flow running gameplay=active"
       ]
     },
@@ -980,7 +988,11 @@ test("tooling panel sections include animation data when requested", () => {
   assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { animations: true })), [
     {
       title: "Runtime Debug",
-      lines: ["Scene AnimationSectionsScene", "Entities 1/1", "Systems 0"]
+      lines: [
+        "Scene AnimationSectionsScene",
+        "Entities active=1 total=1 destroyed=0",
+        "Systems total=0"
+      ]
     },
     {
       title: "Sprite Animations",
@@ -1006,7 +1018,11 @@ test("tooling panel sections include input action data when requested", () => {
   assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { input, inputActions })), [
     {
       title: "Runtime Debug",
-      lines: ["Scene InputActionSectionsScene", "Entities 0/0", "Systems 0"]
+      lines: [
+        "Scene InputActionSectionsScene",
+        "Entities active=0 total=0 destroyed=0",
+        "Systems total=0"
+      ]
     },
     {
       title: "Input Actions",
@@ -1027,10 +1043,10 @@ test("tooling panel sections include runtime services data when requested", () =
       title: "Runtime Debug",
       lines: [
         "Scene RuntimeServicesSectionsScene",
-        "Entities 0/0",
-        "Systems 1",
-        "Order #0 RuntimeServicesSystem:-250",
-        "System #0 RuntimeServicesSystem lifecycle=pending enabled=true started=false destroyed=false priority=-250"
+        "Entities active=0 total=0 destroyed=0",
+        "Systems total=1",
+        "System Order",
+        "- #0 RuntimeServicesSystem priority=-250 lifecycle=pending enabled=true started=false destroyed=false"
       ]
     },
     {
@@ -1053,7 +1069,11 @@ test("tooling panel sections pass selected entity state to inspector sections", 
   assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { inspector: true }), { selectedEntityId: entity.id }), [
     {
       title: "Runtime Debug",
-      lines: ["Scene SelectedToolingSectionsScene", "Entities 1/1", "Systems 0"]
+      lines: [
+        "Scene SelectedToolingSectionsScene",
+        "Entities active=1 total=1 destroyed=0",
+        "Systems total=0"
+      ]
     },
     {
       title: "Entity Inspector",
@@ -1211,7 +1231,11 @@ test("tooling panel sections include schema data when requested", () => {
   assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { schemas: createDefaultComponentSchemaRegistry() })).slice(0, 2), [
     {
       title: "Runtime Debug",
-      lines: ["Scene PanelSchemaScene", "Entities 0/0", "Systems 0"]
+      lines: [
+        "Scene PanelSchemaScene",
+        "Entities active=0 total=0 destroyed=0",
+        "Systems total=0"
+      ]
     },
     {
       title: "Component Schemas",

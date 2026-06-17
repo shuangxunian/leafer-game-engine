@@ -15,7 +15,6 @@ import {
   formatComponentSchemaSnapshot,
   formatDebugAssetSnapshot,
   formatDebugGameFlowSnapshot,
-  formatDebugSnapshot,
   formatInputActionSnapshot,
   formatRuntimeServicesSnapshot,
   formatSceneInspectorSnapshot,
@@ -36,7 +35,7 @@ const ENTITY_ROW_PATTERN = /^[->] #(\d+) /;
 export function createRuntimeDebugPanelSection(snapshot: DebugSnapshot): ToolingPanelSection {
   return {
     title: "Runtime Debug",
-    lines: formatDebugSnapshot(snapshot)
+    lines: formatRuntimeDebugPanelLines(snapshot)
   };
 }
 
@@ -105,6 +104,51 @@ export function createRuntimeServicesPanelSection(snapshot: RuntimeServicesSnaps
     title: "Runtime Services",
     lines: formatRuntimeServicesSnapshot(snapshot)
   };
+}
+
+function formatRuntimeDebugPanelLines(snapshot: DebugSnapshot): string[] {
+  const lines = [
+    `Scene ${snapshot.sceneName}`,
+    `Entities active=${snapshot.activeEntityCount} total=${snapshot.entityCount} destroyed=${snapshot.destroyedEntityCount}`,
+    `Systems total=${snapshot.systemCount}`
+  ];
+
+  if (snapshot.time) {
+    lines.push(
+      `Time fps=${snapshot.time.fps} dt=${snapshot.time.delta.toFixed(3)}s elapsed=${snapshot.time.elapsed.toFixed(3)}s fixed=${snapshot.time.fixedDelta.toFixed(3)}s paused=${snapshot.time.paused} scale=${snapshot.time.scale}`
+    );
+  }
+
+  if (snapshot.render) {
+    lines.push(`Viewport ${snapshot.render.width}x${snapshot.render.height} layers=${formatPanelList(snapshot.render.layers)}`);
+  }
+
+  if (snapshot.assets) {
+    const { statusCounts } = snapshot.assets;
+    lines.push(
+      `Assets sprites=${snapshot.assets.spriteCount} registered=${statusCounts.registered} loading=${statusCounts.loading} loaded=${statusCounts.loaded} failed=${statusCounts.failed}`
+    );
+  }
+
+  if (snapshot.flow) {
+    lines.push(`Flow ${snapshot.flow.phase} gameplay=${snapshot.flow.canUpdateGameplay ? "active" : "inactive"}`);
+  }
+
+  if (snapshot.systems.length > 0) {
+    lines.push("System Order");
+    lines.push(
+      ...snapshot.systems.map(
+        (system) =>
+          `- #${system.order} ${system.name} priority=${system.priority} lifecycle=${system.lifecycle} enabled=${system.enabled} started=${system.started} destroyed=${system.destroyed}`
+      )
+    );
+  }
+
+  return lines;
+}
+
+function formatPanelList(values: string[]): string {
+  return values.length ? values.join(",") : "<none>";
 }
 
 export function createSelectedEntityDetailPanelSection(
