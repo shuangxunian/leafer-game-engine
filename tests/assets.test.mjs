@@ -1,7 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { AssetRegistry, loadAssetManifest, loadAssetManifestAsync } from "../lib/framework/index.js";
+import {
+  AssetRegistry,
+  createBrowserImageSpriteLoader,
+  loadAssetManifest,
+  loadAssetManifestAsync
+} from "../lib/framework/index.js";
 
 test("asset registry registers and resolves sprite assets", () => {
   const assets = new AssetRegistry();
@@ -356,3 +361,103 @@ test("async asset manifest helper can load into a registry", async () => {
   assert.deepEqual(result.loadedSprites, ["coin"]);
   assert.equal(assets.getSpriteLoadState("coin")?.status, "loaded");
 });
+
+test("browser image sprite loader resolves when an image loads", async () => {
+  const image = createFakeImage();
+  const loader = createBrowserImageSpriteLoader({
+    crossOrigin: "anonymous",
+    imageFactory: () => image
+  });
+
+  await loader({
+    id: "player",
+    type: "sprite",
+    source: "/assets/player.png"
+  });
+
+  assert.equal(image.src, "/assets/player.png");
+  assert.equal(image.crossOrigin, "anonymous");
+  assert.equal(image.onload, null);
+  assert.equal(image.onerror, null);
+});
+
+test("browser image sprite loader rejects sprites without sources", async () => {
+  const loader = createBrowserImageSpriteLoader({
+    imageFactory: () => createFakeImage()
+  });
+
+  await assert.rejects(
+    loader({
+      id: "shape",
+      type: "sprite",
+      fill: "#ffcf7a"
+    }),
+    /Sprite asset "shape" must define a source/
+  );
+});
+
+test("browser image sprite loader rejects image load errors", async () => {
+  const image = createFakeImage({ fail: true, error: new Error("404") });
+  const loader = createBrowserImageSpriteLoader({
+    imageFactory: () => image
+  });
+
+  await assert.rejects(
+    loader({
+      id: "broken",
+      type: "sprite",
+      source: "/assets/broken.png"
+    }),
+    /Failed to load sprite asset "broken" from "\/assets\/broken.png"\. 404/
+  );
+  assert.equal(image.onload, null);
+  assert.equal(image.onerror, null);
+});
+
+test("browser image sprite loader integrates with asset registry load state", async () => {
+  const assets = new AssetRegistry();
+  const image = createFakeImage();
+  assets.registerSprite({ id: "coin", source: "/assets/coin.png" });
+
+  const result = await assets.loadSprite(
+    "coin",
+    createBrowserImageSpriteLoader({
+      imageFactory: () => image
+    })
+  );
+
+  assert.deepEqual(result, {
+    id: "coin",
+    status: "loaded"
+  });
+  assert.equal(image.src, "/assets/coin.png");
+  assert.equal(assets.getSpriteLoadState("coin")?.status, "loaded");
+});
+
+function createFakeImage(options = {}) {
+  const image = {
+    crossOrigin: null,
+    onload: null,
+    onerror: null,
+    src: ""
+  };
+
+  Object.defineProperty(image, "src", {
+    get() {
+      return this.assignedSrc ?? "";
+    },
+    set(value) {
+      this.assignedSrc = value;
+      queueMicrotask(() => {
+        if (options.fail) {
+          this.onerror?.(options.error);
+          return;
+        }
+
+        this.onload?.();
+      });
+    }
+  });
+
+  return image;
+}

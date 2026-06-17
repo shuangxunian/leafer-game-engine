@@ -638,16 +638,18 @@
 
 ## 近期执行版本
 
-如果要把当前阶段收敛成一个明确版本，建议先执行：
+当前已经不再停留在最早的稳定性冲刺。近期执行重点应收敛到 `0.8.x`：
 
-- [v0.0.2](version/v0.0.2.md)
+- [v0.8.0](version/v0.8.0.md)
+- [v0.8.3](version/v0.8.3.md)
 
-这个版本的重点不是扩玩法，而是先完成一轮稳定性冲刺：
+这一阶段的重点不是扩玩法，也不是在本仓库里做编辑器，而是把资源加载作为引擎包能力补完整：
 
-- 生命周期收紧
-- runtime 单循环保护
-- world 安全增删
-- destroy 语义明确
+- async asset loading
+- manifest partial result
+- browser image loader adapter
+- asset load state visibility
+- examples 作为消费者验证资源加载路径
 - 最小回归测试落地
 
 完成这一步之后，下一阶段建议进入：
@@ -792,3 +794,11 @@
 接着建议进入：
 
 - [v0.8.2](version/v0.8.2.md)
+
+再下一步建议进入：
+
+- [v0.8.3](version/v0.8.3.md)
+
+随后建议进入：
+
+- `v0.8.4` asset loading snapshot/tooling visibility

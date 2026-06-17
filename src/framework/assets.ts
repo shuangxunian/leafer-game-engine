@@ -38,6 +38,18 @@ export type AssetLoadState = {
 
 export type SpriteAssetLoader = (asset: SpriteAsset) => Promise<void>;
 
+export type BrowserImageSpriteLoaderImage = {
+  src: string;
+  crossOrigin: string | null;
+  onload: (() => void) | null;
+  onerror: ((error?: unknown) => void) | null;
+};
+
+export type BrowserImageSpriteLoaderOptions = {
+  crossOrigin?: string | null;
+  imageFactory?: () => BrowserImageSpriteLoaderImage;
+};
+
 export type SpriteLoadResult = {
   id: string;
   status: "loaded" | "failed" | "skipped";
@@ -236,6 +248,53 @@ export async function loadAssetManifestAsync(
   };
 }
 
+export function createBrowserImageSpriteLoader(options: BrowserImageSpriteLoaderOptions = {}): SpriteAssetLoader {
+  const imageFactory = options.imageFactory ?? createDefaultBrowserImage;
+
+  return async (asset) => {
+    const source = typeof asset.source === "string" ? asset.source.trim() : "";
+    if (!source) {
+      throw new Error(`Sprite asset "${asset.id}" must define a source before browser image loading.`);
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      const image = imageFactory();
+      let settled = false;
+
+      const cleanup = () => {
+        image.onload = null;
+        image.onerror = null;
+      };
+
+      const settleLoaded = () => {
+        if (settled) return;
+
+        settled = true;
+        cleanup();
+        resolve();
+      };
+
+      const settleFailed = (error?: unknown) => {
+        if (settled) return;
+
+        settled = true;
+        cleanup();
+        const detail = error instanceof Error && error.message ? ` ${error.message}` : "";
+        reject(new Error(`Failed to load sprite asset "${asset.id}" from "${source}".${detail}`));
+      };
+
+      image.onload = settleLoaded;
+      image.onerror = settleFailed;
+
+      if (options.crossOrigin !== undefined) {
+        image.crossOrigin = options.crossOrigin;
+      }
+
+      image.src = source;
+    });
+  };
+}
+
 function validateManifestSprites(sprites: AssetManifestSprite[]): AssetLoadError[] {
   const seenSprites = new Set<string>();
   const errors: AssetLoadError[] = [];
@@ -264,4 +323,12 @@ function validateManifestSprites(sprites: AssetManifestSprite[]): AssetLoadError
   }
 
   return errors;
+}
+
+function createDefaultBrowserImage(): BrowserImageSpriteLoaderImage {
+  if (typeof Image === "undefined") {
+    throw new Error("Browser image sprite loading requires global Image or an imageFactory option.");
+  }
+
+  return new Image() as unknown as BrowserImageSpriteLoaderImage;
 }

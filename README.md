@@ -6,18 +6,18 @@
 
 ## 当前进度
 
-当前项目已经完成到 `0.7.x` interactive runtime inspector 阶段收口。
+当前项目已经推进到 `v0.8.3` Browser Image Sprite Loader Adapter，`0.7.x` interactive runtime inspector 已经收口。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
 - `core` 已具备主循环、场景、实体、组件、系统、时间步进和生命周期管理。
-- `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、相机、资源注册、实体工厂、场景配置和组件 schema 等基础能力。
+- `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、相机、资源注册、异步资源加载状态、实体工厂、场景配置和组件 schema 等基础能力。
 - `adapter` 已经通过渲染抽象接入 Leafer，并把显示层和游戏规则层分开。
 - `runtime` 已经可以在浏览器里装配渲染、场景和动画帧循环。
 - `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail 和 schema-assisted component detail 展示。
 - `examples/dodge-blocks` 作为集成样例，用来验证引擎分层和运行时能力。
 
-当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理。
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，并开始补齐更正式的资源加载管线。
 
 ## 产品边界
 
@@ -25,8 +25,8 @@
 
 **一个可以被前端项目安装和接入的 2D 游戏引擎依赖包。**
 
-它不是编辑器项目，也不计划在这个仓库里实现可视化编辑器。  
-后续如果要做编辑器，应该是另一个上层项目或独立 package；这里最多提供 runtime、schema、snapshot、tooling API 等可被上层工具消费的能力。
+它不是编辑器项目，也不计划在这个仓库里实现可视化编辑器、资产面板、拖拽搭场景或关卡编辑工作流。  
+后续如果要做编辑器，应该是另一个上层项目或独立 package；这里最多提供 runtime、schema、snapshot、asset loading、tooling API 等可被上层工具消费的能力。
 
 ## 发布信息
 
@@ -534,7 +534,7 @@ import {
 
 ## 当前已经实现了什么
 
-当前已经完成了 `0.1.x` 到 `0.7.x` 的连续整理，重点从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过交互式 runtime inspector 辅助开发”。
+当前已经完成了 `0.1.x` 到 `0.7.x` 的连续整理，并进入 `0.8.x` 资源加载管线阶段。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过交互式 runtime inspector 辅助开发”，现在正在继续补齐正式引擎包需要的 asset pipeline。
 
 - Core 稳定性
   - `Game`、`Time`、`Scene`、`World`、`Entity`、`Component`、`System` 已经形成基础骨架。
@@ -548,7 +548,7 @@ import {
   - 已有 `ColliderComponent` 和 `CollisionSystem`，支持 `enter / stay / exit` 语义和 layer 过滤。
   - 已有 `StateMachine`，可以把示例里的状态流沉淀成通用能力。
   - 已有 `CameraSystem`，能驱动 world layer 位移、缩放和跟随实体。
-  - 已有 `AssetRegistry`，支持 typed sprite asset 注册、查找和缺失时报错。
+  - 已有 `AssetRegistry`，支持 typed sprite asset 注册、查找、缺失时报错、异步加载状态和 manifest 部分加载结果。
   - 已有 `defineEntityFactory`，支持把实体创建逻辑从 sample 中抽出来复用。
   - 已有 asset manifest、entity template、scene config 和 component schema registry，开始具备数据驱动内容管线基础。
 
@@ -571,7 +571,7 @@ import {
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
-  - 当前测试数为 69 个。
+  - 当前测试数为 82 个。
   - `npm run check`、`npm test`、`npm run build:example` 是当前主要验证入口。
 
 ## 当前 demo 的意义
@@ -630,7 +630,7 @@ npm pack
 
 如果我们把目标定义为“做游戏引擎”，那接下来的重点不应该是继续打磨 demo 外观，而应该继续把当前已经有的 runtime、framework、tooling 往产品化方向推进。
 
-`0.7.x` 已经把 interactive runtime inspector 阶段收口了。下一阶段更值得优先投入的是这些方向：
+`0.7.x` 已经把 interactive runtime inspector 阶段收口了，当前 `0.8.x` 正在推进资源加载和 asset pipeline。下一阶段更值得优先投入的是这些方向：
 
 1. 更完整的 runtime tooling / inspector
    - 系统开关和运行时状态查看
