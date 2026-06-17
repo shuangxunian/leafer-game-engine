@@ -695,7 +695,7 @@ npm run verify:package
 
 如果我们把目标定义为“做游戏引擎”，那接下来的重点不应该是继续打磨 demo 外观，而应该继续把当前已经有的 runtime、framework、tooling 往产品化方向推进。
 
-`0.7.x` 已经把 selection-aware runtime tooling 阶段收口了，`0.8.x` 完成了资源加载和 asset pipeline 基线，`0.9.x` 完成了 Game Flow 和 Scene Lifecycle 基线，`0.10.x` 完成了 package-facing API boundary 基线，`0.11.x` 已经把 sprite animation 从数据契约推进到 playback helper、ECS component/system、示例集成、tooling 可见性和 runtime 边界文档，`0.12.x` 已经完成 deterministic EventBus、RuntimeScheduler、opt-in scene runtime services、runtime services tooling visibility 和 runtime services 边界文档，`0.13.x` 已经完成 input action mapping、示例集成、tooling visibility 和边界文档。下一阶段更值得优先投入的是这些方向：
+`0.7.x` 已经把 selection-aware runtime tooling 阶段收口了，`0.8.x` 完成了资源加载和 asset pipeline 基线，`0.9.x` 完成了 Game Flow 和 Scene Lifecycle 基线，`0.10.x` 完成了 package-facing API boundary 基线，`0.11.x` 已经把 sprite animation 从数据契约推进到 playback helper、ECS component/system、示例集成、tooling 可见性和 runtime 边界文档，`0.12.x` 已经完成 deterministic EventBus、RuntimeScheduler、opt-in scene runtime services、runtime services tooling visibility 和 runtime services 边界文档，`0.13.x` 已经完成 input action mapping、示例集成、tooling visibility 和边界文档。下一阶段已经规划为 [v0.14.0](docs/version/v0.14.0.md) Runtime Observability Hardening Sprint，更值得优先投入的是这些方向：
 
 1. 更克制的只读 runtime observability / inspector
    - 系统状态查看
