@@ -20,6 +20,7 @@
 - `GameFlow` 是否能管理 ready / running / paused / ended
 - 玩家是否能被限制在当前 viewport 内移动
 - tooling panel 是否能分区显示 runtime debug + assets + game flow + entity inspector + component schema 数据
+- Runtime Debug panel 是否能显示 time、viewport、entity counts、system order 和 system lifecycle 只读状态
 - tooling panel 是否能显示 sprite animation runtime 状态
 - tooling panel 是否能显示 input action mappings 和当前 action state
 - tooling panel 是否能点击 entity 行并显示选中状态
@@ -62,6 +63,7 @@ npm run dev
   - 挂载 keyboard bridge
   - 挂载 browser tooling panel
   - 分区显示 runtime debug、assets、game flow、sprite animations、input actions、entity inspector 和 component schema 信息
+  - Runtime Debug section 展示 time / viewport / entity counts / system order / lifecycle 等只读状态
   - 支持在 panel 中点击 entity 行进行选择
   - 选择 entity 后显示 selected entity detail section
   - selected detail 会结合 component schema metadata 展示字段类型、默认值和当前值
@@ -118,6 +120,8 @@ bootDodgeBlocksExample(runtime).catch((error) => {
 
 `bootDodgeBlocksExample(...)` 里会创建 scene，通过 scene lifecycle helper 预加载 assets 并启动 runtime、绑定键盘输入，再把包含 asset state、game flow state、sprite animation state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
 
+Runtime Debug panel 会消费 `runtime.game` 和 `runtime.renderScene`，因此可以显示时间步进、viewport、entity counts、system totals、system order 和 system lifecycle。这里的 tooling 仍然只是观察 runtime 状态，不提供系统开关、组件改值、场景编辑或资产管理入口。
+
 示例代码使用 `@shuangxunian/leafer-game-engine` package-style imports 来模拟真实消费者项目；在本仓库开发时，这些导入会通过 Vite alias 和 TypeScript paths 指回 `src`。
 
 ## What This Example Proves
@@ -143,6 +147,7 @@ browser runtime
 - 示例通过 `loadManifestAsync(...)` 在 gameplay 启动前完成资源加载
 - 示例通过 `startSceneWithLifecycle(...)` 复用 runtime 层的 prepare / ready / running / failed 启动边界
 - tooling panel 的 `Assets` section 可以显示 player / hazard 的 loaded 状态
+- tooling panel 的 `Runtime Debug` section 可以显示 time / viewport / entity counts / system order / lifecycle 只读摘要
 - tooling panel 的 `Sprite Animations` section 可以显示 player 当前 clip / frame / sprite / playback 状态
 - tooling panel 的 `Input Actions` section 可以显示 action id、keyboard bindings、pressed 和 justPressed
 - player 的 `transform`、`size`、`collider` 来自 `EntityTemplate`

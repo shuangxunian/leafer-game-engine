@@ -146,3 +146,20 @@ test("dodge-blocks gameplay consumes input action mappings instead of direct phy
     assert.equal(source.includes("wasPressed(\""), false, `${file} should not query raw physical just-pressed keys`);
   }
 });
+
+test("dodge-blocks example passes runtime debug context into tooling snapshots", async () => {
+  const source = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
+
+  assert.equal(source.includes("createToolingSnapshot(scene"), true);
+  assert.equal(source.includes("game: runtime.game"), true, "boot should pass Game time state into tooling snapshots");
+  assert.equal(source.includes("renderScene: runtime.renderScene"), true, "boot should pass viewport state into tooling snapshots");
+});
+
+test("dodge-blocks docs frame tooling as read-only runtime observability", async () => {
+  const source = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
+
+  assert.equal(source.includes("Runtime Debug panel"), true);
+  assert.equal(source.includes("system order"), true);
+  assert.equal(source.includes("system lifecycle"), true);
+  assert.equal(source.includes("不提供系统开关、组件改值、场景编辑或资产管理入口"), true);
+});
