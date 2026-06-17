@@ -1,6 +1,11 @@
 import type { BrowserRuntime } from "@shuangxunian/leafer-game-engine/runtime";
 import { startSceneWithLifecycle } from "@shuangxunian/leafer-game-engine/runtime";
-import { BrowserKeyboardBridge, InputSystem, createDefaultComponentSchemaRegistry } from "@shuangxunian/leafer-game-engine/framework";
+import {
+  BrowserKeyboardBridge,
+  BrowserPointerButtonBridge,
+  InputSystem,
+  createDefaultComponentSchemaRegistry
+} from "@shuangxunian/leafer-game-engine/framework";
 import { DodgeBlocksScene } from "./dodge-blocks-scene.js";
 import { DodgeGameSystem } from "./dodge-game-system.js";
 import { BrowserToolingPanel, createToolingSnapshot } from "@shuangxunian/leafer-game-engine/tooling";
@@ -23,6 +28,8 @@ export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<v
 
   const keyboard = new BrowserKeyboardBridge(input);
   keyboard.attach();
+  const pointer = new BrowserPointerButtonBridge(input);
+  pointer.attach();
   const toolingPanel = new BrowserToolingPanel();
   const schemas = createDefaultComponentSchemaRegistry();
   const createSnapshot = () =>
@@ -47,6 +54,7 @@ export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<v
     window.clearInterval(toolingTimer);
     toolingPanel.detach();
     keyboard.detach();
+    pointer.detach();
     destroyScene();
   };
 

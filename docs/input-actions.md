@@ -134,6 +134,7 @@ This keeps gameplay systems stable even if a downstream game changes keyboard bi
 `examples/dodge-blocks` consumes input actions as a downstream-style game:
 
 - physical keyboard keys are declared in `input-actions.ts`
+- primary pointer button input can also trigger `confirm`
 - player movement reads `move:left`, `move:right`, `move:up`, and `move:down`
 - game flow controls read `confirm` and `pause`
 - gameplay files do not query raw physical keys directly

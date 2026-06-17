@@ -1,6 +1,7 @@
 import {
   InputActionMap,
-  defineKeyboardBinding
+  defineKeyboardBinding,
+  definePointerButtonBinding
 } from "@shuangxunian/leafer-game-engine/framework";
 
 export const DODGE_INPUT_ACTION = {
@@ -34,7 +35,11 @@ export function createDodgeInputActions(): InputActionMap {
     },
     {
       id: DODGE_INPUT_ACTION.Confirm,
-      bindings: [defineKeyboardBinding(" "), defineKeyboardBinding("enter")]
+      bindings: [
+        defineKeyboardBinding(" "),
+        defineKeyboardBinding("enter"),
+        definePointerButtonBinding("primary")
+      ]
     },
     {
       id: DODGE_INPUT_ACTION.Pause,

@@ -20,7 +20,7 @@
 - tile map 是否能作为最小运行时数据契约被示例消费
 - transform / size / view 是否能同步到渲染层
 - input 是否能驱动玩家移动
-- input action mapping 是否能把物理键盘输入转换成语义玩法动作
+- input action mapping 是否能把物理键盘和 pointer button input 转换成语义玩法动作
 - collision 是否能判断玩家和障碍物接触
 - `GameFlow` 是否能管理 ready / running / paused / ended
 - 玩家是否能被限制在当前 viewport 内移动
@@ -53,7 +53,7 @@ npm run dev
 - `move:right`：`D` 或方向右键
 - `move:up`：`W` 或方向上键
 - `move:down`：`S` 或方向下键
-- `confirm`：`Space` 或 `Enter`
+- `confirm`：`Space`、`Enter` 或 primary pointer button
 - `pause`：`P` 或 `Esc`
 
 ## File Map
@@ -65,7 +65,7 @@ npm run dev
 - `boot.ts`
   - 启动 `DodgeBlocksScene`
   - 通过 `startSceneWithLifecycle(...)` 在 runtime start 前预加载 asset manifest
-  - 挂载 keyboard bridge
+  - 挂载 keyboard bridge 和 pointer button bridge
   - 挂载 browser tooling panel
   - 分区显示 runtime debug、assets、game flow、sprite animations、input actions、entity inspector 和 component schema 信息
   - Runtime Debug section 展示 time / viewport / entity counts / system order / lifecycle 等只读状态
@@ -103,7 +103,7 @@ npm run dev
 
 - `input-actions.ts`
   - 定义示例级语义动作
-  - 把 `WASD`、方向键、`Space`、`Enter`、`P` 和 `Esc` 映射到 gameplay actions
+  - 把 `WASD`、方向键、`Space`、`Enter`、primary pointer button、`P` 和 `Esc` 映射到 gameplay actions
 
 - `styles.css`
   - 示例页面的基础外观
@@ -125,7 +125,7 @@ bootDodgeBlocksExample(runtime).catch((error) => {
 });
 ```
 
-`bootDodgeBlocksExample(...)` 里会创建 scene，通过 scene lifecycle helper 预加载 assets 并启动 runtime、绑定键盘输入，再把包含 asset state、game flow state、sprite animation state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
+`bootDodgeBlocksExample(...)` 里会创建 scene，通过 scene lifecycle helper 预加载 assets 并启动 runtime、绑定键盘和 pointer button 输入，再把包含 asset state、game flow state、sprite animation state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
 
 Runtime Debug panel 会消费 `runtime.game` 和 `runtime.renderScene`，因此可以显示时间步进、viewport、entity counts、system totals、system order 和 system lifecycle。这里的 tooling 仍然只是观察 runtime 状态，不提供系统开关、组件改值、场景编辑或资产管理入口。
 
@@ -166,6 +166,7 @@ browser runtime
 - player movement bounds 读取 scene config level layout 的 `playfield` region
 - player 的 `ViewComponent`、`PlayerControllerComponent` 和 `SpriteAnimationComponent` 仍在代码中装配
 - player movement、start/restart 和 pause/resume 使用 `InputActionMap`，而不是在 gameplay 代码里硬编码物理键
+- `confirm` 同时消费 keyboard 和 primary pointer button bindings，验证 browser pointer bridge 到 semantic action 的链路
 - gameplay phase 使用 framework `GameFlow`，而不是示例内的本地 phase state machine
 - tooling panel 的 `Game Flow` section 可以显示当前 ready / running / paused / ended 状态
 - hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度，不适合放进静态 scene config；scene config 只声明 `hazard-spawn` region 作为运行时参考数据

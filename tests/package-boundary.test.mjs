@@ -148,10 +148,11 @@ test("pointer input stage docs are discoverable from roadmap and package docs", 
   const stage = await readFile(new URL("../docs/version/v0.19.0.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.19.1.md", import.meta.url), "utf8");
   const bridgePatch = await readFile(new URL("../docs/version/v0.19.2.md", import.meta.url), "utf8");
+  const examplePatch = await readFile(new URL("../docs/version/v0.19.3.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  for (const version of ["v0.19.0", "v0.19.1", "v0.19.2"]) {
+  for (const version of ["v0.19.0", "v0.19.1", "v0.19.2", "v0.19.3"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
   }
 
@@ -160,9 +161,12 @@ test("pointer input stage docs are discoverable from roadmap and package docs", 
   assert.equal(stage.includes("v0.19.2.md"), true);
   assert.equal(bridgePatch.includes("Browser Pointer Button Bridge Baseline"), true);
   assert.equal(bridgePatch.includes("does not add pointer position tracking"), true);
+  assert.equal(stage.includes("v0.19.3.md"), true);
+  assert.equal(examplePatch.includes("Dodge Blocks Pointer Action Consumption"), true);
+  assert.equal(examplePatch.includes("does not add pointer position tracking"), true);
   assert.equal(publicApi.includes("`0.19.x` starts pointer/input runtime primitives"), true);
   assert.equal(publicApi.includes("BrowserPointerButtonBridge"), true);
-  assert.equal(readme.includes("`v0.19.2` Browser Pointer Button Bridge Baseline"), true);
+  assert.equal(readme.includes("`v0.19.3` Dodge Blocks Pointer Action Consumption"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -269,6 +273,20 @@ test("dodge-blocks gameplay consumes input action mappings instead of direct phy
     assert.equal(source.includes("isPressed(\""), false, `${file} should not query raw physical pressed keys`);
     assert.equal(source.includes("wasPressed(\""), false, `${file} should not query raw physical just-pressed keys`);
   }
+});
+
+test("dodge-blocks example consumes pointer button input through semantic actions", async () => {
+  const boot = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
+  const actions = await readFile(new URL("input-actions.ts", dodgeBlocksExampleUrl), "utf8");
+  const docs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
+
+  assert.equal(boot.includes("BrowserPointerButtonBridge"), true);
+  assert.equal(boot.includes("pointer.attach()"), true);
+  assert.equal(boot.includes("pointer.detach()"), true);
+  assert.equal(actions.includes("definePointerButtonBinding"), true);
+  assert.equal(actions.includes('definePointerButtonBinding("primary")'), true);
+  assert.equal(docs.includes("primary pointer button"), true);
+  assert.equal(docs.includes("browser pointer bridge"), true);
 });
 
 test("dodge-blocks example passes runtime debug context into tooling snapshots", async () => {

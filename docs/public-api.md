@@ -38,7 +38,7 @@ For the runtime ownership boundary across `Game`, `Scene`, browser runtime, rend
 
 For the level/map boundary across tile data, coordinate helpers, spawn/region metadata, scene config integration, example consumption, and non-editor data-contract limits, see [Level/Map Runtime Boundary](level-map.md).
 
-`0.19.x` starts pointer/input runtime primitives. The `framework` entrypoint now exposes `definePointerButtonBinding(...)`, `normalizePointerButton(...)`, and `getPointerButtonInputId(...)` so downstream games can bind semantic input actions to primary, secondary, or auxiliary pointer buttons. It also exposes `BrowserPointerButtonBridge` so browser games can write normalized pointer button state into `InputSystem`. Tooling formatting displays pointer button bindings as read-only input action state.
+`0.19.x` starts pointer/input runtime primitives. The `framework` entrypoint now exposes `definePointerButtonBinding(...)`, `normalizePointerButton(...)`, and `getPointerButtonInputId(...)` so downstream games can bind semantic input actions to primary, secondary, or auxiliary pointer buttons. It also exposes `BrowserPointerButtonBridge` so browser games can write normalized pointer button state into `InputSystem`. `examples/dodge-blocks` consumes this path by binding `confirm` to primary pointer input. Tooling formatting displays pointer button bindings as read-only input action state.
 
 ---
 
