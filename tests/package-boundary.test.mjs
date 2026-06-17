@@ -31,7 +31,7 @@ test("package export map exposes the documented public entrypoints", () => {
 });
 
 test("package publish files include library output and docs", () => {
-  assert.deepEqual(packageJson.files, ["lib", "README.md", "LICENSE"]);
+  assert.deepEqual(packageJson.files, ["lib", "docs/public-api.md", "README.md", "LICENSE"]);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {

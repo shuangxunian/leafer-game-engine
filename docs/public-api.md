@@ -77,3 +77,23 @@ They should be verified through browser/example builds until the package is spli
 - `adapter` is render-implementation-facing and can depend on Leafer.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
 - Future `0.10.x` work should make root/subpath guidance clearer and may split browser runtime APIs into more explicit entrypoints.
+
+---
+
+## Package Artifact Verification
+
+Before publishing, run:
+
+```bash
+npm run verify:package
+```
+
+This command builds the library through `npm pack --dry-run --json` and checks the package artifact includes:
+
+- `package.json`
+- `README.md`
+- `LICENSE`
+- `docs/public-api.md`
+- all JS and type declaration targets from `package.json` exports
+
+It also checks that development-only paths such as `src`, `tests`, `examples`, `dist`, `scripts`, and `node_modules` are not included.

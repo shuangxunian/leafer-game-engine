@@ -33,6 +33,7 @@
   },
   "files": [
     "lib",
+    "docs/public-api.md",
     "README.md",
     "LICENSE"
   ],
@@ -46,6 +47,7 @@
     "build:example": "vite build",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test tests/*.test.mjs",
+    "verify:package": "node scripts/verify-package.mjs",
     "prepack": "npm run build:lib"
   },
   "devDependencies": {

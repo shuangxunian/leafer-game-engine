@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.10.2` Root And Subpath Import Guidance，`0.8.x` resource loading baseline 和 `0.9.x` game-flow/scene-lifecycle 阶段都已经收口，`0.10.x` 正在整理 package-facing API 边界。
+当前项目已经推进到 `v0.10.3` Package Artifact Verification，`0.8.x` resource loading baseline 和 `0.9.x` game-flow/scene-lifecycle 阶段都已经收口，`0.10.x` 正在整理 package-facing API 边界。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -652,6 +652,12 @@ npm run build:lib
 
 ```bash
 npm pack
+```
+
+如果想在发布前检查 npm 包产物是否包含正确文件、排除开发目录：
+
+```bash
+npm run verify:package
 ```
 
 ## 这个项目接下来更应该做什么
