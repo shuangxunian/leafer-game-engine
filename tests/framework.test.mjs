@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { Scene } from "../lib/core/index.js";
 import {
   AssetRegistry,
+  BrowserPointerButtonBridge,
   CameraSystem,
   EventBus,
   GameFlow,
@@ -271,6 +272,67 @@ test("input action map supports pointer button bindings", () => {
 
   assert.throws(() => definePointerButtonBinding("tertiary"), /Unsupported pointer button "tertiary"/);
   assert.throws(() => definePointerButtonBinding(""), /Pointer button input binding must be a non-empty string/);
+});
+
+test("browser pointer button bridge writes normalized button state into input system", () => {
+  const input = new InputSystem();
+  const target = createFakeEventTarget();
+  const bridge = new BrowserPointerButtonBridge(input, target);
+  const actions = new InputActionMap([
+    {
+      id: "select",
+      bindings: [definePointerButtonBinding("primary")]
+    }
+  ]);
+
+  bridge.attach();
+  bridge.attach();
+  assert.equal(target.listenerCount("pointerdown"), 1);
+
+  target.dispatch("pointerdown", { button: 0 });
+  assert.equal(input.isPressed(getPointerButtonInputId("primary")), true);
+  assert.equal(input.wasPressed(getPointerButtonInputId("primary")), true);
+  assert.equal(actions.isPressed(input, "select"), true);
+
+  input.lateUpdate();
+  target.dispatch("pointerdown", { button: 0 });
+  assert.equal(input.wasPressed(getPointerButtonInputId("primary")), false);
+
+  target.dispatch("pointerup", { button: 0 });
+  assert.equal(input.isPressed(getPointerButtonInputId("primary")), false);
+  assert.equal(actions.isPressed(input, "select"), false);
+});
+
+test("browser pointer button bridge handles secondary, auxiliary, cancel, blur and detach cleanup", () => {
+  const input = new InputSystem();
+  const target = createFakeEventTarget();
+  const bridge = new BrowserPointerButtonBridge(input, target);
+
+  bridge.attach();
+  target.dispatch("pointerdown", { button: 2 });
+  target.dispatch("pointerdown", { button: 1 });
+  target.dispatch("pointerdown", { button: 3 });
+
+  assert.equal(input.isPressed(getPointerButtonInputId("secondary")), true);
+  assert.equal(input.isPressed(getPointerButtonInputId("auxiliary")), true);
+  assert.equal(input.isPressed("pointer:unsupported"), false);
+
+  target.dispatch("pointercancel", { button: -1 });
+  assert.equal(input.isPressed(getPointerButtonInputId("secondary")), false);
+  assert.equal(input.isPressed(getPointerButtonInputId("auxiliary")), false);
+
+  target.dispatch("pointerdown", { button: 0 });
+  target.dispatch("blur", {});
+  assert.equal(input.isPressed(getPointerButtonInputId("primary")), false);
+
+  target.dispatch("pointerdown", { button: 0 });
+  bridge.detach();
+  bridge.detach();
+  assert.equal(input.isPressed(getPointerButtonInputId("primary")), false);
+  assert.equal(target.listenerCount("pointerdown"), 0);
+
+  target.dispatch("pointerdown", { button: 0 });
+  assert.equal(input.isPressed(getPointerButtonInputId("primary")), false);
 });
 
 test("tile map data contract copies layers and supports tile lookup", () => {
@@ -1372,6 +1434,33 @@ function createAnimationAssets() {
   });
 
   return assets;
+}
+
+function createFakeEventTarget() {
+  const listeners = new Map();
+
+  return {
+    addEventListener(type, listener) {
+      const current = listeners.get(type) ?? new Set();
+      current.add(listener);
+      listeners.set(type, current);
+    },
+    removeEventListener(type, listener) {
+      listeners.get(type)?.delete(listener);
+    },
+    dispatch(type, event) {
+      for (const listener of listeners.get(type) ?? []) {
+        if (typeof listener === "function") {
+          listener(event);
+        } else {
+          listener.handleEvent(event);
+        }
+      }
+    },
+    listenerCount(type) {
+      return listeners.get(type)?.size ?? 0;
+    }
+  };
 }
 
 function createFakeSpriteNode() {

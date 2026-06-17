@@ -147,17 +147,22 @@ test("pointer input stage docs are discoverable from roadmap and package docs", 
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.19.0.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.19.1.md", import.meta.url), "utf8");
+  const bridgePatch = await readFile(new URL("../docs/version/v0.19.2.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  for (const version of ["v0.19.0", "v0.19.1"]) {
+  for (const version of ["v0.19.0", "v0.19.1", "v0.19.2"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
   }
 
   assert.equal(stage.includes("Pointer/Input Runtime Primitives Sprint"), true);
   assert.equal(patch.includes("Pointer Button Action Binding Baseline"), true);
+  assert.equal(stage.includes("v0.19.2.md"), true);
+  assert.equal(bridgePatch.includes("Browser Pointer Button Bridge Baseline"), true);
+  assert.equal(bridgePatch.includes("does not add pointer position tracking"), true);
   assert.equal(publicApi.includes("`0.19.x` starts pointer/input runtime primitives"), true);
-  assert.equal(readme.includes("`v0.19.1` Pointer Button Action Binding Baseline"), true);
+  assert.equal(publicApi.includes("BrowserPointerButtonBridge"), true);
+  assert.equal(readme.includes("`v0.19.2` Browser Pointer Button Bridge Baseline"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -178,6 +183,7 @@ test("framework package subpath can be imported by package name in Node", async 
 
   assertExports(framework, [
     "AssetRegistry",
+    "BrowserPointerButtonBridge",
     "CameraSystem",
     "CollisionSystem",
     "EventBus",

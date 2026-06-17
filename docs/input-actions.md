@@ -22,7 +22,7 @@ It is not a keybinding settings screen, visual editor UI, profile persistence sy
 - `wasPressed(...)`
 - `lateUpdate(...)` cleanup for just-pressed state
 
-The browser keyboard bridge writes into this system by normalizing `KeyboardEvent.key` values through the same lowercase helper used by action bindings. Pointer button bindings use deterministic raw input ids such as `pointer:primary`.
+The browser keyboard bridge writes into this system by normalizing `KeyboardEvent.key` values through the same lowercase helper used by action bindings. The browser pointer button bridge writes deterministic raw input ids such as `pointer:primary`.
 
 ### Keyboard Bindings
 
@@ -54,7 +54,32 @@ Supported pointer buttons are:
 
 `definePointerButtonBinding(...)` normalizes button names, and `getPointerButtonInputId(...)` exposes the matching raw input id shape used by `InputSystem`.
 
-The current pointer model intentionally covers button state only. Future stages can add browser pointer bridges, pointer position, touch gestures, or gamepad bindings if they remain reusable package APIs.
+The current pointer model intentionally covers button state only. Future stages can add pointer position, touch gestures, or gamepad bindings if they remain reusable package APIs.
+
+### Browser Pointer Button Bridge
+
+Browser projects can attach pointer button events to `InputSystem`:
+
+```ts
+import {
+  BrowserPointerButtonBridge,
+  InputSystem
+} from "@shuangxunian/leafer-game-engine/framework";
+
+const input = new InputSystem();
+const pointer = new BrowserPointerButtonBridge(input);
+pointer.attach();
+```
+
+The bridge maps browser pointer button numbers to normalized input ids:
+
+- `0` maps to `pointer:primary`
+- `1` maps to `pointer:auxiliary`
+- `2` maps to `pointer:secondary`
+
+`pointerup`, `pointercancel`, `blur`, and `detach()` release tracked pointer button state so games do not keep stuck input after browser interruption.
+
+The bridge intentionally tracks button state only. It does not track pointer position, drag state, gesture recognition, hit testing, or editor controls.
 
 ### Action Map
 
@@ -138,7 +163,6 @@ The current sprint intentionally does not include:
 - runtime rebinding controls in tooling
 - local storage or user profile persistence
 - gamepad bindings
-- browser pointer bridge
 - pointer position tracking
 - touch gestures
 - input recording or replay
