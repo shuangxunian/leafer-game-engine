@@ -170,9 +170,9 @@ This stage should not include:
 推荐文件：
 
 ```text
-docs/v0.3.1.md
-docs/v0.3.2.md
-docs/v0.3.3.md
+docs/version/v0.3.1.md
+docs/version/v0.3.2.md
+docs/version/v0.3.3.md
 ```
 
 ### Version Doc Template

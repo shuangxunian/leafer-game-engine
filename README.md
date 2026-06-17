@@ -6,18 +6,18 @@
 
 ## 当前进度
 
-当前项目已经完成到 `0.4.x` 工具化阶段收口。
+当前项目已经完成到 `0.6.x` runtime tooling panel 阶段收口。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
 - `core` 已具备主循环、场景、实体、组件、系统、时间步进和生命周期管理。
-- `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、相机、资源注册和实体工厂等基础能力。
+- `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、相机、资源注册、实体工厂、场景配置和组件 schema 等基础能力。
 - `adapter` 已经通过渲染抽象接入 Leafer，并把显示层和游戏规则层分开。
 - `runtime` 已经可以在浏览器里装配渲染、场景和动画帧循环。
-- `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot 和聚合 tooling snapshot。
+- `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、聚合 tooling snapshot、browser tooling panel 和 component schema 展示。
 - `examples/dodge-blocks` 作为集成样例，用来验证引擎分层和运行时能力。
 
-当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 初步工具链”的第一轮产品化整理。
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + runtime tooling panel”的第一轮产品化整理。
 
 ## 发布信息
 
@@ -322,6 +322,7 @@ import {
   CollisionSystem,
   CameraSystem,
   AssetRegistry,
+  createDefaultComponentSchemaRegistry,
   StateMachine,
   defineEntityFactory
 } from "@shuangxunian/leafer-game-engine/framework";
@@ -336,6 +337,7 @@ import {
 - 碰撞声明和碰撞检测
 - 相机控制
 - 资源注册
+- 组件 schema
 - 状态机
 - 实体工厂
 
@@ -371,20 +373,24 @@ import {
 ```ts
 import {
   BrowserDebugOverlay,
+  BrowserToolingPanel,
   ColliderDebugSystem,
   createDebugSnapshot,
   createSceneInspectorSnapshot,
-  createToolingSnapshot
+  createToolingSnapshot,
+  createToolingPanelSections
 } from "@shuangxunian/leafer-game-engine/tooling";
 ```
 
 职责：
 
 - 浏览器调试 overlay
+- 浏览器 tooling panel
 - 碰撞盒可视化
 - runtime debug snapshot
 - scene/entity inspector snapshot
 - 面向工具面板的聚合 snapshot
+- runtime debug / entity inspector / component schema 分区数据
 
 ### 当前比较常用的第一批类
 
@@ -403,9 +409,11 @@ import {
 - `CollisionSystem`
 - `CameraSystem`
 - `AssetRegistry`
+- `createDefaultComponentSchemaRegistry`
 - `StateMachine`
 - `defineEntityFactory`
 - `BrowserDebugOverlay`
+- `BrowserToolingPanel`
 - `createToolingSnapshot`
 
 这批 API 已经足够搭出一个最小的 2D 游戏原型。
@@ -501,7 +509,7 @@ import {
 
 - `src/tooling`
   - 调试和开发辅助能力
-  - 当前已经包含 debug snapshot、browser overlay、collider visualization、scene inspector snapshot 和聚合 tooling snapshot
+  - 当前已经包含 debug snapshot、browser overlay、collider visualization、scene inspector snapshot、聚合 tooling snapshot、browser tooling panel 和 component schema panel section
   - 这一层是后续编辑器、调试面板、场景检查器的基础
 
 - `examples`
@@ -511,7 +519,7 @@ import {
 
 ## 当前已经实现了什么
 
-当前已经完成了 `0.1.x` 到 `0.4.x` 的连续整理，重点从“能跑起来”推进到了“可复用、可检查、可继续扩展”。
+当前已经完成了 `0.1.x` 到 `0.6.x` 的连续整理，重点从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过浏览器 tooling panel 辅助开发”。
 
 - Core 稳定性
   - `Game`、`Time`、`Scene`、`World`、`Entity`、`Component`、`System` 已经形成基础骨架。
@@ -527,6 +535,7 @@ import {
   - 已有 `CameraSystem`，能驱动 world layer 位移、缩放和跟随实体。
   - 已有 `AssetRegistry`，支持 typed sprite asset 注册、查找和缺失时报错。
   - 已有 `defineEntityFactory`，支持把实体创建逻辑从 sample 中抽出来复用。
+  - 已有 asset manifest、entity template、scene config 和 component schema registry，开始具备数据驱动内容管线基础。
 
 - Adapter 和 Runtime
   - 引擎层通过 `RenderAdapter / RenderScene / RenderNode` 隔离渲染实现。
@@ -540,10 +549,12 @@ import {
   - 已有 `ColliderDebugSystem`，可以在 world layer 可视化碰撞盒。
   - 已有 `createSceneInspectorSnapshot(...)`，可以导出 scene/entity/component 结构化检查数据。
   - 已有 `createToolingSnapshot(...)`，作为面向工具面板的聚合入口。
+  - 已有 `BrowserToolingPanel`，可以分区展示 runtime debug、entity inspector 和 component schema metadata。
+  - 已有 tooling panel section 格式化能力，为后续交互式 inspector/editor 打基础。
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
-  - 当前测试数为 31 个。
+  - 当前测试数为 59 个。
   - `npm run check`、`npm test`、`npm run build:example` 是当前主要验证入口。
 
 ## 当前 demo 的意义
@@ -602,26 +613,24 @@ npm pack
 
 如果我们把目标定义为“做游戏引擎”，那接下来的重点不应该是继续打磨 demo 外观，而应该继续把当前已经有的 runtime、framework、tooling 往产品化方向推进。
 
-`0.4.x` 已经把第一轮工具化收口了。下一阶段更值得优先投入的是这些方向：
+`0.6.x` 已经把 runtime tooling panel 阶段收口了。下一阶段更值得优先投入的是这些方向：
 
-1. 更正式的资源加载
+1. 更完整的 runtime tooling / inspector
+   - 可交互的 scene/entity inspector
+   - entity 选择和高亮
+   - schema-driven 组件字段展示
+   - 系统开关和运行时状态查看
+
+2. 更正式的资源加载
    - 图片加载
    - 资源缓存
    - 加载状态和错误处理
    - 精灵帧、图集和动画资源管理
 
-2. 数据驱动能力
-   - 场景配置
-   - 实体模板
+3. 更完整的数据驱动能力
    - 组件配置
    - 配置校验和默认值
    - 为未来编辑器打基础
-
-3. 更完整的 runtime tooling
-   - 可交互的 scene/entity inspector
-   - 系统开关和运行时状态查看
-   - 输入状态可视化
-   - 更清晰的调试面板装配方式
 
 4. 更完整的游戏流和 UI 状态
    - 在 `StateMachine` 之上沉淀 `GameFlow`
