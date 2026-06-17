@@ -7,6 +7,7 @@ import {
   CameraSystem,
   EventBus,
   GameFlow,
+  RuntimeScheduler,
   StateMachine,
   SpriteAnimationComponent,
   SpriteAnimationSystem,
@@ -283,6 +284,116 @@ test("event bus reports invalid listener configuration clearly", () => {
   assert.throws(() => bus.on("", () => {}), /Event type must be a non-empty string/);
   assert.throws(() => bus.on("tick", undefined), /Event listener for "tick" must be a function/);
   assert.throws(() => bus.emit(" ", undefined), /Event type must be a non-empty string/);
+});
+
+test("runtime scheduler runs one-shot tasks in deterministic due-time order", () => {
+  const scheduler = new RuntimeScheduler();
+  const log = [];
+
+  scheduler.schedule(0.5, (context) => log.push(`second:${context.id}:${context.scheduledTimeSeconds}`));
+  scheduler.schedule(0.25, (context) => log.push(`first:${context.id}:${context.scheduledTimeSeconds}`));
+  scheduler.schedule(0.5, (context) => log.push(`third:${context.id}:${context.scheduledTimeSeconds}`));
+
+  assert.equal(scheduler.elapsedSeconds, 0);
+  assert.equal(scheduler.taskCount(), 3);
+
+  assert.deepEqual(scheduler.update(0.25), {
+    elapsedSeconds: 0.25,
+    deltaSeconds: 0.25,
+    firedCount: 1,
+    taskCount: 2
+  });
+  assert.deepEqual(log, ["first:2:0.25"]);
+
+  assert.deepEqual(scheduler.update(0.25), {
+    elapsedSeconds: 0.5,
+    deltaSeconds: 0.25,
+    firedCount: 2,
+    taskCount: 0
+  });
+  assert.deepEqual(log, ["first:2:0.25", "second:1:0.5", "third:3:0.5"]);
+});
+
+test("runtime scheduler supports repeated tasks and catch-up updates", () => {
+  const scheduler = new RuntimeScheduler();
+  const log = [];
+
+  const task = scheduler.repeat(0.25, (context) => {
+    log.push(`${context.firedCount}@${context.scheduledTimeSeconds}->${context.elapsedSeconds}`);
+  }, { maxRuns: 4 });
+
+  const result = scheduler.update(1);
+
+  assert.deepEqual(result, {
+    elapsedSeconds: 1,
+    deltaSeconds: 1,
+    firedCount: 4,
+    taskCount: 0
+  });
+  assert.equal(task.active, false);
+  assert.equal(task.firedCount, 4);
+  assert.deepEqual(log, [
+    "1@0.25->1",
+    "2@0.5->1",
+    "3@0.75->1",
+    "4@1->1"
+  ]);
+});
+
+test("runtime scheduler supports cancellation and clearing", () => {
+  const scheduler = new RuntimeScheduler();
+  const log = [];
+
+  const cancelled = scheduler.schedule(0.1, () => log.push("cancelled"));
+  scheduler.schedule(0.1, () => log.push("kept"));
+
+  assert.equal(cancelled.active, true);
+  assert.equal(cancelled.cancel(), true);
+  assert.equal(cancelled.cancel(), false);
+  assert.equal(cancelled.active, false);
+
+  scheduler.update(0.1);
+  assert.deepEqual(log, ["kept"]);
+  assert.equal(scheduler.taskCount(), 0);
+
+  scheduler.schedule(1, () => log.push("late"));
+  scheduler.repeat(1, () => log.push("repeat"));
+  assert.equal(scheduler.clear(), 2);
+  assert.equal(scheduler.clear(), 0);
+  assert.equal(scheduler.taskCount(), 0);
+  scheduler.update(2);
+  assert.deepEqual(log, ["kept"]);
+});
+
+test("runtime scheduler handles task mutation during update deterministically", () => {
+  const scheduler = new RuntimeScheduler();
+  const log = [];
+  let secondTask;
+
+  scheduler.schedule(0, () => {
+    log.push("first");
+    secondTask.cancel();
+    scheduler.schedule(0, () => log.push("late"));
+  });
+  secondTask = scheduler.schedule(0, () => log.push("second"));
+
+  scheduler.update(0);
+  assert.deepEqual(log, ["first"]);
+  assert.equal(scheduler.taskCount(), 1);
+
+  scheduler.update(0);
+  assert.deepEqual(log, ["first", "late"]);
+});
+
+test("runtime scheduler reports invalid timing inputs clearly", () => {
+  const scheduler = new RuntimeScheduler();
+
+  assert.throws(() => scheduler.schedule(-1, () => {}), /Schedule delay must be a finite non-negative number/);
+  assert.throws(() => scheduler.schedule(0, undefined), /Scheduler callback must be a function/);
+  assert.throws(() => scheduler.repeat(0, () => {}), /Repeat interval must be a finite positive number/);
+  assert.throws(() => scheduler.repeat(1, () => {}, { startDelaySeconds: -1 }), /Repeat start delay must be a finite non-negative number/);
+  assert.throws(() => scheduler.repeat(1, () => {}, { maxRuns: 0 }), /Repeat maxRuns must be a positive integer/);
+  assert.throws(() => scheduler.update(Number.POSITIVE_INFINITY), /Scheduler delta must be a finite non-negative number/);
 });
 
 test("sprite frame and animation clip helpers return isolated data contracts", () => {

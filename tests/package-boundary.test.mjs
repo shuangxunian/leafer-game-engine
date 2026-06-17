@@ -75,6 +75,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "EventBus",
     "GameFlow",
     "InputSystem",
+    "RuntimeScheduler",
     "SpriteAnimationComponent",
     "SpriteAnimationSystem",
     "StateMachine",
