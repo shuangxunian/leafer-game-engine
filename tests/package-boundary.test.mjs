@@ -89,6 +89,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "ViewComponent",
     "advanceSpriteAnimationPlayback",
     "addRuntimeServices",
+    "bootstrapSceneFromConfig",
     "createSpriteAnimationPlayback",
     "createDefaultComponentSchemaRegistry",
     "createRuntimeServices",

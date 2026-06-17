@@ -1,7 +1,7 @@
 import type { Entity, Scene, System } from "../core/index.js";
 import type { AssetLoadResult, AssetManifest, AssetRegistry } from "./assets.js";
 import { AssetRegistry as AssetRegistryClass, loadAssetManifest } from "./assets.js";
-import type { EntityTemplate, EntityTemplateRegistry } from "./factory.js";
+import type { EntityTemplate, EntityTemplateComponent, EntityTemplateRegistry } from "./factory.js";
 import { createDefaultEntityTemplateRegistry, instantiateEntityTemplate } from "./factory.js";
 
 export type SceneConfigSystem<TData = unknown> = {
@@ -21,12 +21,14 @@ export type SceneBootstrapOptions = {
   assets?: AssetRegistry;
   entityRegistry?: EntityTemplateRegistry;
   systemRegistry?: SceneSystemRegistry;
+  validateBeforeBootstrap?: boolean;
 };
 
 export type SceneBootstrapResult = {
   assets?: AssetLoadResult;
   entities: Entity[];
   systems: System[];
+  validation?: SceneConfigValidationResult;
 };
 
 export type SceneConfigValidationErrorCode =
@@ -36,6 +38,7 @@ export type SceneConfigValidationErrorCode =
   | "invalid-entity"
   | "invalid-components"
   | "invalid-component"
+  | "invalid-component-data"
   | "unknown-component"
   | "invalid-systems"
   | "invalid-system"
@@ -103,12 +106,25 @@ export function bootstrapSceneFromConfig(
   config: SceneConfig,
   options: SceneBootstrapOptions = {}
 ): SceneBootstrapResult {
+  const validation = options.validateBeforeBootstrap
+    ? validateSceneConfig(config, options)
+    : undefined;
+
+  if (validation && !validation.ok) {
+    return {
+      validation,
+      entities: [],
+      systems: []
+    };
+  }
+
   const assetResult = options.assets && config.assets
     ? loadAssetManifest(options.assets, config.assets)
     : undefined;
 
   if (assetResult && !assetResult.ok) {
     return {
+      validation,
       assets: assetResult,
       entities: [],
       systems: []
@@ -127,6 +143,7 @@ export function bootstrapSceneFromConfig(
   });
 
   return {
+    validation,
     assets: assetResult,
     entities,
     systems
@@ -249,6 +266,17 @@ function validateSceneConfigEntities(
           code: "unknown-component",
           path: `${componentPath}.type`,
           message: `Unknown entity template component type "${component.type}".`
+        });
+        return;
+      }
+
+      try {
+        registry.create(component as EntityTemplateComponent);
+      } catch (error) {
+        errors.push({
+          code: "invalid-component-data",
+          path: `${componentPath}.data`,
+          message: error instanceof Error ? error.message : String(error)
         });
       }
     });

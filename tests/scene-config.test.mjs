@@ -239,6 +239,111 @@ test("scene config validation requires a system registry for system declarations
   });
 });
 
+test("scene config validation reports invalid component data as diagnostics", () => {
+  assert.deepEqual(validateSceneConfig({
+    entities: [
+      {
+        components: [
+          { type: "size", data: { width: "wide", height: 52 } }
+        ]
+      }
+    ]
+  }), {
+    ok: false,
+    errors: [
+      {
+        code: "invalid-component-data",
+        path: "entities[0].components[0].data",
+        message: 'Invalid entity template data for "size.width": expected number.'
+      }
+    ]
+  });
+});
+
+test("scene config safe bootstrap returns validation diagnostics before runtime mutation", () => {
+  const scene = new Scene("SafeBootstrapInvalidScene");
+  const assets = new AssetRegistry();
+  const systemRegistry = new SceneSystemRegistry().register("marker", (targetScene, data) => new MarkerSystem(targetScene, data?.label));
+
+  const result = bootstrapSceneFromConfig(
+    scene,
+    {
+      assets: {
+        sprites: [{ id: "player", fill: "#ffcf7a" }]
+      },
+      entities: [
+        {
+          name: "InvalidPlayer",
+          components: [{ type: "size", data: { width: "wide", height: 52 } }]
+        }
+      ],
+      systems: [{ type: "marker", data: { label: "runtime" } }]
+    },
+    {
+      assets,
+      systemRegistry,
+      validateBeforeBootstrap: true
+    }
+  );
+
+  assert.deepEqual(result, {
+    validation: {
+      ok: false,
+      errors: [
+        {
+          code: "invalid-component-data",
+          path: "entities[0].components[0].data",
+          message: 'Invalid entity template data for "size.width": expected number.'
+        }
+      ]
+    },
+    entities: [],
+    systems: []
+  });
+  assert.deepEqual(scene.world.getEntities(), []);
+  assert.deepEqual(scene.systems, []);
+  assert.deepEqual(assets.listSprites(), []);
+});
+
+test("scene config safe bootstrap includes successful validation result", () => {
+  const scene = new Scene("SafeBootstrapValidScene");
+  const assets = new AssetRegistry();
+  const systemRegistry = new SceneSystemRegistry().register("marker", (targetScene, data) => new MarkerSystem(targetScene, data?.label));
+
+  const result = bootstrapSceneFromConfig(
+    scene,
+    {
+      assets: {
+        sprites: [{ id: "player", fill: "#ffcf7a" }]
+      },
+      entities: [
+        {
+          name: "Player",
+          components: [{ type: "transform", data: { x: 12, y: 34 } }]
+        }
+      ],
+      systems: [{ type: "marker", data: { label: "runtime" } }]
+    },
+    {
+      assets,
+      systemRegistry,
+      validateBeforeBootstrap: true
+    }
+  );
+
+  assert.deepEqual(result.validation, {
+    ok: true,
+    errors: []
+  });
+  assert.equal(result.assets?.ok, true);
+  assert.equal(result.entities.length, 1);
+  assert.equal(result.entities[0].name, "Player");
+  assert.equal(result.systems.length, 1);
+  assert.equal(assets.requireSprite("player").fill, "#ffcf7a");
+  assert.equal(scene.world.getEntities().length, 1);
+  assert.equal(scene.systems.length, 1);
+});
+
 test("scene config stops before entity creation when asset manifest fails", () => {
   const scene = new Scene("InvalidAssetScene");
   const assets = new AssetRegistry();

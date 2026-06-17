@@ -22,7 +22,7 @@ For the input-actions boundary across raw input state, keyboard bindings, action
 
 For the runtime-observability boundary across debug snapshots, system lifecycle state, text formatting, browser panel section formatting, aggregate tooling snapshots, and example consumption, see [Runtime Observability Boundary](runtime-observability.md).
 
-`0.15.x` starts data-driven scene contract hardening. The Node-safe `framework` entrypoint now exposes `validateSceneConfig(...)` so downstream games can inspect scene config diagnostics before bootstrap mutates a scene, asset registry, entity list, or system list.
+`0.15.x` starts data-driven scene contract hardening. The Node-safe `framework` entrypoint now exposes `validateSceneConfig(...)` so downstream games can inspect scene config diagnostics before bootstrap mutates a scene, asset registry, entity list, or system list. `bootstrapSceneFromConfig(...)` also supports an opt-in `validateBeforeBootstrap` safety gate for callers that want validation diagnostics returned before any scene/entity/system/asset mutation.
 
 ---
 
@@ -56,6 +56,7 @@ import {
   SpriteAnimationComponent,
   SpriteAnimationSystem,
   addRuntimeServices,
+  bootstrapSceneFromConfig,
   createRuntimeServices,
   createSpriteAnimationPlayback,
   defineKeyboardBinding,
@@ -96,6 +97,7 @@ import {
   SpriteAnimationComponent,
   SpriteAnimationSystem,
   addRuntimeServices,
+  bootstrapSceneFromConfig,
   createRuntimeServices,
   createSpriteAnimationPlayback,
   defineKeyboardBinding,
@@ -147,7 +149,7 @@ They should be verified through browser/example builds until the package is spli
 ## Current Boundary Notes
 
 - `core` should stay independent from browser and rendering implementations.
-- `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, opt-in scene runtime service integration, and data-driven scene config validation.
+- `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, opt-in scene runtime service integration, data-driven scene config validation, and safe scene config bootstrap.
 - `tooling` can expose structured snapshots and formatters in Node, including read-only system lifecycle state, sprite animation state, runtime services state, and input action state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
