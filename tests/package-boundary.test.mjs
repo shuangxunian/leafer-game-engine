@@ -1,15 +1,33 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 
 const packageJson = JSON.parse(
   await readFile(new URL("../package.json", import.meta.url), "utf8")
 );
+const dodgeBlocksExampleUrl = new URL("../examples/dodge-blocks/", import.meta.url);
 
 function assertExports(moduleExports, names) {
   for (const name of names) {
     assert.equal(name in moduleExports, true, `Expected public export "${name}"`);
   }
+}
+
+async function listFiles(directoryUrl) {
+  const entries = await readdir(directoryUrl, { withFileTypes: true });
+  const files = [];
+
+  for (const entry of entries) {
+    const entryUrl = new URL(entry.name, directoryUrl);
+    if (entry.isDirectory()) {
+      files.push(...await listFiles(new URL(`${entry.name}/`, directoryUrl)));
+      continue;
+    }
+
+    files.push(entryUrl);
+  }
+
+  return files;
 }
 
 test("package export map exposes the documented public entrypoints", () => {
@@ -67,4 +85,14 @@ test("tooling package subpath can be imported by package name in Node", async ()
     "formatDebugSnapshot",
     "formatToolingSnapshot"
   ]);
+});
+
+test("dodge-blocks example imports engine APIs through package-style entrypoints", async () => {
+  const files = (await listFiles(dodgeBlocksExampleUrl))
+    .filter((fileUrl) => fileUrl.pathname.endsWith(".ts"));
+
+  for (const fileUrl of files) {
+    const source = await readFile(fileUrl, "utf8");
+    assert.equal(source.includes("../../src/"), false, `${fileUrl.pathname} should not import engine APIs from src`);
+  }
 });

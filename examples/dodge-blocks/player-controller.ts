@@ -1,5 +1,5 @@
-import { Component } from "../../src/core/index.js";
-import { InputSystem, SizeComponent, TransformComponent } from "../../src/framework/index.js";
+import { Component } from "@shuangxunian/leafer-game-engine/core";
+import { InputSystem, SizeComponent, TransformComponent } from "@shuangxunian/leafer-game-engine/framework";
 
 type Bounds = {
   width: number;

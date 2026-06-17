@@ -1,4 +1,4 @@
-import type { Entity } from "../../src/core/index.js";
+import type { Entity } from "@shuangxunian/leafer-game-engine/core";
 import {
   ColliderComponent,
   defineEntityFactory,
@@ -6,8 +6,8 @@ import {
   TransformComponent,
   VelocityComponent,
   ViewComponent
-} from "../../src/framework/index.js";
-import type { EntityFactoryContext } from "../../src/framework/index.js";
+} from "@shuangxunian/leafer-game-engine/framework";
+import type { EntityFactoryContext } from "@shuangxunian/leafer-game-engine/framework";
 
 type HazardFactoryOptions = {
   canMove: () => boolean;

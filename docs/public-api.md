@@ -55,6 +55,21 @@ This keeps browser runtime dependencies out of tests that only need ECS, gamepla
 
 ---
 
+## Local Example Import Boundary
+
+The repository examples also use package-style imports:
+
+```ts
+import { createBrowserRuntime } from "@shuangxunian/leafer-game-engine";
+import { Scene } from "@shuangxunian/leafer-game-engine/core";
+```
+
+During local development, `vite.config.ts` and `tsconfig.json` map those imports back to `src`. This keeps example code close to downstream consumer code without requiring a prebuilt `lib` folder for every edit.
+
+Published consumers do not use these local aliases; they resolve through `package.json` exports.
+
+---
+
 ## Browser-Facing Imports
 
 These entrypoints may import Leafer or DOM-dependent code:

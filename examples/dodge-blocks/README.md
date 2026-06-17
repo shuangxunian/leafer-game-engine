@@ -88,7 +88,7 @@ npm run dev
 这个示例的启动形态可以简化理解成：
 
 ```ts
-import { createBrowserRuntime } from "../../src/runtime/index.js";
+import { createBrowserRuntime } from "@shuangxunian/leafer-game-engine";
 import { bootDodgeBlocksExample } from "./boot.js";
 
 const runtime = createBrowserRuntime({
@@ -101,6 +101,8 @@ bootDodgeBlocksExample(runtime).catch((error) => {
 ```
 
 `bootDodgeBlocksExample(...)` 里会创建 scene，通过 scene lifecycle helper 预加载 assets 并启动 runtime、绑定键盘输入，再把包含 asset state、game flow state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
+
+示例代码使用 `@shuangxunian/leafer-game-engine` package-style imports 来模拟真实消费者项目；在本仓库开发时，这些导入会通过 Vite alias 和 TypeScript paths 指回 `src`。
 
 ## What This Example Proves
 

@@ -1,5 +1,5 @@
-import { Scene } from "../../src/core/index.js";
-import type { AsyncAssetManifestLoadResult, EntityTemplate } from "../../src/framework/index.js";
+import { Scene } from "@shuangxunian/leafer-game-engine/core";
+import type { AsyncAssetManifestLoadResult, EntityTemplate } from "@shuangxunian/leafer-game-engine/framework";
 import {
   AssetRegistry,
   CollisionSystem,
@@ -7,8 +7,8 @@ import {
   ViewComponent,
   createBrowserImageSpriteLoader,
   instantiateEntityTemplate
-} from "../../src/framework/index.js";
-import type { RenderAdapter, RenderScene } from "../../src/adapter/index.js";
+} from "@shuangxunian/leafer-game-engine/framework";
+import type { RenderAdapter, RenderScene } from "@shuangxunian/leafer-game-engine/adapter";
 import { DODGE_GAME_CONFIG, DodgeGameSystem } from "./dodge-game-system.js";
 import { PlayerControllerComponent } from "./player-controller.js";
 

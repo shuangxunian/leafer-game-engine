@@ -1,9 +1,9 @@
-import type { BrowserRuntime } from "../../src/runtime/index.js";
-import { startSceneWithLifecycle } from "../../src/runtime/index.js";
-import { BrowserKeyboardBridge, InputSystem, createDefaultComponentSchemaRegistry } from "../../src/framework/index.js";
+import type { BrowserRuntime } from "@shuangxunian/leafer-game-engine/runtime";
+import { startSceneWithLifecycle } from "@shuangxunian/leafer-game-engine/runtime";
+import { BrowserKeyboardBridge, InputSystem, createDefaultComponentSchemaRegistry } from "@shuangxunian/leafer-game-engine/framework";
 import { DodgeBlocksScene } from "./dodge-blocks-scene.js";
 import { DodgeGameSystem } from "./dodge-game-system.js";
-import { BrowserToolingPanel, createToolingSnapshot } from "../../src/tooling/index.js";
+import { BrowserToolingPanel, createToolingSnapshot } from "@shuangxunian/leafer-game-engine/tooling";
 
 export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<void> {
   const scene = new DodgeBlocksScene(runtime.renderAdapter, runtime.renderScene);

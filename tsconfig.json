@@ -10,7 +10,16 @@
     "lib": ["ES2022", "DOM"],
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shuangxunian/leafer-game-engine": ["src/engine.ts"],
+      "@shuangxunian/leafer-game-engine/adapter": ["src/adapter/index.ts"],
+      "@shuangxunian/leafer-game-engine/core": ["src/core/index.ts"],
+      "@shuangxunian/leafer-game-engine/framework": ["src/framework/index.ts"],
+      "@shuangxunian/leafer-game-engine/runtime": ["src/runtime/index.ts"],
+      "@shuangxunian/leafer-game-engine/tooling": ["src/tooling/index.ts"]
+    }
   },
   "include": ["src", "examples"]
 }

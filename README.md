@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.10.3` Package Artifact Verification，`0.8.x` resource loading baseline 和 `0.9.x` game-flow/scene-lifecycle 阶段都已经收口，`0.10.x` 正在整理 package-facing API 边界。
+当前项目已经推进到 `v0.10.4` Example Import Boundary Cleanup，`0.8.x` resource loading baseline 和 `0.9.x` game-flow/scene-lifecycle 阶段都已经收口，`0.10.x` 正在整理 package-facing API 边界。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -556,6 +556,7 @@ import {
   - 示例项目层
   - 用来放基于引擎运行的样例游戏或 playground
   - 这里的代码不是引擎本体，而是引擎的消费者示例
+  - 示例通过 package-style imports 访问引擎 API，本仓库开发时由 Vite alias 和 TypeScript paths 映射回 `src`
 
 ## 当前已经实现了什么
 
@@ -599,7 +600,7 @@ import {
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
-  - 当前测试数为 103 个。
+  - 当前测试数为 104 个。
   - `npm run check`、`npm test`、`npm run build:example` 是当前主要验证入口。
 
 ## 当前 demo 的意义

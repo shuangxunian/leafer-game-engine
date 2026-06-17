@@ -1,6 +1,6 @@
-import type { Entity, Scene } from "../../src/core/index.js";
-import { System } from "../../src/core/index.js";
-import type { RenderAdapter, RenderScene, RenderText } from "../../src/adapter/index.js";
+import type { Entity, Scene } from "@shuangxunian/leafer-game-engine/core";
+import { System } from "@shuangxunian/leafer-game-engine/core";
+import type { RenderAdapter, RenderScene, RenderText } from "@shuangxunian/leafer-game-engine/adapter";
 import {
   AssetRegistry,
   CollisionSystem,
@@ -8,7 +8,7 @@ import {
   InputSystem,
   ColliderComponent,
   TransformComponent
-} from "../../src/framework/index.js";
+} from "@shuangxunian/leafer-game-engine/framework";
 import { hazardFactory } from "./factories.js";
 
 const PLAYER_SIZE = 52;
