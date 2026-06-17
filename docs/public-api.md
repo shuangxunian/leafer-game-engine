@@ -6,7 +6,9 @@ The project is a frontend 2D game engine dependency package. It is not an editor
 
 `0.10.x` completed the first package-facing API boundary baseline: entrypoints are documented, Node-safe imports are smoke-tested, package artifacts can be verified, and examples use package-style imports during local development.
 
-`0.11.x` is extending the Node-safe `framework` entrypoint with sprite animation data contracts, deterministic playback timing helpers, and ECS animation component/system behavior. It also exposes read-only sprite animation state through the Node-safe `tooling` entrypoint.
+`0.11.x` closed the sprite animation runtime baseline: the Node-safe `framework` entrypoint includes sprite animation data contracts, deterministic playback timing helpers, and ECS animation component/system behavior. The Node-safe `tooling` entrypoint exposes read-only sprite animation state.
+
+For the animation-specific boundary across asset metadata, playback helpers, ECS behavior, render application, example consumption, and read-only tooling visibility, see [Sprite Animation Runtime Boundary](animation-runtime.md).
 
 ---
 
@@ -123,6 +125,8 @@ This command builds the library through `npm pack --dry-run --json` and checks t
 - `README.md`
 - `LICENSE`
 - `docs/public-api.md`
+- `docs/product-boundary.md`
+- `docs/animation-runtime.md`
 - all JS and type declaration targets from `package.json` exports
 
 It also checks that development-only paths such as `src`, `tests`, `examples`, `dist`, `scripts`, and `node_modules` are not included.

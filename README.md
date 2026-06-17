@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.11.4` Example Sprite Animation Integration And Tooling Visibility，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段和 `0.10.x` package-facing API boundary 阶段都已经收口，`0.11.x` 正在推进 sprite animation 和 asset runtime 能力。
+当前项目已经推进到 `v0.11.5` Sprite Animation Stage Closeout，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段、`0.10.x` package-facing API boundary 阶段和 `0.11.x` sprite animation / asset runtime 阶段都已经收口。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -17,7 +17,7 @@
 - `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、asset load state snapshot、GameFlow snapshot、sprite animation snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail、assets/game flow/sprite animations panel section 和 schema-assisted component detail 展示。
 - `examples/dodge-blocks` 作为集成样例，用来验证引擎分层、异步资源加载、sprite animation 和运行时 tooling 能力。
 
-当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程、scene lifecycle 启动边界、sprite animation 数据契约、deterministic playback timing helpers、ECS animation component/system 和示例级动画集成。
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程、scene lifecycle 启动边界、sprite animation 数据契约、deterministic playback timing helpers、ECS animation component/system、示例级动画集成和动画 runtime 边界文档。
 
 ## 产品边界
 
@@ -148,6 +148,10 @@ runtime.start(scene);
 如果你想了解当前 package 入口边界，可以参考：
 
 - [docs/public-api.md](docs/public-api.md)
+
+如果你想了解 sprite animation 的资源、播放、ECS、渲染应用和只读 tooling 边界，可以参考：
+
+- [docs/animation-runtime.md](docs/animation-runtime.md)
 
 ## 最小可运行项目目录示例
 
@@ -562,7 +566,7 @@ import {
 
 ## 当前已经实现了什么
 
-当前已经完成了 `0.1.x` 到 `0.10.x` 的连续整理，`0.11.x` 正在推进 sprite animation 和 asset runtime 能力。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过交互式 runtime inspector 辅助开发、可作为 package 被消费”，并补齐了资源加载基线、GameFlow、scene lifecycle 启动边界、package-facing API 边界、sprite animation playback timing 基础、ECS animation component/system 和示例级动画集成。
+当前已经完成了 `0.1.x` 到 `0.11.x` 的连续整理，`0.11.x` sprite animation 和 asset runtime 阶段已经收口。重点已经从“能跑起来”推进到了“可复用、可数据驱动、可检查、可通过交互式 runtime inspector 辅助开发、可作为 package 被消费”，并补齐了资源加载基线、GameFlow、scene lifecycle 启动边界、package-facing API 边界、sprite animation playback timing 基础、ECS animation component/system、示例级动画集成和动画 runtime 边界文档。
 
 - Core 稳定性
   - `Game`、`Time`、`Scene`、`World`、`Entity`、`Component`、`System` 已经形成基础骨架。
@@ -670,7 +674,7 @@ npm run verify:package
 
 如果我们把目标定义为“做游戏引擎”，那接下来的重点不应该是继续打磨 demo 外观，而应该继续把当前已经有的 runtime、framework、tooling 往产品化方向推进。
 
-`0.7.x` 已经把 interactive runtime inspector 阶段收口了，`0.8.x` 完成了资源加载和 asset pipeline 基线，`0.9.x` 完成了 Game Flow 和 Scene Lifecycle 基线，`0.10.x` 完成了 package-facing API boundary 基线，`0.11.x` 已经把 sprite animation 从数据契约推进到 playback helper、ECS component/system、示例集成和 tooling 可见性。下一阶段更值得优先投入的是这些方向：
+`0.7.x` 已经把 interactive runtime inspector 阶段收口了，`0.8.x` 完成了资源加载和 asset pipeline 基线，`0.9.x` 完成了 Game Flow 和 Scene Lifecycle 基线，`0.10.x` 完成了 package-facing API boundary 基线，`0.11.x` 已经把 sprite animation 从数据契约推进到 playback helper、ECS component/system、示例集成、tooling 可见性和 runtime 边界文档。下一阶段更值得优先投入的是这些方向：
 
 1. 更完整的 runtime tooling / inspector
    - 系统开关和运行时状态查看
