@@ -4,11 +4,14 @@ import assert from "node:assert/strict";
 import { Component, Game, Scene, System } from "../lib/core/index.js";
 import {
   AssetRegistry,
+  ColliderComponent,
+  CollisionSystem,
   ComponentSchemaRegistry,
   GameFlow,
   InputActionMap,
   InputSystem,
   RuntimeServicesSystem,
+  SizeComponent,
   SpriteAnimationComponent,
   TransformComponent,
   addRuntimeServices,
@@ -17,6 +20,8 @@ import {
 } from "../lib/framework/index.js";
 import {
   createAssetsPanelSection,
+  createCollisionSnapshot,
+  createCollisionsPanelSection,
   createComponentSchemasPanelSection,
   createComponentSchemaSnapshot,
   createDebugSnapshot,
@@ -34,6 +39,7 @@ import {
   createToolingPanelSections,
   createToolingSnapshot,
   formatComponentSchemaSnapshot,
+  formatCollisionSnapshot,
   formatDebugAssetSnapshot,
   formatDebugGameFlowSnapshot,
   formatDebugSnapshot,
@@ -476,6 +482,84 @@ test("tooling snapshot can include input action state", () => {
   });
 });
 
+test("tooling snapshot can report missing collision system", () => {
+  const scene = new Scene("MissingCollisionToolingScene");
+
+  assert.deepEqual(createToolingSnapshot(scene, { collisions: true }).collisions, {
+    installed: false
+  });
+});
+
+test("tooling snapshot can include copied collision pair state", () => {
+  const scene = new Scene("CollisionToolingScene");
+  scene.addSystem(new CollisionSystem(scene));
+
+  const player = scene.world.createEntity("player");
+  const playerTransform = player.addComponent(new TransformComponent());
+  player.addComponent(new SizeComponent(10, 10));
+  player.addComponent(new ColliderComponent("player", undefined, undefined, 1, 2));
+
+  const hazard = scene.world.createEntity("hazard");
+  const hazardTransform = hazard.addComponent(new TransformComponent());
+  hazard.addComponent(new SizeComponent(8, 6));
+  hazard.addComponent(new ColliderComponent("hazard", undefined, undefined, 3, 4));
+
+  scene.start();
+  playerTransform.x = 0;
+  playerTransform.y = 0;
+  hazardTransform.x = 5;
+  hazardTransform.y = 4;
+  scene.lateUpdate(1 / 60);
+
+  const snapshot = createToolingSnapshot(scene, { collisions: true }).collisions;
+
+  assert.deepEqual(snapshot, {
+    installed: true,
+    currentCount: 1,
+    enterCount: 1,
+    stayCount: 0,
+    exitCount: 0,
+    current: [
+      {
+        a: {
+          entityId: player.id,
+          entityName: "player",
+          layer: "player",
+          rect: { x: 1, y: 2, width: 10, height: 10 }
+        },
+        b: {
+          entityId: hazard.id,
+          entityName: "hazard",
+          layer: "hazard",
+          rect: { x: 8, y: 8, width: 8, height: 6 }
+        }
+      }
+    ],
+    entered: [
+      {
+        a: {
+          entityId: player.id,
+          entityName: "player",
+          layer: "player",
+          rect: { x: 1, y: 2, width: 10, height: 10 }
+        },
+        b: {
+          entityId: hazard.id,
+          entityName: "hazard",
+          layer: "hazard",
+          rect: { x: 8, y: 8, width: 8, height: 6 }
+        }
+      }
+    ],
+    stayed: [],
+    exited: []
+  });
+  assert.equal("entity" in snapshot.current[0].a, false);
+
+  snapshot.current[0].a.rect.x = 999;
+  assert.equal(createCollisionSnapshot(scene).current[0].a.rect.x, 1);
+});
+
 test("input action snapshot can omit live input state", () => {
   const inputActions = new InputActionMap([
     {
@@ -794,6 +878,50 @@ test("tooling snapshot formatting appends input action data when present", () =>
   ]);
 });
 
+test("collision snapshot formatting is stable and readable", () => {
+  assert.deepEqual(formatCollisionSnapshot({
+    installed: true,
+    currentCount: 1,
+    enterCount: 1,
+    stayCount: 0,
+    exitCount: 0,
+    current: [
+      {
+        a: { entityId: 1, entityName: "player", layer: "player", rect: { x: 1, y: 2, width: 10, height: 10 } },
+        b: { entityId: 2, entityName: "hazard", layer: "hazard", rect: { x: 8, y: 8, width: 8, height: 6 } }
+      }
+    ],
+    entered: [
+      {
+        a: { entityId: 1, entityName: "player", layer: "player", rect: { x: 1, y: 2, width: 10, height: 10 } },
+        b: { entityId: 2, entityName: "hazard", layer: "hazard", rect: { x: 8, y: 8, width: 8, height: 6 } }
+      }
+    ],
+    stayed: [],
+    exited: []
+  }), [
+    "Collisions current=1 enter=1 stay=0 exit=0",
+    "Current",
+    "- #1 player[player] rect=1,2,10x10 <-> #2 hazard[hazard] rect=8,8,8x6",
+    "Enter",
+    "- #1 player[player] rect=1,2,10x10 <-> #2 hazard[hazard] rect=8,8,8x6"
+  ]);
+
+  assert.deepEqual(formatCollisionSnapshot({ installed: false }), ["Collisions missing"]);
+});
+
+test("tooling snapshot formatting appends collision data when present", () => {
+  const scene = new Scene("CollisionToolingFormatScene");
+
+  assert.deepEqual(formatToolingSnapshot(createToolingSnapshot(scene, { collisions: true })), [
+    "Scene CollisionToolingFormatScene",
+    "Entities 0/0",
+    "Systems 0",
+    "",
+    "Collisions missing"
+  ]);
+});
+
 test("tooling panel sections expose runtime debug output", () => {
   const scene = new Scene("RuntimePanelScene");
 
@@ -871,6 +999,23 @@ test("input actions panel section exposes read-only action state", () => {
       "Input Actions 1",
       "- confirm bindings=pointer:primary pressed=false justPressed=true"
     ]
+  });
+});
+
+test("collisions panel section exposes read-only pair state", () => {
+  assert.deepEqual(createCollisionsPanelSection({
+    installed: true,
+    currentCount: 0,
+    enterCount: 0,
+    stayCount: 0,
+    exitCount: 0,
+    current: [],
+    entered: [],
+    stayed: [],
+    exited: []
+  }), {
+    title: "Collisions",
+    lines: ["Collisions current=0 enter=0 stay=0 exit=0"]
   });
 });
 

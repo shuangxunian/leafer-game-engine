@@ -183,19 +183,24 @@ test("collision query stage docs are discoverable from roadmap and package docs"
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.20.0.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.20.1.md", import.meta.url), "utf8");
+  const toolingPatch = await readFile(new URL("../docs/version/v0.20.2.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  for (const version of ["v0.20.0", "v0.20.1"]) {
+  for (const version of ["v0.20.0", "v0.20.1", "v0.20.2"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
   }
 
   assert.equal(stage.includes("Collision Query Runtime Primitives Sprint"), true);
+  assert.equal(stage.includes("v0.20.2.md"), true);
   assert.equal(patch.includes("Collision Pair Query Baseline"), true);
   assert.equal(patch.includes("does not add a physics engine"), true);
+  assert.equal(toolingPatch.includes("Collision Pair Tooling Snapshot Baseline"), true);
+  assert.equal(toolingPatch.includes("read-only runtime observability"), true);
   assert.equal(publicApi.includes("`0.20.x` starts collision query runtime primitives"), true);
   assert.equal(publicApi.includes("structured collision pair query methods"), true);
-  assert.equal(readme.includes("`v0.20.1` Collision Pair Query Baseline"), true);
+  assert.equal(publicApi.includes("read-only collision snapshots"), true);
+  assert.equal(readme.includes("`v0.20.2` Collision Pair Tooling Snapshot Baseline"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -267,6 +272,8 @@ test("tooling package subpath can be imported by package name in Node", async ()
   const tooling = await import(`${packageJson.name}/tooling`);
 
   assertExports(tooling, [
+    "createCollisionSnapshot",
+    "createCollisionsPanelSection",
     "createDebugSnapshot",
     "createInputActionSnapshot",
     "createInputActionsPanelSection",
@@ -276,6 +283,7 @@ test("tooling package subpath can be imported by package name in Node", async ()
     "createSpriteAnimationsPanelSection",
     "createToolingSnapshot",
     "createToolingPanelSections",
+    "formatCollisionSnapshot",
     "formatDebugSnapshot",
     "formatInputActionSnapshot",
     "formatRuntimeServicesSnapshot",

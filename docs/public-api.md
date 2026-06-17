@@ -40,7 +40,7 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `0.19.x` closed pointer/input runtime primitives. The `framework` entrypoint now exposes `definePointerButtonBinding(...)`, `normalizePointerButton(...)`, and `getPointerButtonInputId(...)` so downstream games can bind semantic input actions to primary, secondary, or auxiliary pointer buttons. It also exposes `BrowserPointerButtonBridge` so browser games can write normalized pointer button state into `InputSystem`. `examples/dodge-blocks` consumes this path by binding `confirm` to primary pointer input. Tooling formatting displays pointer button bindings as read-only input action state.
 
-`0.20.x` starts collision query runtime primitives. `CollisionSystem` now exposes structured collision pair query methods for current, enter, stay, and exit buckets so downstream games can inspect entity/layer/rect data without rebuilding pair metadata from raw entity arrays. This remains AABB runtime query data, not a physics simulation or collider editor.
+`0.20.x` starts collision query runtime primitives. `CollisionSystem` now exposes structured collision pair query methods for current, enter, stay, and exit buckets so downstream games can inspect entity/layer/rect data without rebuilding pair metadata from raw entity arrays. The Node-safe `tooling` entrypoint can also expose those pairs as read-only collision snapshots and browser panel sections. This remains AABB runtime query/observability data, not a physics simulation or collider editor.
 
 ---
 
@@ -195,7 +195,7 @@ They should be verified through browser/example builds until the package is spli
 
 - `core` should stay independent from browser and rendering implementations, and should preserve scene/world phase cleanup invariants even when runtime hooks throw.
 - `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, pointer button action bindings, browser pointer button bridging, collision pair query snapshots, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, opt-in scene runtime service integration, data-driven scene config validation, safe scene config bootstrap, render/view synchronization, render-node capability checks, tile map data contracts, level spawn/region metadata, and optional scene config level/map declarations.
-- `tooling` can expose structured snapshots and formatters in Node, including read-only system lifecycle state, sprite animation state, runtime services state, and input action state, but browser panel classes should only be constructed in a DOM environment.
+- `tooling` can expose structured snapshots and formatters in Node, including read-only system lifecycle state, sprite animation state, runtime services state, input action state, and collision pair state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer. It owns render scene layer naming/order helpers.
 - `runtime` currently includes browser runtime assembly, so importing the broad runtime entrypoint in Node is not guaranteed to work.
 - Future package-boundary work may split browser runtime APIs into more explicit entrypoints, but `0.17.x` runtime/game loop hardening guarantees are now documented and covered by package verification.

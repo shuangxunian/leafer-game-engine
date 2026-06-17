@@ -4,6 +4,8 @@ import type { Component, Game, Scene } from "../core/index.js";
 import type {
   AssetLoadStatus,
   AssetRegistry,
+  CollisionLayer,
+  CollisionPairSnapshot,
   ComponentSchema,
   ComponentSchemaRegistry,
   GameFlow,
@@ -11,9 +13,10 @@ import type {
   InputActionMap,
   InputBinding,
   InputSystem,
+  Rect,
   SpriteAnimationPlaybackStatus
 } from "../framework/index.js";
-import { RuntimeServicesSystem, SpriteAnimationComponent } from "../framework/index.js";
+import { CollisionSystem, RuntimeServicesSystem, SpriteAnimationComponent } from "../framework/index.js";
 
 export type DebugSnapshot = {
   sceneName: string;
@@ -85,6 +88,7 @@ export type DebugSnapshotOptions = {
 
 export type ToolingSnapshotOptions = DebugSnapshotOptions & {
   animations?: boolean;
+  collisions?: boolean;
   input?: InputSystem;
   inputActions?: InputActionMap;
   inspector?: boolean;
@@ -122,6 +126,7 @@ export type InspectorComponentSnapshot = {
 export type ToolingSnapshot = {
   debug: DebugSnapshot;
   animations?: SpriteAnimationSnapshot;
+  collisions?: CollisionSnapshot;
   inputActions?: InputActionSnapshot;
   inspector?: SceneInspectorSnapshot;
   runtimeServices?: RuntimeServicesSnapshot;
@@ -199,6 +204,34 @@ export type InputActionEntrySnapshot = {
   justPressed?: boolean;
 };
 
+export type CollisionSnapshot =
+  | {
+      installed: false;
+    }
+  | {
+      installed: true;
+      currentCount: number;
+      enterCount: number;
+      stayCount: number;
+      exitCount: number;
+      current: CollisionPairSummarySnapshot[];
+      entered: CollisionPairSummarySnapshot[];
+      stayed: CollisionPairSummarySnapshot[];
+      exited: CollisionPairSummarySnapshot[];
+    };
+
+export type CollisionPairSummarySnapshot = {
+  a: CollisionPairEntrySummarySnapshot;
+  b: CollisionPairEntrySummarySnapshot;
+};
+
+export type CollisionPairEntrySummarySnapshot = {
+  entityId: number;
+  entityName: string;
+  layer: CollisionLayer;
+  rect: Rect;
+};
+
 const COMPONENT_LIFECYCLE_FIELDS = new Set(["entity", "enabled", "started", "destroyed"]);
 
 export function createDebugSnapshot(scene: Scene, options: DebugSnapshotOptions = {}): DebugSnapshot {
@@ -251,6 +284,7 @@ export function createToolingSnapshot(scene: Scene, options: ToolingSnapshotOpti
   return {
     debug: createDebugSnapshot(scene, options),
     animations: options.animations ? createSpriteAnimationSnapshot(scene) : undefined,
+    collisions: options.collisions ? createCollisionSnapshot(scene) : undefined,
     inputActions: options.inputActions ? createInputActionSnapshot(options.inputActions, options.input) : undefined,
     inspector: options.inspector ? createSceneInspectorSnapshot(scene) : undefined,
     runtimeServices: options.runtimeServices ? createRuntimeServicesSnapshot(scene) : undefined,
@@ -335,6 +369,10 @@ export function formatToolingSnapshot(snapshot: ToolingSnapshot): string[] {
 
   if (snapshot.inputActions) {
     lines.push("", ...formatInputActionSnapshot(snapshot.inputActions));
+  }
+
+  if (snapshot.collisions) {
+    lines.push("", ...formatCollisionSnapshot(snapshot.collisions));
   }
 
   if (snapshot.runtimeServices) {
@@ -482,6 +520,50 @@ export function formatInputActionSnapshot(snapshot: InputActionSnapshot): string
   return lines;
 }
 
+export function createCollisionSnapshot(scene: Scene): CollisionSnapshot {
+  const system = scene.getSystem(CollisionSystem);
+
+  if (!system) {
+    return {
+      installed: false
+    };
+  }
+
+  const current = system.getCollisionPairs().map(createCollisionPairSummarySnapshot);
+  const entered = system.getCollisionEnterPairs().map(createCollisionPairSummarySnapshot);
+  const stayed = system.getCollisionStayPairs().map(createCollisionPairSummarySnapshot);
+  const exited = system.getCollisionExitPairs().map(createCollisionPairSummarySnapshot);
+
+  return {
+    installed: true,
+    currentCount: current.length,
+    enterCount: entered.length,
+    stayCount: stayed.length,
+    exitCount: exited.length,
+    current,
+    entered,
+    stayed,
+    exited
+  };
+}
+
+export function formatCollisionSnapshot(snapshot: CollisionSnapshot): string[] {
+  if (!snapshot.installed) {
+    return ["Collisions missing"];
+  }
+
+  const lines = [
+    `Collisions current=${snapshot.currentCount} enter=${snapshot.enterCount} stay=${snapshot.stayCount} exit=${snapshot.exitCount}`
+  ];
+
+  lines.push(...formatCollisionPairBucket("Current", snapshot.current));
+  lines.push(...formatCollisionPairBucket("Enter", snapshot.entered));
+  lines.push(...formatCollisionPairBucket("Stay", snapshot.stayed));
+  lines.push(...formatCollisionPairBucket("Exit", snapshot.exited));
+
+  return lines;
+}
+
 export function createComponentSchemaSnapshot(registry: ComponentSchemaRegistry): ComponentSchemaSnapshot {
   const schemas = registry.list().map((schema) => ({
     ...schema,
@@ -593,6 +675,46 @@ function formatInputBinding(binding: InputBinding): string {
 
 function formatInputBindingKey(key: string): string {
   return key === " " ? "<space>" : key;
+}
+
+function createCollisionPairSummarySnapshot(pair: CollisionPairSnapshot): CollisionPairSummarySnapshot {
+  return {
+    a: createCollisionPairEntrySummarySnapshot(pair.a),
+    b: createCollisionPairEntrySummarySnapshot(pair.b)
+  };
+}
+
+function createCollisionPairEntrySummarySnapshot(
+  entry: CollisionPairSnapshot["a"]
+): CollisionPairEntrySummarySnapshot {
+  return {
+    entityId: entry.entityId,
+    entityName: entry.entityName,
+    layer: entry.layer,
+    rect: {
+      x: entry.rect.x,
+      y: entry.rect.y,
+      width: entry.rect.width,
+      height: entry.rect.height
+    }
+  };
+}
+
+function formatCollisionPairBucket(label: string, pairs: CollisionPairSummarySnapshot[]): string[] {
+  if (!pairs.length) return [];
+
+  return [
+    label,
+    ...pairs.map((pair) => `- ${formatCollisionPairEntry(pair.a)} <-> ${formatCollisionPairEntry(pair.b)}`)
+  ];
+}
+
+function formatCollisionPairEntry(entry: CollisionPairEntrySummarySnapshot): string {
+  return `#${entry.entityId} ${entry.entityName}[${entry.layer}] rect=${formatCollisionRect(entry.rect)}`;
+}
+
+function formatCollisionRect(rect: Rect): string {
+  return `${rect.x},${rect.y},${rect.width}x${rect.height}`;
 }
 
 export function createSpriteAnimationSnapshot(scene: Scene): SpriteAnimationSnapshot {

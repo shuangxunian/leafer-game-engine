@@ -1,4 +1,5 @@
 import type {
+  CollisionSnapshot,
   ComponentSchemaSnapshot,
   DebugAssetSnapshot,
   DebugGameFlowSnapshot,
@@ -12,6 +13,7 @@ import type {
   ToolingSnapshot
 } from "./debug.js";
 import {
+  formatCollisionSnapshot,
   formatComponentSchemaSnapshot,
   formatDebugAssetSnapshot,
   formatDebugGameFlowSnapshot,
@@ -96,6 +98,13 @@ export function createInputActionsPanelSection(snapshot: InputActionSnapshot): T
   return {
     title: "Input Actions",
     lines: formatInputActionSnapshot(snapshot)
+  };
+}
+
+export function createCollisionsPanelSection(snapshot: CollisionSnapshot): ToolingPanelSection {
+  return {
+    title: "Collisions",
+    lines: formatCollisionSnapshot(snapshot)
   };
 }
 
@@ -206,6 +215,10 @@ export function createToolingPanelSections(snapshot: ToolingSnapshot, selection:
 
   if (snapshot.inputActions) {
     sections.push(createInputActionsPanelSection(snapshot.inputActions));
+  }
+
+  if (snapshot.collisions) {
+    sections.push(createCollisionsPanelSection(snapshot.collisions));
   }
 
   if (snapshot.runtimeServices) {
