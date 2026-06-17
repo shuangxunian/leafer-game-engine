@@ -18,6 +18,10 @@ test("asset registry registers and resolves sprite assets", () => {
   assert.equal(assets.hasSprite("player"), true);
   assert.deepEqual(assets.getSprite("player"), player);
   assert.deepEqual(assets.listSprites(), [player]);
+  assert.deepEqual(assets.getSpriteLoadState("player"), {
+    id: "player",
+    status: "registered"
+  });
 });
 
 test("asset registry keeps legacy source lookup compatibility", () => {
@@ -33,6 +37,78 @@ test("asset registry fails clearly for missing required sprites", () => {
   const assets = new AssetRegistry();
 
   assert.throws(() => assets.requireSprite("missing"), /Sprite asset "missing" is not registered/);
+});
+
+test("asset registry loads registered sprites with an async loader", async () => {
+  const assets = new AssetRegistry();
+  assets.registerSprite({ id: "player", source: "/assets/player.png" });
+  const loaded = [];
+
+  const result = await assets.loadSprite("player", async (asset) => {
+    loaded.push(asset.source);
+  });
+
+  assert.deepEqual(result, {
+    id: "player",
+    status: "loaded"
+  });
+  assert.deepEqual(loaded, ["/assets/player.png"]);
+  assert.equal(assets.getSpriteLoadState("player")?.status, "loaded");
+  assert.equal(typeof assets.getSpriteLoadState("player")?.loadedAt, "number");
+});
+
+test("asset registry skips sprites that are already loaded", async () => {
+  const assets = new AssetRegistry();
+  assets.registerSprite({ id: "player", source: "/assets/player.png" });
+  let loadCount = 0;
+
+  await assets.loadSprite("player", async () => {
+    loadCount += 1;
+  });
+  const result = await assets.loadSprite("player", async () => {
+    loadCount += 1;
+  });
+
+  assert.deepEqual(result, {
+    id: "player",
+    status: "skipped"
+  });
+  assert.equal(loadCount, 1);
+  assert.equal(assets.getSpriteLoadState("player")?.status, "loaded");
+});
+
+test("asset registry records failed sprite loads", async () => {
+  const assets = new AssetRegistry();
+  assets.registerSprite({ id: "broken", source: "/assets/broken.png" });
+
+  const result = await assets.loadSprite("broken", async () => {
+    throw new Error("Network failed");
+  });
+
+  assert.deepEqual(result, {
+    id: "broken",
+    status: "failed",
+    error: "Network failed"
+  });
+  assert.deepEqual(assets.getSpriteLoadState("broken"), {
+    id: "broken",
+    status: "failed",
+    error: "Network failed"
+  });
+});
+
+test("asset registry reports missing sprite loads without mutating load states", async () => {
+  const assets = new AssetRegistry();
+
+  const result = await assets.loadSprite("missing", async () => {});
+
+  assert.deepEqual(result, {
+    id: "missing",
+    status: "failed",
+    error: 'Sprite asset "missing" is not registered.'
+  });
+  assert.equal(assets.getSpriteLoadState("missing"), undefined);
+  assert.deepEqual(assets.listSpriteLoadStates(), []);
 });
 
 test("asset manifest registers sprite assets", () => {

@@ -27,8 +27,26 @@ export type AssetLoadResult = {
   errors: AssetLoadError[];
 };
 
+export type AssetLoadStatus = "registered" | "loading" | "loaded" | "failed";
+
+export type AssetLoadState = {
+  id: string;
+  status: AssetLoadStatus;
+  error?: string;
+  loadedAt?: number;
+};
+
+export type SpriteAssetLoader = (asset: SpriteAsset) => Promise<void>;
+
+export type SpriteLoadResult = {
+  id: string;
+  status: "loaded" | "failed" | "skipped";
+  error?: string;
+};
+
 export class AssetRegistry {
   private readonly sprites = new Map<string, SpriteAsset>();
+  private readonly spriteLoadStates = new Map<string, AssetLoadState>();
 
   register(id: string, source: string): void {
     this.registerSprite({ id, source });
@@ -40,7 +58,60 @@ export class AssetRegistry {
       type: "sprite"
     };
     this.sprites.set(asset.id, spriteAsset);
+    this.spriteLoadStates.set(asset.id, {
+      id: asset.id,
+      status: "registered"
+    });
     return spriteAsset;
+  }
+
+  async loadSprite(id: string, loader: SpriteAssetLoader): Promise<SpriteLoadResult> {
+    const asset = this.getSprite(id);
+    if (!asset) {
+      return {
+        id,
+        status: "failed",
+        error: `Sprite asset "${id}" is not registered.`
+      };
+    }
+
+    const currentState = this.getSpriteLoadState(id);
+    if (currentState?.status === "loaded") {
+      return {
+        id,
+        status: "skipped"
+      };
+    }
+
+    this.spriteLoadStates.set(id, {
+      id,
+      status: "loading"
+    });
+
+    try {
+      await loader(asset);
+      this.spriteLoadStates.set(id, {
+        id,
+        status: "loaded",
+        loadedAt: Date.now()
+      });
+      return {
+        id,
+        status: "loaded"
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.spriteLoadStates.set(id, {
+        id,
+        status: "failed",
+        error: message
+      });
+      return {
+        id,
+        status: "failed",
+        error: message
+      };
+    }
   }
 
   loadManifest(manifest: AssetManifest): AssetLoadResult {
@@ -66,6 +137,17 @@ export class AssetRegistry {
 
   hasSprite(id: string): boolean {
     return this.sprites.has(id);
+  }
+
+  getSpriteLoadState(id: string): AssetLoadState | undefined {
+    const state = this.spriteLoadStates.get(id);
+    if (!state) return undefined;
+
+    return { ...state };
+  }
+
+  listSpriteLoadStates(): AssetLoadState[] {
+    return [...this.spriteLoadStates.values()].map((state) => ({ ...state }));
   }
 
   listSprites(): SpriteAsset[] {
