@@ -6,18 +6,18 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.10.5` Public API And Package Boundary Docs Closeout，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段和 `0.10.x` package-facing API boundary 阶段都已经收口。
+当前项目已经推进到 `v0.11.1` Sprite Frame And Animation Clip Contracts，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段和 `0.10.x` package-facing API boundary 阶段都已经收口，`0.11.x` 正在推进 sprite animation 和 asset runtime 能力。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
 - `core` 已具备主循环、场景、实体、组件、系统、时间步进和生命周期管理。
-- `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、GameFlow、相机、资源注册、异步资源加载状态、实体工厂、场景配置和组件 schema 等基础能力。
+- `framework` 已具备输入、变换、尺寸、视图同步、速度运动、碰撞、状态机、GameFlow、相机、资源注册、异步资源加载状态、sprite frame / animation clip 数据契约、实体工厂、场景配置和组件 schema 等基础能力。
 - `adapter` 已经通过渲染抽象接入 Leafer，并把显示层和游戏规则层分开。
 - `runtime` 已经可以在浏览器里装配渲染、场景、动画帧循环和 scene lifecycle start helper。
 - `tooling` 已经具备 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、asset load state snapshot、GameFlow snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail、assets/game flow panel section 和 schema-assisted component detail 展示。
 - `examples/dodge-blocks` 作为集成样例，用来验证引擎分层、异步资源加载和运行时能力。
 
-当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程和 scene lifecycle 启动边界。
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + interactive runtime inspector”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程、scene lifecycle 启动边界和 sprite animation 数据契约。
 
 ## 产品边界
 
@@ -574,7 +574,7 @@ import {
   - 已有 `ColliderComponent` 和 `CollisionSystem`，支持 `enter / stay / exit` 语义和 layer 过滤。
   - 已有 `StateMachine` 和 `GameFlow`，可以把示例里的状态流沉淀成通用能力。
   - 已有 `CameraSystem`，能驱动 world layer 位移、缩放和跟随实体。
-  - 已有 `AssetRegistry`，支持 typed sprite asset 注册、查找、缺失时报错、异步加载状态、manifest 部分加载结果和浏览器图片加载适配。
+  - 已有 `AssetRegistry`，支持 typed sprite asset 注册、查找、缺失时报错、异步加载状态、manifest 部分加载结果、sprite frame / animation clip 数据契约和浏览器图片加载适配。
   - 已有 `defineEntityFactory`，支持把实体创建逻辑从 sample 中抽出来复用。
   - 已有 asset manifest、entity template、scene config 和 component schema registry，开始具备数据驱动内容管线基础。
 
@@ -600,7 +600,7 @@ import {
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
-  - 当前测试数为 104 个。
+  - 当前测试数为 107 个。
   - `npm run check`、`npm test`、`npm run build:example`、`npm run verify:package` 是当前主要验证入口。
 
 ## 当前 demo 的意义

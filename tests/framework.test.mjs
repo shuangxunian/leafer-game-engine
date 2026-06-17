@@ -2,7 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { Scene } from "../lib/core/index.js";
-import { CameraSystem, GameFlow, StateMachine, TransformComponent } from "../lib/framework/index.js";
+import {
+  CameraSystem,
+  GameFlow,
+  StateMachine,
+  TransformComponent,
+  defineSpriteAnimationClip,
+  defineSpriteFrame
+} from "../lib/framework/index.js";
 
 test("state machine transitions call exit, enter and transition hooks in order", () => {
   const log = [];
@@ -150,6 +157,45 @@ test("game flow rejects invalid transitions without mutating state", () => {
     error: 'Cannot resume game flow from "ready" to "running".'
   });
   assert.equal(flow.getPhase(), "ready");
+});
+
+test("sprite frame and animation clip helpers return isolated data contracts", () => {
+  const frameInput = {
+    id: "hero-run-1",
+    spriteId: "hero",
+    x: 0,
+    y: 0,
+    width: 32,
+    height: 32,
+    durationSeconds: 0.08
+  };
+  const clipInput = {
+    id: "hero-run",
+    frameIds: ["hero-run-1", "hero-run-2"],
+    frameDurationSeconds: 0.08,
+    loop: true
+  };
+  const frame = defineSpriteFrame(frameInput);
+  const clip = defineSpriteAnimationClip(clipInput);
+
+  frameInput.x = 99;
+  clipInput.frameIds.push("mutated");
+
+  assert.deepEqual(frame, {
+    id: "hero-run-1",
+    spriteId: "hero",
+    x: 0,
+    y: 0,
+    width: 32,
+    height: 32,
+    durationSeconds: 0.08
+  });
+  assert.deepEqual(clip, {
+    id: "hero-run",
+    frameIds: ["hero-run-1", "hero-run-2"],
+    frameDurationSeconds: 0.08,
+    loop: true
+  });
 });
 
 test("camera system maps world layer from position and zoom", () => {

@@ -1,4 +1,5 @@
 import type { RenderSpriteAsset } from "../adapter/index.js";
+import type { SpriteAnimationClip, SpriteFrame } from "./animation.js";
 
 export type AssetRecord = {
   id: string;
@@ -13,11 +14,24 @@ export type AssetManifestSprite = RenderSpriteAsset;
 
 export type AssetManifest = {
   sprites?: AssetManifestSprite[];
+  frames?: SpriteFrame[];
+  clips?: SpriteAnimationClip[];
 };
 
 export type AssetLoadError = {
   assetId?: string;
-  code: "duplicate-sprite" | "invalid-sprite-id";
+  code:
+    | "duplicate-animation-clip"
+    | "duplicate-sprite"
+    | "duplicate-sprite-frame"
+    | "invalid-animation-clip-frame"
+    | "invalid-animation-clip-frame-duration"
+    | "invalid-animation-clip-id"
+    | "invalid-animation-clip-frames"
+    | "invalid-sprite-frame-duration"
+    | "invalid-sprite-frame-id"
+    | "invalid-sprite-frame-sprite"
+    | "invalid-sprite-id";
   message: string;
 };
 
@@ -68,6 +82,8 @@ export type AsyncAssetManifestLoadResult = {
 
 export class AssetRegistry {
   private readonly sprites = new Map<string, SpriteAsset>();
+  private readonly spriteFrames = new Map<string, SpriteFrame>();
+  private readonly animationClips = new Map<string, SpriteAnimationClip>();
   private readonly spriteLoadStates = new Map<string, AssetLoadState>();
 
   register(id: string, source: string): void {
@@ -85,6 +101,26 @@ export class AssetRegistry {
       status: "registered"
     });
     return spriteAsset;
+  }
+
+  registerSpriteFrame(frame: SpriteFrame): SpriteFrame {
+    const spriteFrame = {
+      ...frame
+    };
+    this.spriteFrames.set(frame.id, spriteFrame);
+    return { ...spriteFrame };
+  }
+
+  registerAnimationClip(clip: SpriteAnimationClip): SpriteAnimationClip {
+    const animationClip = {
+      ...clip,
+      frameIds: [...clip.frameIds]
+    };
+    this.animationClips.set(clip.id, animationClip);
+    return {
+      ...animationClip,
+      frameIds: [...animationClip.frameIds]
+    };
   }
 
   async loadSprite(id: string, loader: SpriteAssetLoader): Promise<SpriteLoadResult> {
@@ -161,6 +197,41 @@ export class AssetRegistry {
     return asset;
   }
 
+  getSpriteFrame(id: string): SpriteFrame | undefined {
+    const frame = this.spriteFrames.get(id);
+    if (!frame) return undefined;
+
+    return { ...frame };
+  }
+
+  requireSpriteFrame(id: string): SpriteFrame {
+    const frame = this.getSpriteFrame(id);
+    if (!frame) {
+      throw new Error(`Sprite frame "${id}" is not registered.`);
+    }
+
+    return frame;
+  }
+
+  getAnimationClip(id: string): SpriteAnimationClip | undefined {
+    const clip = this.animationClips.get(id);
+    if (!clip) return undefined;
+
+    return {
+      ...clip,
+      frameIds: [...clip.frameIds]
+    };
+  }
+
+  requireAnimationClip(id: string): SpriteAnimationClip {
+    const clip = this.getAnimationClip(id);
+    if (!clip) {
+      throw new Error(`Sprite animation clip "${id}" is not registered.`);
+    }
+
+    return clip;
+  }
+
   hasSprite(id: string): boolean {
     return this.sprites.has(id);
   }
@@ -179,11 +250,24 @@ export class AssetRegistry {
   listSprites(): SpriteAsset[] {
     return [...this.sprites.values()];
   }
+
+  listSpriteFrames(): SpriteFrame[] {
+    return [...this.spriteFrames.values()].map((frame) => ({ ...frame }));
+  }
+
+  listAnimationClips(): SpriteAnimationClip[] {
+    return [...this.animationClips.values()].map((clip) => ({
+      ...clip,
+      frameIds: [...clip.frameIds]
+    }));
+  }
 }
 
 export function loadAssetManifest(registry: AssetRegistry, manifest: AssetManifest): AssetLoadResult {
   const sprites = manifest.sprites ?? [];
-  const errors = validateManifestSprites(sprites);
+  const frames = manifest.frames ?? [];
+  const clips = manifest.clips ?? [];
+  const errors = validateAssetManifest(registry, manifest);
 
   if (errors.length > 0) {
     return {
@@ -194,6 +278,8 @@ export function loadAssetManifest(registry: AssetRegistry, manifest: AssetManife
   }
 
   const registeredSprites = sprites.map((sprite) => registry.registerSprite(sprite).id);
+  frames.forEach((frame) => registry.registerSpriteFrame(frame));
+  clips.forEach((clip) => registry.registerAnimationClip(clip));
 
   return {
     ok: true,
@@ -208,7 +294,9 @@ export async function loadAssetManifestAsync(
   loader: SpriteAssetLoader
 ): Promise<AsyncAssetManifestLoadResult> {
   const sprites = manifest.sprites ?? [];
-  const errors = validateManifestSprites(sprites);
+  const frames = manifest.frames ?? [];
+  const clips = manifest.clips ?? [];
+  const errors = validateAssetManifest(registry, manifest);
 
   if (errors.length > 0) {
     return {
@@ -227,6 +315,8 @@ export async function loadAssetManifestAsync(
 
     return registry.registerSprite(sprite).id;
   });
+  frames.forEach((frame) => registry.registerSpriteFrame(frame));
+  clips.forEach((clip) => registry.registerAnimationClip(clip));
   const loadResults: SpriteLoadResult[] = [];
 
   for (const id of registeredSprites) {
@@ -295,6 +385,26 @@ export function createBrowserImageSpriteLoader(options: BrowserImageSpriteLoader
   };
 }
 
+function validateAssetManifest(registry: AssetRegistry, manifest: AssetManifest): AssetLoadError[] {
+  const sprites = manifest.sprites ?? [];
+  const frames = manifest.frames ?? [];
+  const clips = manifest.clips ?? [];
+  const errors = validateManifestSprites(sprites);
+  const spriteIds = new Set([
+    ...registry.listSprites().map((sprite) => sprite.id),
+    ...sprites.map((sprite) => sprite.id).filter((id): id is string => typeof id === "string")
+  ]);
+  const frameIds = new Set([
+    ...registry.listSpriteFrames().map((frame) => frame.id),
+    ...frames.map((frame) => frame.id).filter((id): id is string => typeof id === "string")
+  ]);
+
+  errors.push(...validateManifestFrames(frames, spriteIds));
+  errors.push(...validateManifestClips(clips, frameIds));
+
+  return errors;
+}
+
 function validateManifestSprites(sprites: AssetManifestSprite[]): AssetLoadError[] {
   const seenSprites = new Set<string>();
   const errors: AssetLoadError[] = [];
@@ -320,6 +430,109 @@ function validateManifestSprites(sprites: AssetManifestSprite[]): AssetLoadError
     }
 
     seenSprites.add(id);
+  }
+
+  return errors;
+}
+
+function validateManifestFrames(frames: SpriteFrame[], spriteIds: Set<string>): AssetLoadError[] {
+  const seenFrames = new Set<string>();
+  const errors: AssetLoadError[] = [];
+
+  for (const frame of frames) {
+    const id = typeof frame.id === "string" ? frame.id.trim() : "";
+    if (!id) {
+      errors.push({
+        assetId: frame.id,
+        code: "invalid-sprite-frame-id",
+        message: "Sprite frame id must be a non-empty string."
+      });
+      continue;
+    }
+
+    if (seenFrames.has(id)) {
+      errors.push({
+        assetId: frame.id,
+        code: "duplicate-sprite-frame",
+        message: `Sprite frame "${frame.id}" is declared more than once in the manifest.`
+      });
+      continue;
+    }
+
+    const spriteId = typeof frame.spriteId === "string" ? frame.spriteId.trim() : "";
+    if (!spriteId || !spriteIds.has(spriteId)) {
+      errors.push({
+        assetId: frame.id,
+        code: "invalid-sprite-frame-sprite",
+        message: `Sprite frame "${frame.id}" must reference a registered sprite asset.`
+      });
+    }
+
+    if (frame.durationSeconds !== undefined && frame.durationSeconds <= 0) {
+      errors.push({
+        assetId: frame.id,
+        code: "invalid-sprite-frame-duration",
+        message: `Sprite frame "${frame.id}" durationSeconds must be greater than 0.`
+      });
+    }
+
+    seenFrames.add(id);
+  }
+
+  return errors;
+}
+
+function validateManifestClips(clips: SpriteAnimationClip[], frameIds: Set<string>): AssetLoadError[] {
+  const seenClips = new Set<string>();
+  const errors: AssetLoadError[] = [];
+
+  for (const clip of clips) {
+    const id = typeof clip.id === "string" ? clip.id.trim() : "";
+    if (!id) {
+      errors.push({
+        assetId: clip.id,
+        code: "invalid-animation-clip-id",
+        message: "Sprite animation clip id must be a non-empty string."
+      });
+      continue;
+    }
+
+    if (seenClips.has(id)) {
+      errors.push({
+        assetId: clip.id,
+        code: "duplicate-animation-clip",
+        message: `Sprite animation clip "${clip.id}" is declared more than once in the manifest.`
+      });
+      continue;
+    }
+
+    if (!Array.isArray(clip.frameIds) || clip.frameIds.length === 0) {
+      errors.push({
+        assetId: clip.id,
+        code: "invalid-animation-clip-frames",
+        message: `Sprite animation clip "${clip.id}" must include at least one frame id.`
+      });
+    } else {
+      for (const frameId of clip.frameIds) {
+        if (!frameIds.has(frameId)) {
+          errors.push({
+            assetId: clip.id,
+            code: "invalid-animation-clip-frame",
+            message: `Sprite animation clip "${clip.id}" references missing frame "${frameId}".`
+          });
+        }
+      }
+    }
+
+    if (clip.frameDurationSeconds !== undefined && clip.frameDurationSeconds <= 0) {
+      errors.push({
+        assetId: clip.id,
+        code: "invalid-animation-clip-frame-duration",
+        message: `Sprite animation clip "${clip.id}" frameDurationSeconds must be greater than 0.`
+      });
+    }
+
+    seenClips.add(id);
   }
 
   return errors;

@@ -214,6 +214,100 @@ test("asset manifest reports duplicate sprite ids without mutating registry", ()
   assert.deepEqual(assets.listSprites(), []);
 });
 
+test("asset manifest registers sprite frames and animation clips", () => {
+  const assets = new AssetRegistry();
+
+  const result = assets.loadManifest({
+    sprites: [{ id: "hero", source: "/assets/hero.png" }],
+    frames: [
+      { id: "hero-idle-1", spriteId: "hero", x: 0, y: 0, width: 32, height: 32, durationSeconds: 0.12 },
+      { id: "hero-idle-2", spriteId: "hero", x: 32, y: 0, width: 32, height: 32 }
+    ],
+    clips: [
+      {
+        id: "hero-idle",
+        frameIds: ["hero-idle-1", "hero-idle-2"],
+        frameDurationSeconds: 0.1,
+        loop: true
+      }
+    ]
+  });
+
+  assert.deepEqual(result, {
+    ok: true,
+    registeredSprites: ["hero"],
+    errors: []
+  });
+  assert.deepEqual(assets.requireSpriteFrame("hero-idle-1"), {
+    id: "hero-idle-1",
+    spriteId: "hero",
+    x: 0,
+    y: 0,
+    width: 32,
+    height: 32,
+    durationSeconds: 0.12
+  });
+  assert.deepEqual(assets.requireAnimationClip("hero-idle"), {
+    id: "hero-idle",
+    frameIds: ["hero-idle-1", "hero-idle-2"],
+    frameDurationSeconds: 0.1,
+    loop: true
+  });
+});
+
+test("asset manifest validates sprite frame and animation clip references before mutating registry", () => {
+  const assets = new AssetRegistry();
+  assets.registerSprite({ id: "existing", source: "/assets/existing.png" });
+
+  const result = assets.loadManifest({
+    frames: [
+      { id: "valid-frame", spriteId: "existing" },
+      { id: "missing-sprite-frame", spriteId: "missing" },
+      { id: "bad-duration", spriteId: "existing", durationSeconds: 0 }
+    ],
+    clips: [
+      { id: "valid-clip", frameIds: ["valid-frame"] },
+      { id: "missing-frame-clip", frameIds: ["missing-frame"] },
+      { id: "empty-clip", frameIds: [] },
+      { id: "bad-duration-clip", frameIds: ["valid-frame"], frameDurationSeconds: 0 }
+    ]
+  });
+
+  assert.deepEqual(result, {
+    ok: false,
+    registeredSprites: [],
+    errors: [
+      {
+        assetId: "missing-sprite-frame",
+        code: "invalid-sprite-frame-sprite",
+        message: 'Sprite frame "missing-sprite-frame" must reference a registered sprite asset.'
+      },
+      {
+        assetId: "bad-duration",
+        code: "invalid-sprite-frame-duration",
+        message: 'Sprite frame "bad-duration" durationSeconds must be greater than 0.'
+      },
+      {
+        assetId: "missing-frame-clip",
+        code: "invalid-animation-clip-frame",
+        message: 'Sprite animation clip "missing-frame-clip" references missing frame "missing-frame".'
+      },
+      {
+        assetId: "empty-clip",
+        code: "invalid-animation-clip-frames",
+        message: 'Sprite animation clip "empty-clip" must include at least one frame id.'
+      },
+      {
+        assetId: "bad-duration-clip",
+        code: "invalid-animation-clip-frame-duration",
+        message: 'Sprite animation clip "bad-duration-clip" frameDurationSeconds must be greater than 0.'
+      }
+    ]
+  });
+  assert.deepEqual(assets.listSpriteFrames(), []);
+  assert.deepEqual(assets.listAnimationClips(), []);
+});
+
 test("async asset manifest loading registers and loads sprites", async () => {
   const assets = new AssetRegistry();
   const loaded = [];

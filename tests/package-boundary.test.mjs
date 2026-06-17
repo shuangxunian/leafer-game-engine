@@ -71,6 +71,8 @@ test("framework package subpath can be imported by package name in Node", async 
     "TransformComponent",
     "ViewComponent",
     "createDefaultComponentSchemaRegistry",
+    "defineSpriteAnimationClip",
+    "defineSpriteFrame",
     "loadAssetManifestAsync"
   ]);
 });
