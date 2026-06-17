@@ -1,6 +1,7 @@
 import type { BrowserRuntime } from "../../src/runtime/index.js";
 import { BrowserKeyboardBridge, InputSystem, createDefaultComponentSchemaRegistry } from "../../src/framework/index.js";
 import { DodgeBlocksScene } from "./dodge-blocks-scene.js";
+import { DodgeGameSystem } from "./dodge-game-system.js";
 import { BrowserToolingPanel, createToolingSnapshot } from "../../src/tooling/index.js";
 
 export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<void> {
@@ -10,6 +11,8 @@ export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<v
 
   const input = scene.getSystem(InputSystem);
   if (!input) throw new Error("InputSystem was not initialized.");
+  const gameSystem = scene.getSystem(DodgeGameSystem);
+  if (!gameSystem) throw new Error("DodgeGameSystem was not initialized.");
 
   const keyboard = new BrowserKeyboardBridge(input);
   keyboard.attach();
@@ -18,6 +21,7 @@ export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<v
   const createSnapshot = () =>
     createToolingSnapshot(scene, {
       assets: scene.assetRegistry,
+      flow: gameSystem.gameFlow,
       game: runtime.game,
       inspector: true,
       renderScene: runtime.renderScene,

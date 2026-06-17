@@ -16,7 +16,7 @@
 - collision 是否能判断玩家和障碍物接触
 - `GameFlow` 是否能管理 ready / running / paused / ended
 - 玩家是否能被限制在当前 viewport 内移动
-- tooling panel 是否能分区显示 runtime debug + assets + entity inspector + component schema 数据
+- tooling panel 是否能分区显示 runtime debug + assets + game flow + entity inspector + component schema 数据
 - tooling panel 是否能点击 entity 行并显示选中状态
 - tooling panel 是否能显示 selected entity detail 摘要
 - tooling panel 是否能用 component schema 辅助展示 selected component 字段
@@ -49,7 +49,7 @@ npm run dev
   - 在 runtime start 前预加载 asset manifest
   - 挂载 keyboard bridge
   - 挂载 browser tooling panel
-  - 分区显示 runtime debug、assets、entity inspector 和 component schema 信息
+  - 分区显示 runtime debug、assets、game flow、entity inspector 和 component schema 信息
   - 支持在 panel 中点击 entity 行进行选择
   - 选择 entity 后显示 selected entity detail section
   - selected detail 会结合 component schema metadata 展示字段类型、默认值和当前值
@@ -98,7 +98,7 @@ bootDodgeBlocksExample(runtime).catch((error) => {
 });
 ```
 
-`bootDodgeBlocksExample(...)` 里会创建 scene、预加载 assets、启动 runtime、绑定键盘输入，并把包含 asset state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
+`bootDodgeBlocksExample(...)` 里会创建 scene、预加载 assets、启动 runtime、绑定键盘输入，并把包含 asset state、game flow state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
 
 ## What This Example Proves
 
@@ -123,6 +123,7 @@ browser runtime
 - player 的 `transform`、`size`、`collider` 来自 `EntityTemplate`
 - player 的 `ViewComponent` 和 `PlayerControllerComponent` 仍在代码中装配
 - gameplay phase 使用 framework `GameFlow`，而不是示例内的本地 phase state machine
+- tooling panel 的 `Game Flow` section 可以显示当前 ready / running / paused / ended 状态
 - hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度
 
 后续新增资源加载、数据驱动场景、关卡配置和 runtime tooling 能力时，这个示例可以继续作为集成验证样例。

@@ -50,6 +50,10 @@ export class DodgeGameSystem extends System {
     });
   }
 
+  get gameFlow(): GameFlow {
+    return this.flow;
+  }
+
   override start(): void {
     this.resetRunState();
     this.updateHud();

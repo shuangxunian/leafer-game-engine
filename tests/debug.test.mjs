@@ -2,13 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { Component, Game, Scene, System } from "../lib/core/index.js";
-import { AssetRegistry, ComponentSchemaRegistry, TransformComponent, createDefaultComponentSchemaRegistry } from "../lib/framework/index.js";
+import { AssetRegistry, ComponentSchemaRegistry, GameFlow, TransformComponent, createDefaultComponentSchemaRegistry } from "../lib/framework/index.js";
 import {
   createAssetsPanelSection,
   createComponentSchemasPanelSection,
   createComponentSchemaSnapshot,
   createDebugSnapshot,
   createEntityInspectorPanelSection,
+  createGameFlowPanelSection,
   createRuntimeDebugPanelSection,
   createSelectedEntityDetailPanelSection,
   createSceneInspectorSnapshot,
@@ -16,6 +17,7 @@ import {
   createToolingSnapshot,
   formatComponentSchemaSnapshot,
   formatDebugAssetSnapshot,
+  formatDebugGameFlowSnapshot,
   formatDebugSnapshot,
   formatSceneInspectorSnapshot,
   formatToolingSnapshot,
@@ -62,6 +64,7 @@ test("debug snapshot can include time, render and asset details", () => {
   const game = new Game();
   const scene = new Scene("RuntimeDebugScene");
   const assets = new AssetRegistry();
+  const flow = new GameFlow({ initialPhase: "running" });
   assets.registerSprite({ id: "player", fill: "#ffcf7a" });
 
   game.setScene(scene);
@@ -69,6 +72,7 @@ test("debug snapshot can include time, render and asset details", () => {
 
   const snapshot = createDebugSnapshot(scene, {
     assets,
+    flow,
     game,
     renderScene: createFakeRenderScene()
   });
@@ -90,6 +94,10 @@ test("debug snapshot can include time, render and asset details", () => {
       status: "registered"
     }
   ]);
+  assert.deepEqual(snapshot.flow, {
+    phase: "running",
+    canUpdateGameplay: true
+  });
 });
 
 test("debug asset snapshot includes copied load states", async () => {
@@ -175,6 +183,16 @@ test("debug asset snapshot formatting is stable and readable", async () => {
   ]);
 });
 
+test("debug game flow snapshot formatting is stable and readable", () => {
+  assert.deepEqual(formatDebugGameFlowSnapshot({
+    phase: "paused",
+    canUpdateGameplay: false
+  }), [
+    "Game Flow paused",
+    "Gameplay inactive"
+  ]);
+});
+
 test("scene inspector snapshot includes entity and component details", () => {
   const scene = new Scene("InspectorScene");
   const player = scene.world.createEntity("player");
@@ -227,6 +245,7 @@ test("tooling snapshot aggregates debug data and optional inspector data", () =>
   const game = new Game();
   const scene = new Scene("ToolingScene");
   const assets = new AssetRegistry();
+  const flow = new GameFlow({ initialPhase: "paused" });
   scene.world.createEntity("player");
   assets.registerSprite({ id: "player", fill: "#ffcf7a" });
   game.setScene(scene);
@@ -234,6 +253,7 @@ test("tooling snapshot aggregates debug data and optional inspector data", () =>
 
   const debugOnly = createToolingSnapshot(scene, {
     assets,
+    flow,
     game,
     renderScene: createFakeRenderScene()
   });
@@ -241,6 +261,7 @@ test("tooling snapshot aggregates debug data and optional inspector data", () =>
   assert.equal(debugOnly.debug.sceneName, "ToolingScene");
   assert.equal(debugOnly.debug.time?.fps, 2);
   assert.deepEqual(debugOnly.debug.assets?.sprites, ["player"]);
+  assert.equal(debugOnly.debug.flow?.phase, "paused");
   assert.equal(debugOnly.inspector, undefined);
 
   const withInspector = createToolingSnapshot(scene, { inspector: true });
@@ -356,6 +377,18 @@ test("tooling snapshot formatting keeps debug-only output compact", () => {
   ]);
 });
 
+test("tooling snapshot formatting includes flow data when present", () => {
+  const scene = new Scene("FlowToolingFormatScene");
+  const flow = new GameFlow({ initialPhase: "running" });
+
+  assert.deepEqual(formatToolingSnapshot(createToolingSnapshot(scene, { flow })), [
+    "Scene FlowToolingFormatScene",
+    "Entities 0/0",
+    "Systems 0",
+    "Flow running gameplay=active"
+  ]);
+});
+
 test("tooling panel sections expose runtime debug output", () => {
   const scene = new Scene("RuntimePanelScene");
 
@@ -376,6 +409,19 @@ test("asset panel section exposes asset load states", async () => {
     lines: [
       "Assets sprites=1 registered=0 loading=0 loaded=1 failed=0",
       "- player loaded"
+    ]
+  });
+});
+
+test("game flow panel section exposes current flow state", () => {
+  assert.deepEqual(createGameFlowPanelSection({
+    phase: "ready",
+    canUpdateGameplay: false
+  }), {
+    title: "Game Flow",
+    lines: [
+      "Game Flow ready",
+      "Gameplay inactive"
     ]
   });
 });
@@ -468,6 +514,30 @@ test("tooling panel sections include asset data when requested", () => {
       lines: [
         "Assets sprites=1 registered=1 loading=0 loaded=0 failed=0",
         "- player registered"
+      ]
+    }
+  ]);
+});
+
+test("tooling panel sections include flow data when requested", () => {
+  const scene = new Scene("FlowSectionsScene");
+  const flow = new GameFlow({ initialPhase: "running" });
+
+  assert.deepEqual(createToolingPanelSections(createToolingSnapshot(scene, { flow })), [
+    {
+      title: "Runtime Debug",
+      lines: [
+        "Scene FlowSectionsScene",
+        "Entities 0/0",
+        "Systems 0",
+        "Flow running gameplay=active"
+      ]
+    },
+    {
+      title: "Game Flow",
+      lines: [
+        "Game Flow running",
+        "Gameplay active"
       ]
     }
   ]);

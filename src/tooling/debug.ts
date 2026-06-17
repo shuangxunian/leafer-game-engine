@@ -1,6 +1,6 @@
 import type { RenderScene } from "../adapter/index.js";
 import type { Component, Game, Scene } from "../core/index.js";
-import type { AssetLoadStatus, AssetRegistry, ComponentSchema, ComponentSchemaRegistry } from "../framework/index.js";
+import type { AssetLoadStatus, AssetRegistry, ComponentSchema, ComponentSchemaRegistry, GameFlow, GameFlowPhase } from "../framework/index.js";
 
 export type DebugSnapshot = {
   sceneName: string;
@@ -12,6 +12,7 @@ export type DebugSnapshot = {
   time?: DebugTimeSnapshot;
   render?: DebugRenderSnapshot;
   assets?: DebugAssetSnapshot;
+  flow?: DebugGameFlowSnapshot;
 };
 
 export type DebugSystemSnapshot = {
@@ -52,8 +53,14 @@ export type DebugAssetSpriteSnapshot = {
   loadedAt?: number;
 };
 
+export type DebugGameFlowSnapshot = {
+  phase: GameFlowPhase;
+  canUpdateGameplay: boolean;
+};
+
 export type DebugSnapshotOptions = {
   assets?: AssetRegistry;
+  flow?: GameFlow;
   game?: Game;
   renderScene?: RenderScene;
 };
@@ -121,7 +128,8 @@ export function createDebugSnapshot(scene: Scene, options: DebugSnapshotOptions 
     })),
     time: options.game ? createTimeSnapshot(options.game) : undefined,
     render: options.renderScene ? createRenderSnapshot(options.renderScene) : undefined,
-    assets: options.assets ? createAssetSnapshot(options.assets) : undefined
+    assets: options.assets ? createAssetSnapshot(options.assets) : undefined,
+    flow: options.flow ? createGameFlowSnapshot(options.flow) : undefined
   };
 }
 
@@ -173,6 +181,10 @@ export function formatDebugSnapshot(snapshot: DebugSnapshot): string[] {
     lines.push(
       `Sprites ${snapshot.assets.spriteCount} registered=${statusCounts.registered} loading=${statusCounts.loading} loaded=${statusCounts.loaded} failed=${statusCounts.failed}`
     );
+  }
+
+  if (snapshot.flow) {
+    lines.push(`Flow ${snapshot.flow.phase} gameplay=${snapshot.flow.canUpdateGameplay ? "active" : "inactive"}`);
   }
 
   if (snapshot.systems.length > 0) {
@@ -227,6 +239,13 @@ export function formatDebugAssetSnapshot(snapshot: DebugAssetSnapshot): string[]
   }
 
   return lines;
+}
+
+export function formatDebugGameFlowSnapshot(snapshot: DebugGameFlowSnapshot): string[] {
+  return [
+    `Game Flow ${snapshot.phase}`,
+    `Gameplay ${snapshot.canUpdateGameplay ? "active" : "inactive"}`
+  ];
 }
 
 export function createComponentSchemaSnapshot(registry: ComponentSchemaRegistry): ComponentSchemaSnapshot {
@@ -316,6 +335,13 @@ function createAssetStatusCounts(spriteStates: DebugAssetSpriteSnapshot[]): Debu
   }
 
   return counts;
+}
+
+function createGameFlowSnapshot(flow: GameFlow): DebugGameFlowSnapshot {
+  return {
+    phase: flow.getPhase(),
+    canUpdateGameplay: flow.canUpdateGameplay()
+  };
 }
 
 function createComponentInspectorSnapshot(component: Component): InspectorComponentSnapshot {

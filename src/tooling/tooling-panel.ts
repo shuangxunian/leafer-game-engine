@@ -1,13 +1,20 @@
 import type {
   ComponentSchemaSnapshot,
   DebugAssetSnapshot,
+  DebugGameFlowSnapshot,
   DebugSnapshot,
   InspectorComponentSnapshot,
   InspectorPrimitive,
   SceneInspectorSnapshot,
   ToolingSnapshot
 } from "./debug.js";
-import { formatComponentSchemaSnapshot, formatDebugAssetSnapshot, formatDebugSnapshot, formatSceneInspectorSnapshot } from "./debug.js";
+import {
+  formatComponentSchemaSnapshot,
+  formatDebugAssetSnapshot,
+  formatDebugGameFlowSnapshot,
+  formatDebugSnapshot,
+  formatSceneInspectorSnapshot
+} from "./debug.js";
 
 export type ToolingPanelSection = {
   title: string;
@@ -66,6 +73,13 @@ export function createAssetsPanelSection(snapshot: DebugAssetSnapshot): ToolingP
   };
 }
 
+export function createGameFlowPanelSection(snapshot: DebugGameFlowSnapshot): ToolingPanelSection {
+  return {
+    title: "Game Flow",
+    lines: formatDebugGameFlowSnapshot(snapshot)
+  };
+}
+
 export function createSelectedEntityDetailPanelSection(
   snapshot: SceneInspectorSnapshot,
   selection: Required<ToolingPanelSelection>,
@@ -106,6 +120,10 @@ export function parseToolingPanelEntityRowId(line: string): number | undefined {
 
 export function createToolingPanelSections(snapshot: ToolingSnapshot, selection: ToolingPanelSelection = {}): ToolingPanelSection[] {
   const sections = [createRuntimeDebugPanelSection(snapshot.debug)];
+
+  if (snapshot.debug.flow) {
+    sections.push(createGameFlowPanelSection(snapshot.debug.flow));
+  }
 
   if (snapshot.debug.assets) {
     sections.push(createAssetsPanelSection(snapshot.debug.assets));
