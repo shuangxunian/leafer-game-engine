@@ -35,6 +35,26 @@ The smoke tests intentionally use the real package name so they exercise `packag
 
 ---
 
+## Recommended Import Patterns
+
+Use the root package entrypoint for browser game bootstrapping:
+
+```ts
+import { Scene, createBrowserRuntime } from "@shuangxunian/leafer-game-engine";
+```
+
+Use subpath entrypoints for pure engine logic, framework primitives, and Node-side tests:
+
+```ts
+import { Scene } from "@shuangxunian/leafer-game-engine/core";
+import { GameFlow } from "@shuangxunian/leafer-game-engine/framework";
+import { createToolingSnapshot } from "@shuangxunian/leafer-game-engine/tooling";
+```
+
+This keeps browser runtime dependencies out of tests that only need ECS, gameplay flow, assets, scene config, or snapshot formatting.
+
+---
+
 ## Browser-Facing Imports
 
 These entrypoints may import Leafer or DOM-dependent code:

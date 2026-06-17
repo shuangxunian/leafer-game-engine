@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.10.1` Public API Inventory And Import Smoke Tests，`0.8.x` resource loading baseline 和 `0.9.x` game-flow/scene-lifecycle 阶段都已经收口，`0.10.x` 正在整理 package-facing API 边界。
+当前项目已经推进到 `v0.10.2` Root And Subpath Import Guidance，`0.8.x` resource loading baseline 和 `0.9.x` game-flow/scene-lifecycle 阶段都已经收口，`0.10.x` 正在整理 package-facing API 边界。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -55,6 +55,24 @@ npm install @shuangxunian/leafer-game-engine
 
 - GitHub 仓库已创建并接入 CI
 - npm 包页面链接已经固定，发布后可直接通过上面的地址访问
+
+## 如何选择导入入口
+
+如果你在浏览器项目里启动游戏，可以使用 root import。这个入口会导出 `createBrowserRuntime(...)`，也会带上浏览器 runtime 和 Leafer adapter 相关能力：
+
+```ts
+import { Scene, createBrowserRuntime } from "@shuangxunian/leafer-game-engine";
+```
+
+如果你在 Node 测试、纯逻辑模块或服务端构建脚本里只需要引擎逻辑，优先使用 subpath import，避免不小心拉入浏览器 runtime：
+
+```ts
+import { Scene } from "@shuangxunian/leafer-game-engine/core";
+import { GameFlow } from "@shuangxunian/leafer-game-engine/framework";
+import { createToolingSnapshot } from "@shuangxunian/leafer-game-engine/tooling";
+```
+
+当前 Node-safe smoke tests 覆盖 `/core`、`/framework` 和 `/tooling`。`/adapter`、`/runtime` 和 root import 当前按浏览器侧入口看待，主要通过示例构建验证。
 
 ## 安装后最小使用示例
 
