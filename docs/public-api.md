@@ -10,7 +10,9 @@ The project is a frontend 2D game engine dependency package. It is not an editor
 
 For the animation-specific boundary across asset metadata, playback helpers, ECS behavior, render application, example consumption, and read-only tooling visibility, see [Sprite Animation Runtime Boundary](animation-runtime.md).
 
-`0.12.x` starts the runtime services baseline with a Node-safe `EventBus` for deterministic gameplay/runtime event dispatch, a Node-safe `RuntimeScheduler` for update-driven delayed/repeated tasks, opt-in scene integration through `RuntimeServicesSystem`, and read-only runtime services visibility through `/tooling`.
+`0.12.x` closed the runtime services baseline with a Node-safe `EventBus` for deterministic gameplay/runtime event dispatch, a Node-safe `RuntimeScheduler` for update-driven delayed/repeated tasks, opt-in scene integration through `RuntimeServicesSystem`, and read-only runtime services visibility through `/tooling`.
+
+For the runtime-services boundary across event dispatch, update-driven scheduling, scene integration, and read-only tooling visibility, see [Runtime Services Boundary](runtime-services.md).
 
 ---
 
@@ -43,7 +45,9 @@ import {
   SpriteAnimationComponent,
   SpriteAnimationSystem,
   addRuntimeServices,
-  createSpriteAnimationPlayback
+  createRuntimeServices,
+  createSpriteAnimationPlayback,
+  getRuntimeServices
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
   createToolingSnapshot,
@@ -76,7 +80,9 @@ import {
   SpriteAnimationComponent,
   SpriteAnimationSystem,
   addRuntimeServices,
-  createSpriteAnimationPlayback
+  createRuntimeServices,
+  createSpriteAnimationPlayback,
+  getRuntimeServices
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
   createToolingSnapshot,
@@ -145,6 +151,7 @@ This command builds the library through `npm pack --dry-run --json` and checks t
 - `docs/public-api.md`
 - `docs/product-boundary.md`
 - `docs/animation-runtime.md`
+- `docs/runtime-services.md`
 - all JS and type declaration targets from `package.json` exports
 
 It also checks that development-only paths such as `src`, `tests`, `examples`, `dist`, `scripts`, and `node_modules` are not included.

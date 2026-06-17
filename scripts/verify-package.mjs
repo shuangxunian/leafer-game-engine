@@ -63,7 +63,8 @@ for (const requiredFile of [
   "LICENSE",
   "docs/public-api.md",
   "docs/product-boundary.md",
-  "docs/animation-runtime.md"
+  "docs/animation-runtime.md",
+  "docs/runtime-services.md"
 ]) {
   assertHasFile(packageFiles, requiredFile);
 }
