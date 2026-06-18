@@ -6,6 +6,7 @@ export * from "./collision.js";
 export * from "./events.js";
 export * from "./factory.js";
 export * from "./game-flow.js";
+export * from "./hud.js";
 export * from "./input.js";
 export * from "./keyboard.js";
 export * from "./level.js";

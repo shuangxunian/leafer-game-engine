@@ -365,7 +365,7 @@ test("camera runtime contract stage docs are discoverable from roadmap", async (
   assert.equal(publicApi.includes("not visual scene editing, camera timeline authoring"), true);
   assert.equal(publicApi.includes("`v0.23.2` adds camera bounds and follow clamping primitives"), true);
   assert.equal(publicApi.includes("not camera authoring UI, editor gizmos"), true);
-  assert.equal(readme.includes("`v0.24.2` Actor Template Composition Baseline"), true);
+  assert.equal(readme.includes("`v0.24.3` Runtime HUD Text Helper Baseline"), true);
   assert.equal(readme.includes("`0.23.x` camera runtime contract hardening 阶段已经完成 viewport/coordinate conversion baseline 和 bounds/follow clamping primitives"), true);
   assert.equal(readme.includes("`v0.23.3` camera read-only tooling visibility 已记录但暂缓"), true);
 });
@@ -375,12 +375,14 @@ test("playable game kit stage docs are discoverable from roadmap and README", as
   const stage = await readFile(new URL("../docs/version/v0.24.0.md", import.meta.url), "utf8");
   const movementPatch = await readFile(new URL("../docs/version/v0.24.1.md", import.meta.url), "utf8");
   const actorPatch = await readFile(new URL("../docs/version/v0.24.2.md", import.meta.url), "utf8");
+  const hudPatch = await readFile(new URL("../docs/version/v0.24.3.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
   assert.equal(roadmap.includes("version/v0.24.0.md"), true);
   assert.equal(roadmap.includes("version/v0.24.1.md"), true);
   assert.equal(roadmap.includes("version/v0.24.2.md"), true);
+  assert.equal(roadmap.includes("version/v0.24.3.md"), true);
   assert.equal(roadmap.includes("playable 2D game kit"), true);
   assert.equal(stage.includes("Playable 2D Game Kit Sprint"), true);
   assert.equal(stage.includes("4399-style browser game"), true);
@@ -398,14 +400,21 @@ test("playable game kit stage docs are discoverable from roadmap and README", as
   assert.equal(actorPatch.includes("defineActorTemplate"), true);
   assert.equal(actorPatch.includes("does not add a visual prefab editor"), true);
   assert.equal(actorPatch.includes("Every actor template includes `transform` and `size`"), true);
+  assert.equal(hudPatch.includes("Runtime HUD Text Helper Baseline"), true);
+  assert.equal(hudPatch.includes("createHudText"), true);
+  assert.equal(hudPatch.includes("does not add a visual UI editor"), true);
+  assert.equal(hudPatch.includes("HUD text is screen-space by default"), true);
   assert.equal(publicApi.includes("`v0.24.1` starts the playable 2D game kit stage"), true);
   assert.equal(publicApi.includes("limitMovementVector"), true);
   assert.equal(publicApi.includes("`v0.24.2` adds actor template composition"), true);
   assert.equal(publicApi.includes("defineActorTemplate"), true);
-  assert.equal(readme.includes("`v0.24.2` Actor Template Composition Baseline"), true);
+  assert.equal(publicApi.includes("`v0.24.3` adds a runtime HUD text helper"), true);
+  assert.equal(publicApi.includes("createHudText"), true);
+  assert.equal(readme.includes("`v0.24.3` Runtime HUD Text Helper Baseline"), true);
   assert.equal(readme.includes("复刻一个简单 4399 小游戏"), true);
   assert.equal(readme.includes("Playable movement primitives"), true);
   assert.equal(readme.includes("actor template composition baseline"), true);
+  assert.equal(readme.includes("runtime HUD text helper baseline"), true);
   assert.equal(readme.includes("tooling 保持辅助观察，不抢产品主线"), true);
 });
 
@@ -457,6 +466,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "createTileMap",
     "createSpriteAnimationPlayback",
     "createDefaultComponentSchemaRegistry",
+    "createHudText",
     "createRuntimeServices",
     "defineAudioAsset",
     "defineAudioChannel",
@@ -500,6 +510,7 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.CameraSystem.prototype.clearBounds, "function");
   assert.equal(typeof framework.limitMovementVector, "function");
   assert.equal(typeof framework.defineActorTemplate, "function");
+  assert.equal(typeof framework.createHudText, "function");
   assert.equal(typeof framework.addAudioPlayback, "function");
   assert.equal(typeof framework.addAudioRuntime, "function");
   assert.equal(typeof framework.dispatchAudioRuntimeOperation, "function");

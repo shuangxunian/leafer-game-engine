@@ -46,6 +46,7 @@ import {
   getRuntimeServices,
   isSpriteCapableRenderNode,
   limitMovementVector,
+  createHudText,
   normalizeKeyboardKey,
   normalizePointerButton,
   pauseSpriteAnimationPlayback,
@@ -1922,6 +1923,54 @@ test("movement vector limiting keeps arcade directional movement consistent", ()
   assert.throws(() => limitMovementVector({ x: 1, y: 0 }, Number.NaN), /maxLength must be a finite number/);
 });
 
+test("hud text helper creates screen-space text on the ui layer by default", () => {
+  const uiChildren = [];
+  const overlayChildren = [];
+  const renderAdapter = createFakeTextRenderAdapter();
+  const renderScene = createFakeLayeredRenderScene(uiChildren, overlayChildren);
+
+  const node = createHudText(renderAdapter, renderScene, {
+    text: "Score 0",
+    x: 24,
+    y: 32,
+    fontSize: 18
+  });
+
+  assert.equal(node.text, "Score 0");
+  assert.equal(node.x, 24);
+  assert.equal(node.y, 32);
+  assert.equal(node.fontSize, 18);
+  assert.equal(node.visible, true);
+  assert.deepEqual(uiChildren, [node]);
+  assert.deepEqual(overlayChildren, []);
+
+  node.setText("Score 100");
+  assert.equal(node.text, "Score 100");
+});
+
+test("hud text helper can target the overlay layer and initial visibility", () => {
+  const uiChildren = [];
+  const overlayChildren = [];
+  const renderAdapter = createFakeTextRenderAdapter();
+  const renderScene = createFakeLayeredRenderScene(uiChildren, overlayChildren);
+
+  const node = createHudText(renderAdapter, renderScene, {
+    text: "Paused",
+    x: 120,
+    y: 80,
+    visible: false,
+    layer: "overlay"
+  });
+
+  assert.equal(node.text, "Paused");
+  assert.equal(node.x, 120);
+  assert.equal(node.y, 80);
+  assert.equal(node.fontSize, undefined);
+  assert.equal(node.visible, false);
+  assert.deepEqual(uiChildren, []);
+  assert.deepEqual(overlayChildren, [node]);
+});
+
 test("camera system maps world layer from position and zoom", () => {
   const scene = new Scene("CameraScene");
   const renderScene = createFakeRenderScene(800, 600);
@@ -2220,6 +2269,51 @@ function createFakeRenderScene(width, height) {
     height,
     mount() {},
     destroy() {}
+  };
+}
+
+function createFakeLayeredRenderScene(uiChildren, overlayChildren) {
+  return {
+    ...createFakeRenderScene(800, 600),
+    layers: {
+      background: createFakeContainer(),
+      world: createFakeContainer(),
+      ui: createFakeChildCollector(uiChildren),
+      overlay: createFakeChildCollector(overlayChildren)
+    }
+  };
+}
+
+function createFakeTextRenderAdapter() {
+  return {
+    createScene() {
+      return createFakeRenderScene(800, 600);
+    },
+    createContainer() {
+      return createFakeContainer();
+    },
+    createSprite() {
+      return createFakeSpriteNode();
+    },
+    createText(text = "") {
+      return {
+        ...createFakeContainer(),
+        text,
+        fontSize: undefined,
+        setText(value) {
+          this.text = value;
+        }
+      };
+    }
+  };
+}
+
+function createFakeChildCollector(children) {
+  return {
+    ...createFakeContainer(),
+    addChild(node) {
+      children.push(node);
+    }
   };
 }
 

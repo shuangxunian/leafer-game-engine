@@ -60,6 +60,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.24.2` adds actor template composition on top of the existing entity template pipeline. The Node-safe `framework` entrypoint now exposes `defineActorTemplate(...)`, which turns common actor fields into `transform`, `size`, optional `collider`, optional `velocity`, and extra component declarations that can still be instantiated by `instantiateEntityTemplate(...)`. `examples/dodge-blocks` consumes this path for the player template. This is code/runtime composition, not a visual prefab editor, hierarchy editor, asset browser, or content authoring workflow.
 
+`v0.24.3` adds a runtime HUD text helper. The Node-safe `framework` entrypoint now exposes `createHudText(...)`, which creates a render text node through the injected `RenderAdapter`, initializes basic position/font/visibility fields, attaches it to the `ui` layer by default, and can explicitly target the screen-space `overlay` layer. `examples/dodge-blocks` consumes this path for score/status/title/overlay text. This is runtime HUD creation, not a visual UI editor, layout designer, widget library, or content authoring workflow.
+
 ---
 
 ## Package Entrypoints

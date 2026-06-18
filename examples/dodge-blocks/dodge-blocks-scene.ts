@@ -20,6 +20,7 @@ import {
   addAudioRuntime,
   bootstrapSceneFromConfig,
   createBrowserImageSpriteLoader,
+  createHudText,
   defineActorTemplate
 } from "@shuangxunian/leafer-game-engine/framework";
 import type { RenderAdapter, RenderScene } from "@shuangxunian/leafer-game-engine/adapter";
@@ -231,42 +232,50 @@ export class DodgeBlocksScene extends Scene {
     this.addSystem(new SpriteAnimationSystem(this, this.assets));
     this.addSystem(new CollisionSystem(this));
 
-    const titleNode = this.renderAdapter.createText("Dodge Blocks");
-    titleNode.x = 24;
-    titleNode.y = 20;
-    titleNode.fontSize = 28;
+    const titleNode = createHudText(this.renderAdapter, this.renderScene, {
+      text: "Dodge Blocks",
+      x: 24,
+      y: 20,
+      fontSize: 28
+    });
 
-    const scoreNode = this.renderAdapter.createText("Score 0");
-    scoreNode.x = 24;
-    scoreNode.y = 58;
-    scoreNode.fontSize = 20;
+    const scoreNode = createHudText(this.renderAdapter, this.renderScene, {
+      text: "Score 0",
+      x: 24,
+      y: 58,
+      fontSize: 20
+    });
 
-    const statusNode = this.renderAdapter.createText("Move with WASD or arrow keys. Pause with P or Esc.");
-    statusNode.x = 24;
-    statusNode.y = 88;
-    statusNode.fontSize = 18;
+    const statusNode = createHudText(this.renderAdapter, this.renderScene, {
+      text: "Move with WASD or arrow keys. Pause with P or Esc.",
+      x: 24,
+      y: 88,
+      fontSize: 18
+    });
 
-    const overlayTitleNode = this.renderAdapter.createText("Dodge Blocks");
-    overlayTitleNode.x = 250;
-    overlayTitleNode.y = 240;
-    overlayTitleNode.fontSize = 42;
+    const overlayTitleNode = createHudText(this.renderAdapter, this.renderScene, {
+      text: "Dodge Blocks",
+      x: 250,
+      y: 240,
+      fontSize: 42,
+      layer: "overlay"
+    });
 
-    const overlayBodyNode = this.renderAdapter.createText("Survive as long as you can while blocks rain from above.");
-    overlayBodyNode.x = 190;
-    overlayBodyNode.y = 300;
-    overlayBodyNode.fontSize = 22;
+    const overlayBodyNode = createHudText(this.renderAdapter, this.renderScene, {
+      text: "Survive as long as you can while blocks rain from above.",
+      x: 190,
+      y: 300,
+      fontSize: 22,
+      layer: "overlay"
+    });
 
-    const overlayActionNode = this.renderAdapter.createText("Press Space or Enter to start");
-    overlayActionNode.x = 270;
-    overlayActionNode.y = 350;
-    overlayActionNode.fontSize = 24;
-
-    this.renderScene.layers.ui.addChild(titleNode);
-    this.renderScene.layers.ui.addChild(scoreNode);
-    this.renderScene.layers.ui.addChild(statusNode);
-    this.renderScene.layers.overlay.addChild(overlayTitleNode);
-    this.renderScene.layers.overlay.addChild(overlayBodyNode);
-    this.renderScene.layers.overlay.addChild(overlayActionNode);
+    const overlayActionNode = createHudText(this.renderAdapter, this.renderScene, {
+      text: "Press Space or Enter to start",
+      x: 270,
+      y: 350,
+      fontSize: 24,
+      layer: "overlay"
+    });
 
     let dodgeSystem!: DodgeGameSystem;
     const playerNode = this.renderAdapter.createSprite("player");
