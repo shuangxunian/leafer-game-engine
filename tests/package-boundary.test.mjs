@@ -309,6 +309,7 @@ test("camera runtime contract stage docs are discoverable from roadmap", async (
   const stage = await readFile(new URL("../docs/version/v0.23.0.md", import.meta.url), "utf8");
   const viewportPatch = await readFile(new URL("../docs/version/v0.23.1.md", import.meta.url), "utf8");
   const boundsPatch = await readFile(new URL("../docs/version/v0.23.2.md", import.meta.url), "utf8");
+  const toolingPatch = await readFile(new URL("../docs/version/v0.23.3.md", import.meta.url), "utf8");
   const cameraSource = await readFile(new URL("../src/framework/camera.ts", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
@@ -316,11 +317,13 @@ test("camera runtime contract stage docs are discoverable from roadmap", async (
   assert.equal(roadmap.includes("version/v0.23.0.md"), true);
   assert.equal(roadmap.includes("version/v0.23.1.md"), true);
   assert.equal(roadmap.includes("version/v0.23.2.md"), true);
+  assert.equal(roadmap.includes("version/v0.23.3.md"), true);
   assert.equal(roadmap.includes("camera runtime contract"), true);
   assert.equal(stage.includes("Camera Runtime Contract Hardening Sprint"), true);
   assert.equal(stage.includes("CameraSystem"), true);
   assert.equal(stage.includes("v0.23.1.md"), true);
   assert.equal(stage.includes("v0.23.2.md"), true);
+  assert.equal(stage.includes("v0.23.3.md"), true);
   assert.equal(stage.includes("The `0.23.x` stage has completed `v0.23.1`"), true);
   assert.equal(stage.includes("and `v0.23.2`, which adds camera bounds and follow clamping primitives"), true);
   assert.equal(stage.includes("world/screen coordinate conversion"), true);
@@ -340,6 +343,12 @@ test("camera runtime contract stage docs are discoverable from roadmap", async (
   assert.equal(boundsPatch.includes("Follow behavior should also resolve to a clamped camera center"), true);
   assert.equal(boundsPatch.includes("does not add visual scene editors"), true);
   assert.equal(boundsPatch.includes("camera smoothing, shake, damping, or transitions"), true);
+  assert.equal(toolingPatch.includes("Camera Read-only Tooling Snapshot Visibility"), true);
+  assert.equal(toolingPatch.includes("a Node-safe camera tooling snapshot helper"), true);
+  assert.equal(toolingPatch.includes("optional aggregate `createToolingSnapshot(...)` camera inclusion"), true);
+  assert.equal(toolingPatch.includes("does not add visual scene editors"), true);
+  assert.equal(toolingPatch.includes("camera mutation controls"), true);
+  assert.equal(toolingPatch.includes("Camera tooling reads `CameraSystem`; it does not create, move, zoom, follow, clamp, or destroy cameras"), true);
   assert.equal(cameraSource.includes("export type CameraViewportState"), true);
   assert.equal(cameraSource.includes("getViewportState()"), true);
   assert.equal(cameraSource.includes("worldToViewport"), true);
