@@ -2,7 +2,7 @@
 
 `collect-stars` 是 `leaferGame` 的第二个示例方向，用来验证引擎 API 不只适用于 `dodge-blocks`。
 
-当前版本推进到 `v0.25.2` gameplay loop baseline：它已经不只是 shell，可以启动、移动玩家、收集星星、更新分数和倒计时，并在时间结束后重开。
+当前版本推进到 `v0.25.3` package API consumption hardening：它已经不只是 shell，可以启动、移动玩家、收集星星、更新分数和倒计时，并在时间结束后重开；同时本地玩法代码已经拆成更接近下游小游戏项目的模块结构。
 
 ## Current Scope
 
@@ -13,6 +13,8 @@
 - 从 boot path 挂载 `BrowserKeyboardBridge`
 - 使用 `InputActionMap` 读取 movement / confirm 语义动作
 - 使用 `limitMovementVector(...)` 保持斜向移动速度一致
+- 将 input actions、player controller、actor templates 和 gameplay system 拆成示例本地模块
+- 使用 `defineActorTemplate(...)` 和 `instantiateEntityTemplate(...)` 创建 player/star ECS 数据
 - 使用 `GameFlow` 管理 ready / running / ended phase
 - 使用 `createHudText(...)` 创建 screen-space HUD
 - 使用 `createTileMap(...)` 和 `createTileMapLayerView(...)` 创建 world-space playfield visual layer
@@ -36,4 +38,4 @@
 
 ## Next Step
 
-后续 `v0.25.3` 会继续硬化第二示例的 package API consumption，优先观察是否真的需要从 collect-stars 提炼新的 framework helper。
+后续 `v0.25.4` 会做第二示例 docs/stage closeout，重点说明两个 playable examples 共同证明了哪些 engine-package 能力，以及哪些能力仍然不应该进入当前仓库。

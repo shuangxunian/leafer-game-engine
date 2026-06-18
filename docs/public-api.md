@@ -72,6 +72,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.25.2` turns `collect-stars` into a minimal playable collection loop. The second example now consumes `InputActionMap`, keyboard bridge attachment, `limitMovementVector(...)`, `GameFlow`, `CollisionSystem`, `createHudText(...)`, and tile map layer view helpers to prove the existing package APIs can support a different gameplay shape from dodge-blocks. This remains example-level gameplay code, not a new framework abstraction or editor workflow.
 
+`v0.25.3` hardens `collect-stars` package API consumption without adding new public API. The example now splits input actions, player movement, actor templates, and gameplay-loop system code into local downstream-style modules, and creates player/star ECS data through `defineActorTemplate(...)` plus `instantiateEntityTemplate(...)`. This proves the existing package-facing actor/template APIs can support a second example while avoiding a collect-stars-specific framework abstraction, editor surface, or launcher product.
+
 ---
 
 ## Package Entrypoints

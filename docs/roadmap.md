@@ -1162,3 +1162,7 @@
 下一步建议继续：
 
 - [v0.25.2](version/v0.25.2.md)
+
+继续硬化第二示例的 package API consumption：
+
+- [v0.25.3](version/v0.25.3.md)
