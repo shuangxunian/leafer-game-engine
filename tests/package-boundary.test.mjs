@@ -322,6 +322,7 @@ test("camera runtime contract stage docs are discoverable from roadmap", async (
   assert.equal(stage.includes("v0.23.1.md"), true);
   assert.equal(stage.includes("v0.23.2.md"), true);
   assert.equal(stage.includes("The `0.23.x` stage has completed `v0.23.1`"), true);
+  assert.equal(stage.includes("and `v0.23.2`, which adds camera bounds and follow clamping primitives"), true);
   assert.equal(stage.includes("world/screen coordinate conversion"), true);
   assert.equal(stage.includes("camera bounds/follow behavior is deterministic and tested"), true);
   assert.equal(stage.includes("not an editor, cinematic timeline"), true);
@@ -343,10 +344,16 @@ test("camera runtime contract stage docs are discoverable from roadmap", async (
   assert.equal(cameraSource.includes("getViewportState()"), true);
   assert.equal(cameraSource.includes("worldToViewport"), true);
   assert.equal(cameraSource.includes("viewportToWorld"), true);
+  assert.equal(cameraSource.includes("export type CameraBounds"), true);
+  assert.equal(cameraSource.includes("setBounds"), true);
+  assert.equal(cameraSource.includes("getBounds"), true);
+  assert.equal(cameraSource.includes("clearBounds"), true);
   assert.equal(publicApi.includes("`v0.23.1` starts camera runtime contract hardening"), true);
   assert.equal(publicApi.includes("not visual scene editing, camera timeline authoring"), true);
-  assert.equal(readme.includes("`v0.23.1` Camera Viewport and Coordinate Conversion Baseline"), true);
-  assert.equal(readme.includes("`0.23.x` camera runtime contract hardening 阶段已经完成 viewport/coordinate conversion baseline"), true);
+  assert.equal(publicApi.includes("`v0.23.2` adds camera bounds and follow clamping primitives"), true);
+  assert.equal(publicApi.includes("not camera authoring UI, editor gizmos"), true);
+  assert.equal(readme.includes("`v0.23.2` Camera Bounds and Follow Clamping Primitives"), true);
+  assert.equal(readme.includes("`0.23.x` camera runtime contract hardening 阶段已经完成 viewport/coordinate conversion baseline 和 bounds/follow clamping primitives"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -433,6 +440,9 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.CameraSystem.prototype.getViewportState, "function");
   assert.equal(typeof framework.CameraSystem.prototype.worldToViewport, "function");
   assert.equal(typeof framework.CameraSystem.prototype.viewportToWorld, "function");
+  assert.equal(typeof framework.CameraSystem.prototype.setBounds, "function");
+  assert.equal(typeof framework.CameraSystem.prototype.getBounds, "function");
+  assert.equal(typeof framework.CameraSystem.prototype.clearBounds, "function");
   assert.equal(typeof framework.addAudioPlayback, "function");
   assert.equal(typeof framework.addAudioRuntime, "function");
   assert.equal(typeof framework.dispatchAudioRuntimeOperation, "function");

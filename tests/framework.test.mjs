@@ -2016,6 +2016,121 @@ test("camera system coordinate conversion stays aligned with render layer mappin
   assert.deepEqual(worldPoint, point);
 });
 
+test("camera system clamps manual movement to active bounds", () => {
+  const scene = new Scene("CameraBoundsScene");
+  const renderScene = createFakeRenderScene(400, 300);
+  const camera = new CameraSystem(scene, renderScene);
+
+  camera.setBounds({ x: 0, y: 0, width: 1000, height: 800 });
+  camera.moveTo(-100, -100);
+
+  assert.equal(camera.x, 200);
+  assert.equal(camera.y, 150);
+
+  camera.moveTo(900, 700);
+
+  assert.equal(camera.x, 800);
+  assert.equal(camera.y, 650);
+  assert.deepEqual(camera.getViewportState().visibleWorldBounds, {
+    x: 600,
+    y: 500,
+    width: 400,
+    height: 300,
+    minX: 600,
+    minY: 500,
+    maxX: 1000,
+    maxY: 800
+  });
+});
+
+test("camera system returns copied bounds and can clear bounds", () => {
+  const scene = new Scene("CameraBoundsCopyScene");
+  const renderScene = createFakeRenderScene(400, 300);
+  const camera = new CameraSystem(scene, renderScene);
+
+  camera.setBounds({ x: 10, y: 20, width: 500, height: 400 });
+  const bounds = camera.getBounds();
+  assert.deepEqual(bounds, { x: 10, y: 20, width: 500, height: 400 });
+
+  if (bounds) {
+    bounds.x = 999;
+  }
+  assert.deepEqual(camera.getBounds(), { x: 10, y: 20, width: 500, height: 400 });
+
+  camera.clearBounds();
+  camera.moveTo(-100, -100);
+
+  assert.equal(camera.getBounds(), undefined);
+  assert.equal(camera.x, -100);
+  assert.equal(camera.y, -100);
+});
+
+test("camera system clamps follow targets to active bounds", () => {
+  const scene = new Scene("CameraFollowBoundsScene");
+  const renderScene = createFakeRenderScene(400, 300);
+  const camera = new CameraSystem(scene, renderScene);
+  const player = scene.world.createEntity("player");
+  const transform = player.addComponent(new TransformComponent());
+
+  scene.addSystem(camera);
+  scene.start();
+  camera.setBounds({ x: 0, y: 0, width: 1000, height: 800 });
+  camera.follow(player);
+
+  transform.x = 50;
+  transform.y = 50;
+  scene.lateUpdate(1 / 60);
+
+  assert.equal(camera.x, 200);
+  assert.equal(camera.y, 150);
+
+  transform.x = 980;
+  transform.y = 780;
+  scene.lateUpdate(1 / 60);
+
+  assert.equal(camera.x, 800);
+  assert.equal(camera.y, 650);
+});
+
+test("camera system reclamps bounds when zoom changes", () => {
+  const scene = new Scene("CameraZoomBoundsScene");
+  const renderScene = createFakeRenderScene(400, 300);
+  const camera = new CameraSystem(scene, renderScene);
+
+  camera.setBounds({ x: 0, y: 0, width: 1000, height: 800 });
+  camera.moveTo(900, 700);
+
+  assert.equal(camera.x, 800);
+  assert.equal(camera.y, 650);
+
+  camera.setZoom(0.5);
+
+  assert.equal(camera.x, 600);
+  assert.equal(camera.y, 500);
+  assert.deepEqual(camera.getViewportState().visibleWorldBounds, {
+    x: 200,
+    y: 200,
+    width: 800,
+    height: 600,
+    minX: 200,
+    minY: 200,
+    maxX: 1000,
+    maxY: 800
+  });
+});
+
+test("camera system centers on bounds when viewport is larger than bounds", () => {
+  const scene = new Scene("CameraSmallBoundsScene");
+  const renderScene = createFakeRenderScene(800, 600);
+  const camera = new CameraSystem(scene, renderScene);
+
+  camera.setBounds({ x: 100, y: 200, width: 300, height: 100 });
+  camera.moveTo(1000, -1000);
+
+  assert.equal(camera.x, 250);
+  assert.equal(camera.y, 250);
+});
+
 function createAnimationAssets() {
   const assets = new AssetRegistry();
   assets.loadManifest({

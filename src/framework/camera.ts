@@ -19,6 +19,13 @@ export type CameraWorldBounds = {
   maxY: number;
 };
 
+export type CameraBounds = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
 export type CameraViewportState = {
   x: number;
   y: number;
@@ -35,6 +42,7 @@ export class CameraSystem extends System {
   public x = 0;
   public y = 0;
   public zoom = 1;
+  private bounds?: CameraBounds;
   private followTarget?: Entity;
   private followOffsetX = 0;
   private followOffsetY = 0;
@@ -47,12 +55,12 @@ export class CameraSystem extends System {
   }
 
   moveTo(x: number, y: number): void {
-    this.x = x;
-    this.y = y;
+    this.applyCenter(x, y);
   }
 
   setZoom(zoom: number): void {
     this.zoom = Math.max(0.01, zoom);
+    this.applyCenter(this.x, this.y);
   }
 
   follow(entity: Entity, offsetX = 0, offsetY = 0): void {
@@ -65,6 +73,19 @@ export class CameraSystem extends System {
     this.followTarget = undefined;
     this.followOffsetX = 0;
     this.followOffsetY = 0;
+  }
+
+  setBounds(bounds: CameraBounds): void {
+    this.bounds = copyCameraBounds(bounds);
+    this.applyCenter(this.x, this.y);
+  }
+
+  getBounds(): CameraBounds | undefined {
+    return this.bounds ? copyCameraBounds(this.bounds) : undefined;
+  }
+
+  clearBounds(): void {
+    this.bounds = undefined;
   }
 
   getViewportState(): CameraViewportState {
@@ -118,8 +139,7 @@ export class CameraSystem extends System {
     if (this.followTarget) {
       const transform = this.followTarget.getComponent(TransformComponent);
       if (transform) {
-        this.x = transform.x + this.followOffsetX;
-        this.y = transform.y + this.followOffsetY;
+        this.applyCenter(transform.x + this.followOffsetX, transform.y + this.followOffsetY);
       }
     }
 
@@ -137,4 +157,53 @@ export class CameraSystem extends System {
   private getWorldLayerY(): number {
     return this.renderScene.height / 2 - this.y * this.zoom;
   }
+
+  private applyCenter(x: number, y: number): void {
+    const center = this.clampCenter(x, y);
+    this.x = center.x;
+    this.y = center.y;
+  }
+
+  private clampCenter(x: number, y: number): CameraPoint {
+    if (!this.bounds) {
+      return { x, y };
+    }
+
+    const visibleWorldWidth = this.renderScene.width / this.zoom;
+    const visibleWorldHeight = this.renderScene.height / this.zoom;
+
+    return {
+      x: clampCameraAxis(
+        x,
+        this.bounds.x,
+        this.bounds.x + this.bounds.width,
+        visibleWorldWidth
+      ),
+      y: clampCameraAxis(
+        y,
+        this.bounds.y,
+        this.bounds.y + this.bounds.height,
+        visibleWorldHeight
+      )
+    };
+  }
+}
+
+function copyCameraBounds(bounds: CameraBounds): CameraBounds {
+  return {
+    x: bounds.x,
+    y: bounds.y,
+    width: Math.max(0, bounds.width),
+    height: Math.max(0, bounds.height)
+  };
+}
+
+function clampCameraAxis(center: number, min: number, max: number, visibleSize: number): number {
+  const boundsSize = max - min;
+  if (boundsSize <= visibleSize) {
+    return min + boundsSize / 2;
+  }
+
+  const halfVisibleSize = visibleSize / 2;
+  return Math.max(min + halfVisibleSize, Math.min(max - halfVisibleSize, center));
 }
