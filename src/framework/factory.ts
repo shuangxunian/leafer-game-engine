@@ -37,6 +37,33 @@ export type EntityTemplateComponent<TData = unknown> = {
   data?: TData;
 };
 
+export type ActorTemplateDefinition = {
+  name?: string;
+  x?: number;
+  y?: number;
+  width: number;
+  height: number;
+  rotation?: number;
+  scaleX?: number;
+  scaleY?: number;
+  collider?: ActorTemplateColliderDefinition;
+  velocity?: ActorTemplateVelocityDefinition;
+  components?: EntityTemplateComponent[];
+};
+
+export type ActorTemplateColliderDefinition = {
+  layer?: string;
+  width?: number;
+  height?: number;
+  offsetX?: number;
+  offsetY?: number;
+};
+
+export type ActorTemplateVelocityDefinition = {
+  vx?: number;
+  vy?: number;
+};
+
 export type EntityTemplateFactory<TData = unknown> = (data: TData) => Component;
 
 export type InstantiateEntityTemplateOptions = {
@@ -93,6 +120,54 @@ export function instantiateEntityTemplate(
   }
 
   return entity;
+}
+
+export function defineActorTemplate(definition: ActorTemplateDefinition): EntityTemplate {
+  const components: EntityTemplateComponent[] = [
+    {
+      type: "transform",
+      data: {
+        x: definition.x ?? 0,
+        y: definition.y ?? 0,
+        rotation: definition.rotation ?? 0,
+        scaleX: definition.scaleX ?? 1,
+        scaleY: definition.scaleY ?? 1
+      }
+    },
+    {
+      type: "size",
+      data: {
+        width: definition.width,
+        height: definition.height
+      }
+    }
+  ];
+
+  if (definition.collider) {
+    components.push({
+      type: "collider",
+      data: { ...definition.collider }
+    });
+  }
+
+  if (definition.velocity) {
+    components.push({
+      type: "velocity",
+      data: { ...definition.velocity }
+    });
+  }
+
+  components.push(
+    ...(definition.components ?? []).map((component) => ({
+      type: component.type,
+      data: copyTemplateComponentData(component.data)
+    }))
+  );
+
+  return {
+    name: definition.name,
+    components
+  };
 }
 
 type TransformTemplateData = {
@@ -204,4 +279,18 @@ function readNumberWithDefault(
   componentType: string
 ): number {
   return readOptionalNumber(values, key, fallback, componentType) ?? fallback;
+}
+
+function copyTemplateComponentData(data: unknown): unknown {
+  if (Array.isArray(data)) {
+    return data.map(copyTemplateComponentData);
+  }
+
+  if (typeof data === "object" && data !== null) {
+    return Object.fromEntries(
+      Object.entries(data).map(([key, value]) => [key, copyTemplateComponentData(value)])
+    );
+  }
+
+  return data;
 }

@@ -8,6 +8,7 @@ import {
   SizeComponent,
   TransformComponent,
   VelocityComponent,
+  defineActorTemplate,
   defineEntityFactory,
   instantiateEntityTemplate
 } from "../lib/framework/index.js";
@@ -82,6 +83,102 @@ test("entity template instantiates built-in data components", () => {
   assert.deepEqual(collider?.getRect(), { x: 13, y: 36, width: 52, height: 48 });
   assert.equal(velocity?.vx, 10);
   assert.equal(velocity?.vy, -20);
+});
+
+test("actor template composes common gameplay components", () => {
+  const scene = new Scene("ActorTemplateScene");
+  const template = defineActorTemplate({
+    name: "Enemy",
+    x: 10,
+    y: 20,
+    width: 32,
+    height: 40,
+    rotation: 15,
+    scaleX: 2,
+    scaleY: 3,
+    collider: {
+      layer: "enemy",
+      offsetX: 1,
+      offsetY: 2
+    },
+    velocity: {
+      vx: 4,
+      vy: 5
+    }
+  });
+
+  const entity = instantiateEntityTemplate(scene, template);
+  const transform = entity.getComponent(TransformComponent);
+  const size = entity.getComponent(SizeComponent);
+  const collider = entity.getComponent(ColliderComponent);
+  const velocity = entity.getComponent(VelocityComponent);
+
+  assert.equal(entity.name, "Enemy");
+  assert.equal(transform?.x, 10);
+  assert.equal(transform?.y, 20);
+  assert.equal(transform?.rotation, 15);
+  assert.equal(transform?.scaleX, 2);
+  assert.equal(transform?.scaleY, 3);
+  assert.equal(size?.width, 32);
+  assert.equal(size?.height, 40);
+  assert.equal(collider?.layer, "enemy");
+  assert.deepEqual(collider?.getRect(), { x: 11, y: 22, width: 32, height: 40 });
+  assert.equal(velocity?.vx, 4);
+  assert.equal(velocity?.vy, 5);
+});
+
+test("actor template copies extra component declarations", () => {
+  const extraData = { tag: "pickup", nested: { value: 1 } };
+  const template = defineActorTemplate({
+    name: "Pickup",
+    x: 5,
+    y: 6,
+    width: 12,
+    height: 14,
+    components: [
+      {
+        type: "tag",
+        data: extraData
+      }
+    ]
+  });
+
+  extraData.tag = "mutated";
+  extraData.nested.value = 99;
+
+  assert.deepEqual(template, {
+    name: "Pickup",
+    components: [
+      {
+        type: "transform",
+        data: { x: 5, y: 6, rotation: 0, scaleX: 1, scaleY: 1 }
+      },
+      {
+        type: "size",
+        data: { width: 12, height: 14 }
+      },
+      {
+        type: "tag",
+        data: { tag: "pickup", nested: { value: 1 } }
+      }
+    ]
+  });
+});
+
+test("actor template includes optional collider and velocity only when declared", () => {
+  assert.deepEqual(defineActorTemplate({ width: 8, height: 9 }), {
+    name: undefined,
+    components: [
+      {
+        type: "transform",
+        data: { x: 0, y: 0, rotation: 0, scaleX: 1, scaleY: 1 }
+      },
+      {
+        type: "size",
+        data: { width: 8, height: 9 }
+      }
+    ]
+  });
 });
 
 test("entity template supports custom component registry entries", () => {

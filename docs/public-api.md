@@ -58,6 +58,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.24.1` starts the playable 2D game kit stage. The Node-safe `framework` entrypoint now exposes `limitMovementVector(...)`, a small gameplay helper for capping directional movement magnitude while preserving direction. `examples/dodge-blocks` consumes it so diagonal player movement no longer becomes faster than axis-aligned movement. This is reusable runtime gameplay math, not a character editor, physics simulation, input rebinding UI, or content authoring workflow.
 
+`v0.24.2` adds actor template composition on top of the existing entity template pipeline. The Node-safe `framework` entrypoint now exposes `defineActorTemplate(...)`, which turns common actor fields into `transform`, `size`, optional `collider`, optional `velocity`, and extra component declarations that can still be instantiated by `instantiateEntityTemplate(...)`. `examples/dodge-blocks` consumes this path for the player template. This is code/runtime composition, not a visual prefab editor, hierarchy editor, asset browser, or content authoring workflow.
+
 ---
 
 ## Package Entrypoints

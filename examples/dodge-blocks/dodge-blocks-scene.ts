@@ -19,7 +19,8 @@ import {
   ViewComponent,
   addAudioRuntime,
   bootstrapSceneFromConfig,
-  createBrowserImageSpriteLoader
+  createBrowserImageSpriteLoader,
+  defineActorTemplate
 } from "@shuangxunian/leafer-game-engine/framework";
 import type { RenderAdapter, RenderScene } from "@shuangxunian/leafer-game-engine/adapter";
 import type { InputActionMap } from "@shuangxunian/leafer-game-engine/framework";
@@ -128,26 +129,14 @@ const DODGE_BLOCKS_AUDIO_MANIFEST = {
 };
 
 function createPlayerTemplate(x: number, y: number): EntityTemplate {
-  return {
+  return defineActorTemplate({
     name: "Player",
-    components: [
-      {
-        type: "transform",
-        data: { x, y }
-      },
-      {
-        type: "size",
-        data: {
-          width: DODGE_GAME_CONFIG.playerSize,
-          height: DODGE_GAME_CONFIG.playerSize
-        }
-      },
-      {
-        type: "collider",
-        data: { layer: "player" }
-      }
-    ]
-  };
+    x,
+    y,
+    width: DODGE_GAME_CONFIG.playerSize,
+    height: DODGE_GAME_CONFIG.playerSize,
+    collider: { layer: "player" }
+  });
 }
 
 type DodgeBlocksSceneConfigOptions = {
