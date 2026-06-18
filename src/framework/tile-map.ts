@@ -1,3 +1,12 @@
+import type {
+  RenderAdapter,
+  RenderContainer,
+  RenderScene,
+  RenderSceneLayerName,
+  RenderSprite,
+  RenderSpriteAsset
+} from "../adapter/render-types.js";
+
 export type TileId = string | null;
 
 export type TileCoordinate = {
@@ -8,6 +17,28 @@ export type TileCoordinate = {
 export type TileBounds = TileCoordinate & {
   width: number;
   height: number;
+};
+
+export type TileMapViewTargetLayer = Extract<RenderSceneLayerName, "background" | "world">;
+
+export type TileMapLayerViewTile = {
+  tileId: string;
+  coordinate: TileCoordinate;
+  node: RenderSprite;
+};
+
+export type TileMapLayerView = {
+  container: RenderContainer;
+  tiles: TileMapLayerViewTile[];
+};
+
+export type TileMapLayerViewOptions = {
+  tileMap: TileMap;
+  layerId: string;
+  renderAdapter: RenderAdapter;
+  renderScene: RenderScene;
+  targetLayer?: TileMapViewTargetLayer;
+  resolveTileAsset?: (tileId: string, coordinate: TileCoordinate) => string | RenderSpriteAsset;
 };
 
 export type TileMapLayerDefinition = {
@@ -117,6 +148,52 @@ export class TileMap {
 
 export function createTileMap(definition: TileMapDefinition): TileMap {
   return new TileMap(definition);
+}
+
+export function createTileMapLayerView(options: TileMapLayerViewOptions): TileMapLayerView {
+  const layer = options.tileMap.getLayer(options.layerId);
+  if (!layer) {
+    throw new Error(`Tile map layer "${options.layerId}" was not found.`);
+  }
+
+  const targetLayer = options.targetLayer ?? "world";
+  const renderLayer = options.renderScene.layers[targetLayer];
+  if (!renderLayer) {
+    throw new Error(`Render scene layer "${targetLayer}" was not found.`);
+  }
+
+  const container = options.renderAdapter.createContainer();
+  const tiles: TileMapLayerViewTile[] = [];
+
+  for (let y = 0; y < options.tileMap.height; y += 1) {
+    for (let x = 0; x < options.tileMap.width; x += 1) {
+      const tileId = layer.tiles[toTileIndex(x, y, options.tileMap.width)];
+      if (tileId === null) continue;
+
+      const coordinate = { x, y };
+      const bounds = options.tileMap.getTileBounds(x, y);
+      const node = options.renderAdapter.createSprite();
+      const asset = options.resolveTileAsset?.(tileId, coordinate) ?? tileId;
+      node.setAsset(asset);
+      node.x = bounds.x;
+      node.y = bounds.y;
+      node.width = bounds.width;
+      node.height = bounds.height;
+      container.addChild(node);
+      tiles.push({
+        tileId,
+        coordinate,
+        node
+      });
+    }
+  }
+
+  renderLayer.addChild(container);
+
+  return {
+    container,
+    tiles
+  };
 }
 
 export function defineTileMap(definition: TileMapDefinition): DefinedTileMap {

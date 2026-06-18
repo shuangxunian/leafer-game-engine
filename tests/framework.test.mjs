@@ -53,6 +53,7 @@ import {
   resumeSpriteAnimationPlayback,
   stopSpriteAnimationPlayback,
   createLevelLayout,
+  createTileMapLayerView,
   createTileMap,
   defineLevelLayout,
   defineTileMap
@@ -926,6 +927,116 @@ test("tile map converts between world and tile coordinates", () => {
   assert.equal(map.containsTile(3, 2), true);
   assert.equal(map.containsTile(4, 2), false);
   assert.equal(map.containsTile(0.5, 1), false);
+});
+
+test("tile map layer view creates sprites for non-empty tiles on the world layer", () => {
+  const worldChildren = [];
+  const renderAdapter = createFakeTextRenderAdapter();
+  const renderScene = createFakeTileRenderScene(worldChildren);
+  const map = createTileMap({
+    id: "arena",
+    width: 2,
+    height: 2,
+    tileWidth: 16,
+    tileHeight: 24,
+    layers: [
+      {
+        id: "ground",
+        tiles: ["floor", null, "wall", "floor"]
+      }
+    ]
+  });
+
+  const view = createTileMapLayerView({
+    tileMap: map,
+    layerId: "ground",
+    renderAdapter,
+    renderScene,
+    resolveTileAsset: (tileId, coordinate) => ({
+      id: tileId,
+      fill: `${tileId}-${coordinate.x}-${coordinate.y}`,
+      width: 1,
+      height: 1
+    })
+  });
+
+  assert.deepEqual(worldChildren, [view.container]);
+  assert.equal(view.tiles.length, 3);
+  assert.deepEqual(
+    view.tiles.map((tile) => ({
+      tileId: tile.tileId,
+      coordinate: tile.coordinate,
+      x: tile.node.x,
+      y: tile.node.y,
+      width: tile.node.width,
+      height: tile.node.height,
+      asset: tile.node.asset
+    })),
+    [
+      {
+        tileId: "floor",
+        coordinate: { x: 0, y: 0 },
+        x: 0,
+        y: 0,
+        width: 16,
+        height: 24,
+        asset: { id: "floor", fill: "floor-0-0", width: 1, height: 1 }
+      },
+      {
+        tileId: "wall",
+        coordinate: { x: 0, y: 1 },
+        x: 0,
+        y: 24,
+        width: 16,
+        height: 24,
+        asset: { id: "wall", fill: "wall-0-1", width: 1, height: 1 }
+      },
+      {
+        tileId: "floor",
+        coordinate: { x: 1, y: 1 },
+        x: 16,
+        y: 24,
+        width: 16,
+        height: 24,
+        asset: { id: "floor", fill: "floor-1-1", width: 1, height: 1 }
+      }
+    ]
+  );
+});
+
+test("tile map layer view can target background and fails clearly for missing layers", () => {
+  const backgroundChildren = [];
+  const renderAdapter = createFakeTextRenderAdapter();
+  const renderScene = createFakeTileRenderScene([], backgroundChildren);
+  const map = createTileMap({
+    id: "arena",
+    width: 1,
+    height: 1,
+    tileWidth: 8,
+    tileHeight: 8,
+    layers: [{ id: "background", tiles: ["sky"] }]
+  });
+
+  const view = createTileMapLayerView({
+    tileMap: map,
+    layerId: "background",
+    renderAdapter,
+    renderScene,
+    targetLayer: "background"
+  });
+
+  assert.deepEqual(backgroundChildren, [view.container]);
+  assert.equal(view.tiles[0].node.asset, "sky");
+  assert.throws(
+    () =>
+      createTileMapLayerView({
+        tileMap: map,
+        layerId: "missing",
+        renderAdapter,
+        renderScene
+      }),
+    /Tile map layer "missing" was not found/
+  );
 });
 
 test("tile map validation reports invalid definitions clearly", () => {
@@ -2280,6 +2391,18 @@ function createFakeLayeredRenderScene(uiChildren, overlayChildren) {
       world: createFakeContainer(),
       ui: createFakeChildCollector(uiChildren),
       overlay: createFakeChildCollector(overlayChildren)
+    }
+  };
+}
+
+function createFakeTileRenderScene(worldChildren, backgroundChildren = []) {
+  return {
+    ...createFakeRenderScene(800, 600),
+    layers: {
+      background: createFakeChildCollector(backgroundChildren),
+      world: createFakeChildCollector(worldChildren),
+      ui: createFakeContainer(),
+      overlay: createFakeContainer()
     }
   };
 }

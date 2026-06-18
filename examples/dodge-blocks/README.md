@@ -20,6 +20,7 @@
 - safe scene bootstrap 是否能在创建玩家前验证静态配置
 - level layout 是否能声明 player spawn、playfield bounds 和 hazard spawn region
 - tile map 是否能作为最小运行时数据契约被示例消费
+- tile map layer view helper 是否能把 playfield tile map 渲染成 world-space visual layer
 - transform / size / view 是否能同步到渲染层
 - input 是否能驱动玩家移动
 - input action mapping 是否能把物理键盘和 pointer button input 转换成语义玩法动作
@@ -88,6 +89,7 @@ npm run dev
   - 通过 `addAudioRuntime(...)` 安装示例级 audio runtime intent state，并在 manifest asset 上声明 placeholder runtime audio source
   - 创建并注入 dodge-blocks input action map
   - 通过 framework `createHudText(...)` 创建 UI 和 overlay 文本节点
+  - 通过 framework `createTileMapLayerView(...)` 把 playfield tile map 渲染为 world-space visual layer
   - 通过 `createDodgeBlocksSceneConfig(...)` 声明静态示例内容
   - 通过 scene config 的 assets section 声明 sprite assets、sprite frames 和 animation clips
   - 通过 scene config 的 `level.tileMap` 和 `level.layout` 声明最小 map 数据、player spawn、playfield bounds 和 hazard spawn region
@@ -168,6 +170,7 @@ browser runtime
 - scene config 的 `level.layout` 声明 `player-start` spawn、`playfield` region 和 `hazard-spawn` region
 - 示例通过 `loadManifestAsync(...)` 在 gameplay 启动前加载 scene config 里的资源
 - 示例通过 `createHudText(...)` 创建 score、status、title 和 overlay prompt，保持 HUD 节点在 screen-space layer
+- 示例通过 `createTileMapLayerView(...)` 消费 scene config 的 tile map，把非空 tile 渲染成 world-space playfield visual layer
 - 示例通过 `startSceneWithLifecycle(...)` 复用 runtime 层的 prepare / ready / running / failed 启动边界
 - tooling panel 的 `Assets` section 可以显示 player / hazard 的 loaded 状态
 - tooling panel 的 `Runtime Debug` section 可以显示 time / viewport / entity counts / system order / lifecycle 只读摘要
@@ -190,6 +193,6 @@ browser runtime
 - audio runtime 使用 framework `AudioRuntimeSystem`，browser playback 使用 runtime `BrowserAudioPlaybackAdapter`，示例只证明 opt-in playback consumption，不引入 Web Audio graph、mixer、音频编辑器或音频内容生产能力
 - hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度，不适合放进静态 scene config；scene config 只声明 `hazard-spawn` region 作为运行时参考数据
 
-这个示例不会把 level/map 声明变成编辑器、地图渲染器或自动生成器。它只是证明下游游戏可以显式读取引擎返回的 `TileMap` / `LevelLayout` helper，并由游戏代码决定如何使用这些运行时数据。
+这个示例不会把 level/map 声明变成编辑器、地图编辑器、tileset 管理器或自动生成器。它只是证明下游游戏可以显式读取引擎返回的 `TileMap` / `LevelLayout` helper，并用 framework 的 runtime helper 或自己的游戏代码决定如何使用这些运行时数据。
 
 后续新增资源加载、数据驱动场景、关卡配置和 runtime tooling 能力时，这个示例可以继续作为集成验证样例。

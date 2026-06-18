@@ -62,6 +62,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.24.3` adds a runtime HUD text helper. The Node-safe `framework` entrypoint now exposes `createHudText(...)`, which creates a render text node through the injected `RenderAdapter`, initializes basic position/font/visibility fields, attaches it to the `ui` layer by default, and can explicitly target the screen-space `overlay` layer. `examples/dodge-blocks` consumes this path for score/status/title/overlay text. This is runtime HUD creation, not a visual UI editor, layout designer, widget library, or content authoring workflow.
 
+`v0.24.4` adds a runtime tile map layer view helper. The Node-safe `framework` entrypoint now exposes `createTileMapLayerView(...)`, which reads an existing `TileMap` layer, skips `null` tiles, creates render sprites for non-empty tile ids, positions those sprites with tile bounds, and attaches the generated container to the world layer by default. Callers can target the background layer or resolve tile ids to richer sprite assets. This is runtime map visualization for browser games, not tile painting, tileset management, map-to-collider generation, pathfinding, visual scene editing, or tile map authoring.
+
 ---
 
 ## Package Entrypoints
@@ -102,6 +104,7 @@ import {
   bootstrapSceneFromConfig,
   createLevelLayout,
   createTileMap,
+  createTileMapLayerView,
   createRuntimeServices,
   createSpriteAnimationPlayback,
   defineLevelLayout,
@@ -157,6 +160,7 @@ import {
   bootstrapSceneFromConfig,
   createLevelLayout,
   createTileMap,
+  createTileMapLayerView,
   createRuntimeServices,
   createSpriteAnimationPlayback,
   defineLevelLayout,
@@ -214,7 +218,7 @@ They should be verified through browser/example builds until the package is spli
 ## Current Boundary Notes
 
 - `core` should stay independent from browser and rendering implementations, and should preserve scene/world phase cleanup invariants even when runtime hooks throw.
-- `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, pointer button action bindings, browser pointer button bridging, collision pair query snapshots, audio data contracts/runtime intent state, scene-owned audio runtime system integration, audio playback adapter contracts, update-driven audio playback draining system integration, deterministic audio operation draining, camera viewport/coordinate conversion helpers, camera bounds/follow clamping primitives, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, opt-in scene runtime service integration, data-driven scene config validation, safe scene config bootstrap, render/view synchronization, render-node capability checks, tile map data contracts, level spawn/region metadata, and optional scene config level/map declarations.
+- `framework` should stay usable for logic tests and reusable gameplay primitives, including input action mapping, pointer button action bindings, browser pointer button bridging, collision pair query snapshots, audio data contracts/runtime intent state, scene-owned audio runtime system integration, audio playback adapter contracts, update-driven audio playback draining system integration, deterministic audio operation draining, camera viewport/coordinate conversion helpers, camera bounds/follow clamping primitives, sprite animation timing helpers, component/system behavior, deterministic runtime event dispatch, update-driven scheduling, opt-in scene runtime service integration, data-driven scene config validation, safe scene config bootstrap, render/view synchronization, render-node capability checks, tile map data contracts, tile map layer view runtime consumption, level spawn/region metadata, and optional scene config level/map declarations.
 - `tooling` can expose structured snapshots and formatters in Node, including read-only system lifecycle state, sprite animation state, runtime services state, input action state, collision pair state, and audio runtime state, but browser panel classes should only be constructed in a DOM environment.
 - `adapter` is render-implementation-facing and can depend on Leafer. It owns render scene layer naming/order helpers.
 - `runtime` currently includes browser runtime assembly and browser audio playback adapter exports. Browser examples can inject those adapters into framework systems, but importing the broad runtime entrypoint in Node is not guaranteed to work.

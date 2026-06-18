@@ -21,6 +21,7 @@ import {
   bootstrapSceneFromConfig,
   createBrowserImageSpriteLoader,
   createHudText,
+  createTileMapLayerView,
   defineActorTemplate
 } from "@shuangxunian/leafer-game-engine/framework";
 import type { RenderAdapter, RenderScene } from "@shuangxunian/leafer-game-engine/adapter";
@@ -39,6 +40,7 @@ const DODGE_HAZARD_SPAWN_REGION_ID = "hazard-spawn";
 const DODGE_LEVEL_PADDING = 18;
 const DODGE_HAZARD_SPAWN_PADDING = 24;
 const DODGE_TILE_SIZE = 64;
+const DODGE_PLAYFIELD_TILE_FILL = "#143047";
 
 const DODGE_AUDIO_CUE = {
   GameStart: "game:start",
@@ -146,6 +148,7 @@ type DodgeBlocksSceneConfigOptions = {
 };
 
 type DodgeLevelRuntime = {
+  tileMap: TileMap;
   playerSpawn: DefinedLevelSpawnPoint;
   playfield: DefinedLevelRegion;
   hazardSpawnRegion?: DefinedLevelRegion;
@@ -231,6 +234,20 @@ export class DodgeBlocksScene extends Scene {
     });
     this.addSystem(new SpriteAnimationSystem(this, this.assets));
     this.addSystem(new CollisionSystem(this));
+
+    createTileMapLayerView({
+      tileMap: levelRuntime.tileMap,
+      layerId: DODGE_TILE_LAYER_ID,
+      renderAdapter: this.renderAdapter,
+      renderScene: this.renderScene,
+      resolveTileAsset: (tileId) => ({
+        id: tileId,
+        fill: DODGE_PLAYFIELD_TILE_FILL,
+        width: DODGE_TILE_SIZE,
+        height: DODGE_TILE_SIZE,
+        cornerRadius: 0
+      })
+    });
 
     const titleNode = createHudText(this.renderAdapter, this.renderScene, {
       text: "Dodge Blocks",
@@ -417,6 +434,7 @@ function createDodgeLevelRuntime(level: {
   }
 
   return {
+    tileMap: level.tileMap,
     playerSpawn,
     playfield,
     hazardSpawnRegion: level.layout.getRegion(DODGE_HAZARD_SPAWN_REGION_ID)
