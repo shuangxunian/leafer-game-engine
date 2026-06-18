@@ -1154,3 +1154,7 @@
 - [v0.25.0](version/v0.25.0.md)
 
 这一阶段建议优先增加第二个 playable example，验证现有 framework/runtime 能力不是 dodge-blocks 专用。
+
+其中第一批建议先做：
+
+- [v0.25.1](version/v0.25.1.md)

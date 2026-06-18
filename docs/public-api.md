@@ -68,6 +68,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.25.0` starts the second playable example stage. This is a package-consumption proof stage: the next example should use existing public entrypoints through package-style imports and expose real friction before new framework abstractions are added. It is not an editor, example marketplace, visual launcher product, asset manager, or content publishing workflow.
 
+`v0.25.1` adds the second example shell and local routing/build baseline. The repository example entry can boot `dodge-blocks` by default or `collect-stars` through a query route, and `examples/collect-stars` consumes public engine package entrypoints for a shell scene. The route is for local development and build coverage, not a polished example launcher product.
+
 ---
 
 ## Package Entrypoints

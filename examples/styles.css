@@ -1,0 +1,78 @@
+:root {
+  color: #f6f3ea;
+  background:
+    radial-gradient(circle at top left, rgba(255, 207, 122, 0.2), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(108, 183, 255, 0.16), transparent 34%),
+    linear-gradient(180deg, #10324b 0%, #081a2a 100%);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+.shell {
+  display: grid;
+  gap: 20px;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.hud {
+  max-width: 760px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #ffcf7a;
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hud h1 {
+  margin: 0;
+  font-size: clamp(32px, 6vw, 56px);
+  line-height: 0.95;
+}
+
+.hint {
+  margin: 12px 0 0;
+  color: rgba(246, 243, 234, 0.82);
+}
+
+.example-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.example-links a {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  color: #f6f3ea;
+  padding: 8px 12px;
+  text-decoration: none;
+}
+
+.example-links a[aria-current="page"] {
+  background: #ffcf7a;
+  border-color: #ffcf7a;
+  color: #112033;
+}
+
+.game-root {
+  width: min(960px, 100%);
+  height: min(70vh, 640px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.32);
+  background: rgba(6, 18, 29, 0.65);
+}

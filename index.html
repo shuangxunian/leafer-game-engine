@@ -4,17 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>leaferGame</title>
-    <link rel="stylesheet" href="/examples/dodge-blocks/styles.css" />
   </head>
   <body>
     <div class="shell">
       <div class="hud">
         <p class="eyebrow">leaferGame Example</p>
-        <h1>Dodge Blocks Playground</h1>
-        <p class="hint">This page runs the sample game from the examples folder, not the engine package entry.</p>
+        <h1 id="example-title">Dodge Blocks Playground</h1>
+        <p id="example-hint" class="hint">This page runs examples from the examples folder as downstream-style package consumers.</p>
+        <nav class="example-links" aria-label="Example routes">
+          <a href="?example=dodge-blocks" data-example="dodge-blocks">Dodge Blocks</a>
+          <a href="?example=collect-stars" data-example="collect-stars">Collect Stars Shell</a>
+        </nav>
       </div>
       <div id="game-root" class="game-root"></div>
     </div>
-    <script type="module" src="/examples/dodge-blocks/main.ts"></script>
+    <script type="module" src="/examples/main.ts"></script>
   </body>
 </html>
