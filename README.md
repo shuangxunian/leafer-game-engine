@@ -6,7 +6,7 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.25.1` Second Example Shell And Routing Baseline，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段、`0.10.x` package-facing API boundary 阶段、`0.11.x` sprite animation / asset runtime 阶段、`0.12.x` runtime services / event pipeline 阶段、`0.13.x` input actions / control mapping 阶段、`0.14.x` runtime observability hardening 阶段、`0.15.x` data-driven scene contract hardening 阶段、`0.16.x` render/view contract hardening 阶段、`0.17.x` runtime/game loop hardening 阶段、`0.18.x` level/map runtime primitives 阶段、`0.19.x` pointer/input runtime primitives 阶段、`0.20.x` collision query runtime primitives 阶段、`0.21.x` audio runtime primitives 阶段、`0.22.x` audio playback adapter 阶段和 `0.24.x` playable 2D game kit 阶段都已经收口，`0.23.x` camera runtime contract hardening 阶段已经完成 viewport/coordinate conversion baseline 和 bounds/follow clamping primitives。`v0.23.3` camera read-only tooling visibility 已记录但暂缓，当前项目已经能支撑复刻一个简单 4399 风格浏览器小游戏的轻量原型，下一阶段会用第二个 playable example 验证这些能力不是 dodge-blocks 专用。
+当前项目已经推进到 `v0.25.2` Collect Stars Gameplay Loop Baseline，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段、`0.10.x` package-facing API boundary 阶段、`0.11.x` sprite animation / asset runtime 阶段、`0.12.x` runtime services / event pipeline 阶段、`0.13.x` input actions / control mapping 阶段、`0.14.x` runtime observability hardening 阶段、`0.15.x` data-driven scene contract hardening 阶段、`0.16.x` render/view contract hardening 阶段、`0.17.x` runtime/game loop hardening 阶段、`0.18.x` level/map runtime primitives 阶段、`0.19.x` pointer/input runtime primitives 阶段、`0.20.x` collision query runtime primitives 阶段、`0.21.x` audio runtime primitives 阶段、`0.22.x` audio playback adapter 阶段和 `0.24.x` playable 2D game kit 阶段都已经收口，`0.23.x` camera runtime contract hardening 阶段已经完成 viewport/coordinate conversion baseline 和 bounds/follow clamping primitives。`v0.23.3` camera read-only tooling visibility 已记录但暂缓，当前项目已经能支撑复刻一个简单 4399 风格浏览器小游戏的轻量原型，`0.25.x` 正在用第二个 playable example 验证这些能力不是 dodge-blocks 专用。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
@@ -676,7 +676,7 @@ import {
 
 - 工程验证
   - 当前有覆盖 core、framework、assets、factory、collision、tooling、runtime 的自动测试。
-  - 当前测试数为 232 个。
+  - 当前测试数为 253 个。
   - `npm run check`、`npm test`、`npm run build:example`、`npm run verify:package` 是当前主要验证入口。
 
 ## 当前 demo 的意义

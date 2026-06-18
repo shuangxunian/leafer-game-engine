@@ -70,6 +70,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.25.1` adds the second example shell and local routing/build baseline. The repository example entry can boot `dodge-blocks` by default or `collect-stars` through a query route, and `examples/collect-stars` consumes public engine package entrypoints for a shell scene. The route is for local development and build coverage, not a polished example launcher product.
 
+`v0.25.2` turns `collect-stars` into a minimal playable collection loop. The second example now consumes `InputActionMap`, keyboard bridge attachment, `limitMovementVector(...)`, `GameFlow`, `CollisionSystem`, `createHudText(...)`, and tile map layer view helpers to prove the existing package APIs can support a different gameplay shape from dodge-blocks. This remains example-level gameplay code, not a new framework abstraction or editor workflow.
+
 ---
 
 ## Package Entrypoints

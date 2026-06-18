@@ -368,7 +368,7 @@ test("camera runtime contract stage docs are discoverable from roadmap", async (
   assert.equal(publicApi.includes("not visual scene editing, camera timeline authoring"), true);
   assert.equal(publicApi.includes("`v0.23.2` adds camera bounds and follow clamping primitives"), true);
   assert.equal(publicApi.includes("not camera authoring UI, editor gizmos"), true);
-  assert.equal(readme.includes("`v0.25.1` Second Example Shell And Routing Baseline"), true);
+  assert.equal(readme.includes("`v0.25.2` Collect Stars Gameplay Loop Baseline"), true);
   assert.equal(readme.includes("`0.23.x` camera runtime contract hardening 阶段已经完成 viewport/coordinate conversion baseline 和 bounds/follow clamping primitives"), true);
   assert.equal(readme.includes("`v0.23.3` camera read-only tooling visibility 已记录但暂缓"), true);
 });
@@ -429,7 +429,7 @@ test("playable game kit stage docs are discoverable from roadmap and README", as
   assert.equal(publicApi.includes("createTileMapLayerView"), true);
   assert.equal(publicApi.includes("`v0.24.5` closes the playable 2D game kit stage"), true);
   assert.equal(publicApi.includes("DodgeGameSystem"), true);
-  assert.equal(readme.includes("`v0.25.1` Second Example Shell And Routing Baseline"), true);
+  assert.equal(readme.includes("`v0.25.2` Collect Stars Gameplay Loop Baseline"), true);
   assert.equal(readme.includes("复刻一个简单 4399 小游戏"), true);
   assert.equal(readme.includes("Playable movement primitives"), true);
   assert.equal(readme.includes("actor template composition baseline"), true);
@@ -443,28 +443,36 @@ test("second playable example stage docs are discoverable from roadmap and READM
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.25.0.md", import.meta.url), "utf8");
   const shellPatch = await readFile(new URL("../docs/version/v0.25.1.md", import.meta.url), "utf8");
+  const gameplayPatch = await readFile(new URL("../docs/version/v0.25.2.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
   assert.equal(roadmap.includes("version/v0.25.0.md"), true);
   assert.equal(roadmap.includes("version/v0.25.1.md"), true);
+  assert.equal(roadmap.includes("version/v0.25.2.md"), true);
   assert.equal(roadmap.includes("第二个 playable example"), true);
   assert.equal(stage.includes("Second Playable Example Sprint"), true);
   assert.equal(stage.includes("outside a single dodge-blocks sample"), true);
   assert.equal(stage.includes("not an editor, template marketplace, visual scene builder"), true);
   assert.equal(stage.includes("v0.25.1.md"), true);
+  assert.equal(stage.includes("v0.25.2.md"), true);
   assert.equal(stage.includes("second example shell and routing/build baseline"), true);
   assert.equal(stage.includes("broad framework abstractions before two examples prove the need"), true);
   assert.equal(shellPatch.includes("Second Example Shell And Routing Baseline"), true);
   assert.equal(shellPatch.includes("examples/collect-stars"), true);
   assert.equal(shellPatch.includes("does not add an example launcher product"), true);
   assert.equal(shellPatch.includes("not a completed playable game"), true);
+  assert.equal(gameplayPatch.includes("Collect Stars Gameplay Loop Baseline"), true);
+  assert.equal(gameplayPatch.includes("ready / running / ended phases through `GameFlow`"), true);
+  assert.equal(gameplayPatch.includes("collision-based star collection"), true);
+  assert.equal(gameplayPatch.includes("does not add a visual editor"), true);
   assert.equal(publicApi.includes("`v0.25.0` starts the second playable example stage"), true);
   assert.equal(publicApi.includes("`v0.25.1` adds the second example shell"), true);
+  assert.equal(publicApi.includes("`v0.25.2` turns `collect-stars` into a minimal playable collection loop"), true);
   assert.equal(publicApi.includes("collect-stars"), true);
   assert.equal(publicApi.includes("package-style imports"), true);
   assert.equal(publicApi.includes("not an editor, example marketplace, visual launcher product"), true);
-  assert.equal(readme.includes("`v0.25.1` Second Example Shell And Routing Baseline"), true);
+  assert.equal(readme.includes("`v0.25.2` Collect Stars Gameplay Loop Baseline"), true);
   assert.equal(readme.includes("第二个 playable example 验证这些能力不是 dodge-blocks 专用"), true);
 });
 
@@ -608,7 +616,7 @@ test("examples import engine APIs through package-style entrypoints", async () =
   }
 });
 
-test("collect-stars example shell is routed and package-facing", async () => {
+test("collect-stars example gameplay loop is routed and package-facing", async () => {
   const index = await readFile(new URL("../index.html", import.meta.url), "utf8");
   const examplesEntry = await readFile(new URL("main.ts", examplesRootUrl), "utf8");
   const sceneSource = await readFile(new URL("collect-stars-scene.ts", collectStarsExampleUrl), "utf8");
@@ -623,12 +631,22 @@ test("collect-stars example shell is routed and package-facing", async () => {
   assert.equal(sceneSource.includes("class CollectStarsScene"), true);
   assert.equal(sceneSource.includes("new GameFlow"), true);
   assert.equal(sceneSource.includes("new InputSystem"), true);
+  assert.equal(sceneSource.includes("new CollisionSystem"), true);
+  assert.equal(sceneSource.includes("new InputActionMap"), true);
+  assert.equal(sceneSource.includes("defineKeyboardBinding"), true);
+  assert.equal(sceneSource.includes("limitMovementVector"), true);
+  assert.equal(sceneSource.includes("CollectStarsPlayerController"), true);
+  assert.equal(sceneSource.includes("CollectStarsGameSystem"), true);
+  assert.equal(sceneSource.includes('new ColliderComponent("star")'), true);
+  assert.equal(sceneSource.includes('collisions?.hasCollision(this.player, "star")'), true);
   assert.equal(sceneSource.includes("createHudText"), true);
   assert.equal(sceneSource.includes("createTileMapLayerView"), true);
   assert.equal(bootSource.includes("startSceneWithLifecycle"), true);
-  assert.equal(docs.includes("v0.25.1` shell baseline"), true);
+  assert.equal(bootSource.includes("BrowserKeyboardBridge"), true);
+  assert.equal(docs.includes("v0.25.2` gameplay loop baseline"), true);
   assert.equal(docs.includes("package-style imports"), true);
-  assert.equal(docs.includes("不包含完整 gameplay loop"), true);
+  assert.equal(docs.includes("使用 `limitMovementVector(...)` 保持斜向移动速度一致"), true);
+  assert.equal(docs.includes("运行时生成 star entity，并通过 `CollisionSystem` 判断收集"), true);
   assert.equal(docs.includes("不提供编辑器、示例市场、可视化 launcher"), true);
 });
 

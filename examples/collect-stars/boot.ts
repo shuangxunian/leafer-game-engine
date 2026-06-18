@@ -1,5 +1,6 @@
 import type { BrowserRuntime } from "@shuangxunian/leafer-game-engine/runtime";
 import { startSceneWithLifecycle } from "@shuangxunian/leafer-game-engine/runtime";
+import { BrowserKeyboardBridge, InputSystem } from "@shuangxunian/leafer-game-engine/framework";
 import { CollectStarsScene } from "./collect-stars-scene.js";
 
 export async function bootCollectStarsExample(runtime: BrowserRuntime): Promise<void> {
@@ -12,7 +13,18 @@ export async function bootCollectStarsExample(runtime: BrowserRuntime): Promise<
     throw lifecycleResult.error;
   }
 
-  console.log("Collect Stars shell bootstrapped:", {
+  const input = scene.getSystem(InputSystem);
+  if (!input) throw new Error("InputSystem was not initialized.");
+  const keyboard = new BrowserKeyboardBridge(input);
+  keyboard.attach();
+
+  const destroyScene = scene.destroy.bind(scene);
+  scene.destroy = (): void => {
+    keyboard.detach();
+    destroyScene();
+  };
+
+  console.log("Collect Stars gameplay bootstrapped:", {
     phase: scene.gameFlow.getPhase()
   });
 }
