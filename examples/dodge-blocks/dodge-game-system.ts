@@ -1,7 +1,7 @@
 import type { Entity, Scene } from "@shuangxunian/leafer-game-engine/core";
 import { System } from "@shuangxunian/leafer-game-engine/core";
 import type { RenderAdapter, RenderScene, RenderText } from "@shuangxunian/leafer-game-engine/adapter";
-import type { InputActionMap } from "@shuangxunian/leafer-game-engine/framework";
+import type { GameFlowPhase, InputActionMap } from "@shuangxunian/leafer-game-engine/framework";
 import {
   AssetRegistry,
   CollisionSystem,
@@ -55,6 +55,15 @@ type DodgeLevelRuntime = {
   };
 };
 
+export type DodgeGameplaySnapshot = {
+  phase: GameFlowPhase;
+  score: number;
+  bestScore: number;
+  survivalTimeSeconds: number;
+  hazardCount: number;
+  isGameplayActive: boolean;
+};
+
 export class DodgeGameSystem extends System {
   override priority = 200;
   private spawnTimer = 0;
@@ -82,6 +91,17 @@ export class DodgeGameSystem extends System {
 
   get gameFlow(): GameFlow {
     return this.flow;
+  }
+
+  getGameplaySnapshot(): DodgeGameplaySnapshot {
+    return {
+      phase: this.flow.getPhase(),
+      score: this.getScore(),
+      bestScore: this.bestScore,
+      survivalTimeSeconds: this.survivalTime,
+      hazardCount: this.hazards.size,
+      isGameplayActive: this.isGameplayActive()
+    };
   }
 
   override start(): void {

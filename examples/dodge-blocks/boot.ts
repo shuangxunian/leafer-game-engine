@@ -70,5 +70,8 @@ export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<v
   };
 
   console.log("Example assets loaded:", lifecycleResult.prepareResult);
-  console.log("Example bootstrapped:", createSnapshot());
+  console.log("Example bootstrapped:", {
+    tooling: createSnapshot(),
+    gameplay: gameSystem.getGameplaySnapshot()
+  });
 }

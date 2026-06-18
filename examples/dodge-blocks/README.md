@@ -21,6 +21,7 @@
 - level layout 是否能声明 player spawn、playfield bounds 和 hazard spawn region
 - tile map 是否能作为最小运行时数据契约被示例消费
 - tile map layer view helper 是否能把 playfield tile map 渲染成 world-space visual layer
+- gameplay system 是否能暴露只读 snapshot，说明当前 phase、score、best score、hazard count 和 active state
 - transform / size / view 是否能同步到渲染层
 - input 是否能驱动玩家移动
 - input action mapping 是否能把物理键盘和 pointer button input 转换成语义玩法动作
@@ -75,6 +76,7 @@ npm run dev
   - 启动 `DodgeBlocksScene`
   - 通过 `startSceneWithLifecycle(...)` 在 runtime start 前预加载 asset manifest
   - 通过 `addAudioPlayback(...)` 注入 `BrowserAudioPlaybackAdapter`，把 audio runtime intent 可选交给浏览器 media element 消费
+  - 在启动日志里输出 tooling snapshot 和 `DodgeGameSystem.getGameplaySnapshot()` 的只读 gameplay state
   - 挂载 keyboard bridge 和 pointer button bridge
   - 挂载 browser tooling panel
   - 分区显示 runtime debug、assets、game flow、sprite animations、audio runtime、input actions、collisions、entity inspector 和 component schema 信息
@@ -100,6 +102,7 @@ npm run dev
 - `dodge-game-system.ts`
   - 通过 framework `GameFlow` 管理玩法状态
   - 通过 input action map 读取 `confirm` 和 `pause`
+  - 通过 `getGameplaySnapshot()` 暴露只读 phase、score、best score、survival time、hazard count 和 active state
   - 通过 `getAudioRuntime(...)` 在 start / pause / resume / player-hit 事件中记录 semantic audio cue intent
   - 生成障碍物
   - 维护 score / best score
@@ -189,6 +192,7 @@ browser runtime
 - player movement 使用 framework `limitMovementVector(...)`，避免同时按两个方向时移动速度变成斜向超速
 - `confirm` 同时消费 keyboard 和 primary pointer button bindings，验证 browser pointer bridge 到 semantic action 的链路
 - gameplay phase 使用 framework `GameFlow`，而不是示例内的本地 phase state machine
+- gameplay state 通过 `DodgeGameSystem.getGameplaySnapshot()` 以只读数据暴露，方便确认 playable loop 已经闭环，不提供运行时修改入口
 - tooling panel 的 `Game Flow` section 可以显示当前 ready / running / paused / ended 状态
 - audio runtime 使用 framework `AudioRuntimeSystem`，browser playback 使用 runtime `BrowserAudioPlaybackAdapter`，示例只证明 opt-in playback consumption，不引入 Web Audio graph、mixer、音频编辑器或音频内容生产能力
 - hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度，不适合放进静态 scene config；scene config 只声明 `hazard-spawn` region 作为运行时参考数据

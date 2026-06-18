@@ -258,7 +258,8 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   assert.equal(publicApi.includes("AudioRuntimeState"), true);
   assert.equal(publicApi.includes("AudioRuntimeSystem"), true);
   assert.equal(publicApi.includes("read-only audio runtime snapshots"), true);
-  assert.equal(readme.includes("`0.21.x` audio runtime primitives 阶段和 `0.22.x` audio playback adapter 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.21.x` audio runtime primitives 阶段"), true);
+  assert.equal(readme.includes("`0.22.x` audio playback adapter 阶段"), true);
 });
 
 test("audio playback adapter stage docs are discoverable from roadmap", async () => {
@@ -301,7 +302,7 @@ test("audio playback adapter stage docs are discoverable from roadmap", async ()
   assert.equal(publicApi.includes("`v0.22.4` closes audio playback adapter work"), true);
   assert.equal(publicApi.includes("does not add playback buttons, volume sliders, mixer controls"), true);
   assert.equal(readme.includes("dodge-blocks opt-in audio playback consumption"), true);
-  assert.equal(readme.includes("`0.22.x` audio playback adapter 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.22.x` audio playback adapter 阶段"), true);
 });
 
 test("camera runtime contract stage docs are discoverable from roadmap", async () => {
@@ -365,7 +366,7 @@ test("camera runtime contract stage docs are discoverable from roadmap", async (
   assert.equal(publicApi.includes("not visual scene editing, camera timeline authoring"), true);
   assert.equal(publicApi.includes("`v0.23.2` adds camera bounds and follow clamping primitives"), true);
   assert.equal(publicApi.includes("not camera authoring UI, editor gizmos"), true);
-  assert.equal(readme.includes("`v0.24.4` Tile Map Layer View Baseline"), true);
+  assert.equal(readme.includes("`v0.24.5` Playable Example Closeout And Package Docs"), true);
   assert.equal(readme.includes("`0.23.x` camera runtime contract hardening 阶段已经完成 viewport/coordinate conversion baseline 和 bounds/follow clamping primitives"), true);
   assert.equal(readme.includes("`v0.23.3` camera read-only tooling visibility 已记录但暂缓"), true);
 });
@@ -377,6 +378,7 @@ test("playable game kit stage docs are discoverable from roadmap and README", as
   const actorPatch = await readFile(new URL("../docs/version/v0.24.2.md", import.meta.url), "utf8");
   const hudPatch = await readFile(new URL("../docs/version/v0.24.3.md", import.meta.url), "utf8");
   const tileViewPatch = await readFile(new URL("../docs/version/v0.24.4.md", import.meta.url), "utf8");
+  const closeoutPatch = await readFile(new URL("../docs/version/v0.24.5.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
@@ -385,6 +387,7 @@ test("playable game kit stage docs are discoverable from roadmap and README", as
   assert.equal(roadmap.includes("version/v0.24.2.md"), true);
   assert.equal(roadmap.includes("version/v0.24.3.md"), true);
   assert.equal(roadmap.includes("version/v0.24.4.md"), true);
+  assert.equal(roadmap.includes("version/v0.24.5.md"), true);
   assert.equal(roadmap.includes("playable 2D game kit"), true);
   assert.equal(stage.includes("Playable 2D Game Kit Sprint"), true);
   assert.equal(stage.includes("4399-style browser game"), true);
@@ -410,6 +413,10 @@ test("playable game kit stage docs are discoverable from roadmap and README", as
   assert.equal(tileViewPatch.includes("createTileMapLayerView"), true);
   assert.equal(tileViewPatch.includes("does not add a tile map editor"), true);
   assert.equal(tileViewPatch.includes("Empty `null` tiles are skipped"), true);
+  assert.equal(closeoutPatch.includes("Playable Example Closeout And Package Docs"), true);
+  assert.equal(closeoutPatch.includes("DodgeGameSystem.getGameplaySnapshot"), true);
+  assert.equal(closeoutPatch.includes("does not add an editor"), true);
+  assert.equal(closeoutPatch.includes("This is an example-level closeout helper"), true);
   assert.equal(publicApi.includes("`v0.24.1` starts the playable 2D game kit stage"), true);
   assert.equal(publicApi.includes("limitMovementVector"), true);
   assert.equal(publicApi.includes("`v0.24.2` adds actor template composition"), true);
@@ -418,12 +425,15 @@ test("playable game kit stage docs are discoverable from roadmap and README", as
   assert.equal(publicApi.includes("createHudText"), true);
   assert.equal(publicApi.includes("`v0.24.4` adds a runtime tile map layer view helper"), true);
   assert.equal(publicApi.includes("createTileMapLayerView"), true);
-  assert.equal(readme.includes("`v0.24.4` Tile Map Layer View Baseline"), true);
+  assert.equal(publicApi.includes("`v0.24.5` closes the playable 2D game kit stage"), true);
+  assert.equal(publicApi.includes("DodgeGameSystem"), true);
+  assert.equal(readme.includes("`v0.24.5` Playable Example Closeout And Package Docs"), true);
   assert.equal(readme.includes("复刻一个简单 4399 小游戏"), true);
   assert.equal(readme.includes("Playable movement primitives"), true);
   assert.equal(readme.includes("actor template composition baseline"), true);
   assert.equal(readme.includes("runtime HUD text helper baseline"), true);
   assert.equal(readme.includes("tile map layer view baseline"), true);
+  assert.equal(readme.includes("playable example closeout baseline"), true);
   assert.equal(readme.includes("tooling 保持辅助观察，不抢产品主线"), true);
 });
 
@@ -603,6 +613,24 @@ test("dodge-blocks example passes runtime debug context into tooling snapshots",
   assert.equal(source.includes("game: runtime.game"), true, "boot should pass Game time state into tooling snapshots");
   assert.equal(source.includes("renderScene: runtime.renderScene"), true, "boot should pass viewport state into tooling snapshots");
   assert.equal(source.includes("collisions: true"), true, "boot should pass collision pair state into tooling snapshots");
+});
+
+test("dodge-blocks example exposes a read-only gameplay snapshot for playable closeout", async () => {
+  const gameplaySource = await readFile(new URL("dodge-game-system.ts", dodgeBlocksExampleUrl), "utf8");
+  const bootSource = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
+  const docs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
+
+  assert.equal(gameplaySource.includes("export type DodgeGameplaySnapshot"), true);
+  assert.equal(gameplaySource.includes("getGameplaySnapshot()"), true);
+  assert.equal(gameplaySource.includes("phase: this.flow.getPhase()"), true);
+  assert.equal(gameplaySource.includes("score: this.getScore()"), true);
+  assert.equal(gameplaySource.includes("bestScore: this.bestScore"), true);
+  assert.equal(gameplaySource.includes("survivalTimeSeconds: this.survivalTime"), true);
+  assert.equal(gameplaySource.includes("hazardCount: this.hazards.size"), true);
+  assert.equal(gameplaySource.includes("isGameplayActive: this.isGameplayActive()"), true);
+  assert.equal(bootSource.includes("gameSystem.getGameplaySnapshot()"), true);
+  assert.equal(docs.includes("getGameplaySnapshot()"), true);
+  assert.equal(docs.includes("不提供运行时修改入口"), true);
 });
 
 test("dodge-blocks example consumes opt-in browser audio playback APIs without editor scope", async () => {

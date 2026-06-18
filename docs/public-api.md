@@ -64,6 +64,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.24.4` adds a runtime tile map layer view helper. The Node-safe `framework` entrypoint now exposes `createTileMapLayerView(...)`, which reads an existing `TileMap` layer, skips `null` tiles, creates render sprites for non-empty tile ids, positions those sprites with tile bounds, and attaches the generated container to the world layer by default. Callers can target the background layer or resolve tile ids to richer sprite assets. This is runtime map visualization for browser games, not tile painting, tileset management, map-to-collider generation, pathfinding, visual scene editing, or tile map authoring.
 
+`v0.24.5` closes the playable 2D game kit stage. `examples/dodge-blocks` now exposes a small read-only gameplay snapshot from its example-owned `DodgeGameSystem`, covering phase, score, best score, survival time, active state, and hazard count. This keeps the example easy to inspect as a downstream-style mini-game without adding a generic framework snapshot API, editor UI, gameplay debugger, persistence, leaderboard backend, or content-production workflow.
+
 ---
 
 ## Package Entrypoints
