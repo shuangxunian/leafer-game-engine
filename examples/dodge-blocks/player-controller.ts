@@ -4,6 +4,7 @@ import {
   InputSystem,
   SizeComponent,
   TransformComponent,
+  clampPositionToBounds,
   limitMovementVector
 } from "@shuangxunian/leafer-game-engine/framework";
 import { DODGE_INPUT_ACTION } from "./input-actions.js";
@@ -57,11 +58,18 @@ export class PlayerControllerComponent extends Component {
     const boundsX = this.bounds.x ?? 0;
     const boundsY = this.bounds.y ?? 0;
 
-    transform.x = clamp(transform.x, boundsX + padding, boundsX + this.bounds.width - width - padding);
-    transform.y = clamp(transform.y, boundsY + padding, boundsY + this.bounds.height - height - padding);
+    const position = clampPositionToBounds(
+      { x: transform.x, y: transform.y },
+      {
+        x: boundsX,
+        y: boundsY,
+        width: this.bounds.width,
+        height: this.bounds.height,
+        padding
+      },
+      { width, height }
+    );
+    transform.x = position.x;
+    transform.y = position.y;
   }
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
 }

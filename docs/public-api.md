@@ -78,6 +78,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.26.0` starts the framework extraction stage from two playable examples. This planning pass adds no new public API; it documents candidate extraction areas such as bounded directional movement, gameplay loop state helpers, actor/runtime spawn helpers, and read-only gameplay snapshot conventions. Any later helper must be backed by repeated example friction and remain runtime/framework package work, not a visual editor, prefab authoring tool, launcher, gallery, marketplace, persistence layer, or publishing workflow.
 
+`v0.26.1` adds `clampPositionToBounds(...)` to the Node-safe `framework` entrypoint. The helper clamps a desired `{ x, y }` position to rectangular bounds while accounting for optional bounds origin, entity width/height, and symmetric padding. Both `examples/dodge-blocks` and `examples/collect-stars` now consume it for player movement bounds. This is reusable runtime math extracted from repeated example friction, not a generic player controller, collision resolver, level editor, prefab authoring tool, input rebinding UI, launcher, gallery, or content workflow.
+
 ---
 
 ## Package Entrypoints

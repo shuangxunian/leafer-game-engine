@@ -4,6 +4,7 @@ import {
   InputSystem,
   SizeComponent,
   TransformComponent,
+  clampPositionToBounds,
   limitMovementVector
 } from "@shuangxunian/leafer-game-engine/framework";
 import { COLLECT_PLAYER_SPEED } from "./collect-stars-actors.js";
@@ -38,19 +39,18 @@ export class CollectStarsPlayerController extends Component {
     if (this.inputActions.isPressed(input, COLLECT_INPUT_ACTION.MoveDown)) dy += 1;
 
     const movement = limitMovementVector({ x: dx, y: dy });
-    transform.x = clamp(
-      transform.x + movement.x * COLLECT_PLAYER_SPEED * dt,
-      this.bounds.x,
-      this.bounds.x + this.bounds.width - size.width
+    const position = clampPositionToBounds(
+      {
+        x: transform.x + movement.x * COLLECT_PLAYER_SPEED * dt,
+        y: transform.y + movement.y * COLLECT_PLAYER_SPEED * dt
+      },
+      this.bounds,
+      {
+        width: size.width,
+        height: size.height
+      }
     );
-    transform.y = clamp(
-      transform.y + movement.y * COLLECT_PLAYER_SPEED * dt,
-      this.bounds.y,
-      this.bounds.y + this.bounds.height - size.height
-    );
+    transform.x = position.x;
+    transform.y = position.y;
   }
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
 }

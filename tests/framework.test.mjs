@@ -45,6 +45,7 @@ import {
   getSpriteAnimationPlaybackFrameIndex,
   getRuntimeServices,
   isSpriteCapableRenderNode,
+  clampPositionToBounds,
   limitMovementVector,
   createHudText,
   normalizeKeyboardKey,
@@ -2032,6 +2033,65 @@ test("movement vector limiting keeps arcade directional movement consistent", ()
   assert.deepEqual(limitMovementVector({ x: 3, y: 4 }, 0), { x: 0, y: 0 });
   assert.throws(() => limitMovementVector({ x: 1, y: 0 }, -1), /maxLength must be a finite number/);
   assert.throws(() => limitMovementVector({ x: 1, y: 0 }, Number.NaN), /maxLength must be a finite number/);
+});
+
+test("movement position clamping respects bounds, size and padding", () => {
+  assert.deepEqual(
+    clampPositionToBounds(
+      { x: -10, y: 120 },
+      { width: 100, height: 80 },
+      { width: 20, height: 30 }
+    ),
+    { x: 0, y: 50 }
+  );
+
+  assert.deepEqual(
+    clampPositionToBounds(
+      { x: 75, y: -50 },
+      { x: 10, y: 20, width: 100, height: 80, padding: 5 },
+      { width: 20, height: 30 }
+    ),
+    { x: 75, y: 25 }
+  );
+
+  assert.deepEqual(
+    clampPositionToBounds(
+      { x: 999, y: 999 },
+      { x: 10, y: 20, width: 100, height: 80, padding: 5 },
+      { width: 20, height: 30 }
+    ),
+    { x: 85, y: 65 }
+  );
+});
+
+test("movement position clamping anchors oversized actors to the minimum bound", () => {
+  assert.deepEqual(
+    clampPositionToBounds(
+      { x: 80, y: 90 },
+      { x: 10, y: 20, width: 30, height: 40, padding: 5 },
+      { width: 80, height: 90 }
+    ),
+    { x: 15, y: 25 }
+  );
+});
+
+test("movement position clamping reports invalid numeric inputs", () => {
+  assert.throws(
+    () => clampPositionToBounds({ x: 0, y: 0 }, { width: -1, height: 10 }),
+    /bounds.width must be a finite number greater than or equal to 0/
+  );
+  assert.throws(
+    () => clampPositionToBounds({ x: 0, y: 0 }, { width: 10, height: Number.NaN }),
+    /bounds.height must be a finite number greater than or equal to 0/
+  );
+  assert.throws(
+    () => clampPositionToBounds({ x: 0, y: 0 }, { width: 10, height: 10, padding: -1 }),
+    /bounds.padding must be a finite number greater than or equal to 0/
+  );
+  assert.throws(
+    () => clampPositionToBounds({ x: 0, y: 0 }, { width: 10, height: 10 }, { width: -1 }),
+    /size.width must be a finite number greater than or equal to 0/
+  );
 });
 
 test("hud text helper creates screen-space text on the ui layer by default", () => {

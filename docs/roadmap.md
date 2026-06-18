@@ -1174,3 +1174,7 @@
 完成两个 playable examples 后，下一阶段建议从重复痛点反推 framework extraction：
 
 - [v0.26.0](version/v0.26.0.md)
+
+第一批从两个示例重复移动边界逻辑开始：
+
+- [v0.26.1](version/v0.26.1.md)
