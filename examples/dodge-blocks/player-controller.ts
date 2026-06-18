@@ -3,7 +3,8 @@ import type { InputActionMap } from "@shuangxunian/leafer-game-engine/framework"
 import {
   InputSystem,
   SizeComponent,
-  TransformComponent
+  TransformComponent,
+  limitMovementVector
 } from "@shuangxunian/leafer-game-engine/framework";
 import { DODGE_INPUT_ACTION } from "./input-actions.js";
 
@@ -43,8 +44,9 @@ export class PlayerControllerComponent extends Component {
     if (this.inputActions.isPressed(input, DODGE_INPUT_ACTION.MoveUp)) dy -= 1;
     if (this.inputActions.isPressed(input, DODGE_INPUT_ACTION.MoveDown)) dy += 1;
 
-    transform.x += dx * this.speed * dt;
-    transform.y += dy * this.speed * dt;
+    const movement = limitMovementVector({ x: dx, y: dy });
+    transform.x += movement.x * this.speed * dt;
+    transform.y += movement.y * this.speed * dt;
 
     if (!this.bounds) return;
 

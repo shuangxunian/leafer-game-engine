@@ -56,6 +56,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.23.2` adds camera bounds and follow clamping primitives. `CameraSystem` now supports `setBounds(...)`, `getBounds(...)`, and `clearBounds()`, clamps manual `moveTo(...)` and follow target centers to the active world-space bounds, and handles bounds smaller than the visible viewport by centering on the constrained axis. This remains deterministic runtime movement constraint behavior, not camera authoring UI, editor gizmos, cinematic sequencing, or timeline tooling.
 
+`v0.24.1` starts the playable 2D game kit stage. The Node-safe `framework` entrypoint now exposes `limitMovementVector(...)`, a small gameplay helper for capping directional movement magnitude while preserving direction. `examples/dodge-blocks` consumes it so diagonal player movement no longer becomes faster than axis-aligned movement. This is reusable runtime gameplay math, not a character editor, physics simulation, input rebinding UI, or content authoring workflow.
+
 ---
 
 ## Package Entrypoints

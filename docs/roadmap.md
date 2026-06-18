@@ -1114,3 +1114,21 @@
 随后进入：
 
 - [v0.23.3](version/v0.23.3.md)
+
+`v0.23.3` 的 camera read-only tooling visibility 已记录但暂缓。它仍然属于只读 runtime observability，不是编辑器；但在当前产品对齐后，下一阶段优先回到“能做出可玩小游戏”的 framework/runtime 能力。
+
+完成 `v0.23.2` 后，下一阶段建议进入：
+
+- [v0.24.0](version/v0.24.0.md)
+
+这一阶段建议优先补齐 playable 2D game kit：
+
+- normalized directional movement
+- actor/prefab-like gameplay composition helpers
+- runtime HUD/game UI helpers
+- tile/level visual consumption
+- stronger playable example closeout
+
+其中第一批建议先做：
+
+- [v0.24.1](version/v0.24.1.md)

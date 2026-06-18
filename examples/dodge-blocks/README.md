@@ -21,6 +21,7 @@
 - transform / size / view 是否能同步到渲染层
 - input 是否能驱动玩家移动
 - input action mapping 是否能把物理键盘和 pointer button input 转换成语义玩法动作
+- framework movement vector helper 是否能避免玩家斜向移动比横向/纵向更快
 - collision 是否能判断玩家和障碍物接触
 - audio runtime 是否能记录语义音频 intent，并可选交给 browser playback adapter 消费
 - `GameFlow` 是否能管理 ready / running / paused / ended
@@ -107,6 +108,7 @@ npm run dev
 - `player-controller.ts`
   - 读取 `InputSystem` 和 input action map
   - 更新玩家位置
+  - 使用 framework `limitMovementVector(...)` 保持斜向移动速度一致
   - 把玩家限制在 scene config level layout 声明的 playfield 内
 
 - `input-actions.ts`
@@ -177,6 +179,7 @@ browser runtime
 - player movement bounds 读取 scene config level layout 的 `playfield` region
 - player 的 `ViewComponent`、`PlayerControllerComponent` 和 `SpriteAnimationComponent` 仍在代码中装配
 - player movement、start/restart 和 pause/resume 使用 `InputActionMap`，而不是在 gameplay 代码里硬编码物理键
+- player movement 使用 framework `limitMovementVector(...)`，避免同时按两个方向时移动速度变成斜向超速
 - `confirm` 同时消费 keyboard 和 primary pointer button bindings，验证 browser pointer bridge 到 semantic action 的链路
 - gameplay phase 使用 framework `GameFlow`，而不是示例内的本地 phase state machine
 - tooling panel 的 `Game Flow` section 可以显示当前 ready / running / paused / ended 状态

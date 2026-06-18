@@ -45,6 +45,7 @@ import {
   getSpriteAnimationPlaybackFrameIndex,
   getRuntimeServices,
   isSpriteCapableRenderNode,
+  limitMovementVector,
   normalizeKeyboardKey,
   normalizePointerButton,
   pauseSpriteAnimationPlayback,
@@ -1902,6 +1903,23 @@ test("view component owns and destroys its render node", () => {
   view.destroy();
 
   assert.equal(destroyCalls, 1);
+});
+
+test("movement vector limiting keeps arcade directional movement consistent", () => {
+  assert.deepEqual(limitMovementVector({ x: 0, y: 0 }), { x: 0, y: 0 });
+  assert.deepEqual(limitMovementVector({ x: 1, y: 0 }), { x: 1, y: 0 });
+  assert.deepEqual(limitMovementVector({ x: 0.25, y: 0.5 }), { x: 0.25, y: 0.5 });
+
+  const diagonal = limitMovementVector({ x: 1, y: 1 });
+  assert.equal(Math.hypot(diagonal.x, diagonal.y), 1);
+  assert.equal(diagonal.x, diagonal.y);
+
+  assert.deepEqual(limitMovementVector({ x: 3, y: 4 }), { x: 0.6000000000000001, y: 0.8 });
+  assert.deepEqual(limitMovementVector({ x: 3, y: 4 }, 10), { x: 3, y: 4 });
+  assert.deepEqual(limitMovementVector({ x: 3, y: 4 }, 2.5), { x: 1.5, y: 2 });
+  assert.deepEqual(limitMovementVector({ x: 3, y: 4 }, 0), { x: 0, y: 0 });
+  assert.throws(() => limitMovementVector({ x: 1, y: 0 }, -1), /maxLength must be a finite number/);
+  assert.throws(() => limitMovementVector({ x: 1, y: 0 }, Number.NaN), /maxLength must be a finite number/);
 });
 
 test("camera system maps world layer from position and zoom", () => {

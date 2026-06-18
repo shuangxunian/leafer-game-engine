@@ -6,18 +6,18 @@
 
 ## 当前进度
 
-当前项目已经推进到 `v0.23.2` Camera Bounds and Follow Clamping Primitives，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段、`0.10.x` package-facing API boundary 阶段、`0.11.x` sprite animation / asset runtime 阶段、`0.12.x` runtime services / event pipeline 阶段、`0.13.x` input actions / control mapping 阶段、`0.14.x` runtime observability hardening 阶段、`0.15.x` data-driven scene contract hardening 阶段、`0.16.x` render/view contract hardening 阶段、`0.17.x` runtime/game loop hardening 阶段、`0.18.x` level/map runtime primitives 阶段、`0.19.x` pointer/input runtime primitives 阶段、`0.20.x` collision query runtime primitives 阶段、`0.21.x` audio runtime primitives 阶段和 `0.22.x` audio playback adapter 阶段都已经收口，`0.23.x` camera runtime contract hardening 阶段已经完成 viewport/coordinate conversion baseline 和 bounds/follow clamping primitives。
+当前项目已经推进到 `v0.24.1` Normalized Directional Movement Baseline，`0.8.x` resource loading baseline、`0.9.x` game-flow/scene-lifecycle 阶段、`0.10.x` package-facing API boundary 阶段、`0.11.x` sprite animation / asset runtime 阶段、`0.12.x` runtime services / event pipeline 阶段、`0.13.x` input actions / control mapping 阶段、`0.14.x` runtime observability hardening 阶段、`0.15.x` data-driven scene contract hardening 阶段、`0.16.x` render/view contract hardening 阶段、`0.17.x` runtime/game loop hardening 阶段、`0.18.x` level/map runtime primitives 阶段、`0.19.x` pointer/input runtime primitives 阶段、`0.20.x` collision query runtime primitives 阶段、`0.21.x` audio runtime primitives 阶段和 `0.22.x` audio playback adapter 阶段都已经收口，`0.23.x` camera runtime contract hardening 阶段已经完成 viewport/coordinate conversion baseline 和 bounds/follow clamping primitives。`v0.23.3` camera read-only tooling visibility 已记录但暂缓，当前优先级切换到更直接支撑 4399 风格浏览器小游戏的 gameplay-facing primitives。
 
 更准确地说，现在它已经不只是一个 Leafer demo，而是一套可运行、可测试、带示例验证的轻量 2D 游戏引擎雏形：
 
 - `core` 已具备主循环、场景、实体、组件、系统、时间步进和生命周期管理。
-- `framework` 已具备输入、input action mapping、keyboard/pointer button bindings、变换、尺寸、视图同步、速度运动、碰撞、音频数据契约、音频 runtime intent state、scene-owned AudioRuntimeSystem、audio playback adapter contract、deterministic audio operation draining、AudioPlaybackSystem scene integration、状态机、GameFlow、EventBus、RuntimeScheduler、RuntimeServicesSystem、相机 viewport/coordinate conversion、camera bounds/follow clamping、资源注册、异步资源加载状态、sprite frame / animation clip 数据契约、animation playback timing helpers、SpriteAnimationComponent/System、实体工厂、场景配置、组件 schema、tile map 数据契约、level spawn/region metadata 和 scene config level/map 声明集成等基础能力。
+- `framework` 已具备输入、input action mapping、keyboard/pointer button bindings、变换、尺寸、视图同步、速度运动、movement vector limiting、碰撞、音频数据契约、音频 runtime intent state、scene-owned AudioRuntimeSystem、audio playback adapter contract、deterministic audio operation draining、AudioPlaybackSystem scene integration、状态机、GameFlow、EventBus、RuntimeScheduler、RuntimeServicesSystem、相机 viewport/coordinate conversion、camera bounds/follow clamping、资源注册、异步资源加载状态、sprite frame / animation clip 数据契约、animation playback timing helpers、SpriteAnimationComponent/System、实体工厂、场景配置、组件 schema、tile map 数据契约、level spawn/region metadata 和 scene config level/map 声明集成等基础能力。
 - `adapter` 已经通过渲染抽象接入 Leafer，并把显示层和游戏规则层分开。
 - `runtime` 已经可以在浏览器里装配渲染、场景、动画帧循环、scene lifecycle start helper 和 opt-in browser audio playback adapter，`examples/dodge-blocks` 也已消费这条播放链路。
 - `tooling` 已经具备只读 debug snapshot、浏览器 debug overlay、碰撞盒可视化、scene/entity inspector snapshot、asset load state snapshot、GameFlow snapshot、sprite animation snapshot、runtime services snapshot、input action snapshot、collision pair snapshot、audio runtime snapshot、聚合 tooling snapshot、browser tooling panel、entity row selection、selected entity detail、assets/game flow/sprite animations/audio runtime/runtime services/input actions/collisions panel section 和 schema-assisted component detail 展示。
-- `examples/dodge-blocks` 作为集成样例，用来验证引擎分层、异步资源加载、sprite animation 和运行时 tooling 能力。
+- `examples/dodge-blocks` 作为集成样例，用来验证引擎分层、异步资源加载、sprite animation、音频、输入、碰撞、相机基础和可玩小游戏能力。
 
-当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + runtime observability / developer tooling”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程、scene lifecycle 启动边界、sprite animation 数据契约、deterministic playback timing helpers、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、第一版 runtime event bus、deterministic scheduler、scene-level runtime services integration、runtime services 只读 tooling 可见性、runtime services 边界文档、第一版 input action mapping、示例级 input action 集成、input action 只读 tooling 可见性、input action 边界文档、pointer button action binding baseline、browser pointer button bridge baseline、dodge-blocks pointer action consumption、pointer/input runtime boundary closeout、collision pair query baseline、collision pair 只读 tooling snapshot、dodge-blocks collision tooling visibility、collision query runtime boundary closeout、audio data contract baseline、audio runtime service integration、audio runtime 只读 tooling visibility、dodge-blocks audio runtime intent consumption、audio runtime boundary closeout、audio playback adapter contract baseline、audio playback system draining integration、browser audio playback adapter baseline、system observability snapshot 强化、runtime debug panel 可读性整理、dodge-blocks runtime observability 集成验证、runtime observability 边界文档、scene config validation baseline、opt-in safe scene bootstrap validation gate、dodge-blocks scene config 消费验证、scene config 边界文档、explicit ViewComponent sync contract、sprite-capable render node capability guard、Node-safe render-types subpath、render/view contract package doc、runtime phase cleanup hardening、Game.tick error boundary contract、runtime ownership boundary、tile map data contract baseline、level spawn/region data primitives、scene config level/map declaration integration、dodge-blocks level config consumption 和 level/map runtime boundary closeout。
+当前还不是成熟商业引擎，但已经走完了从“引擎骨架”到“可复用框架 + 数据驱动基础 + runtime observability / developer tooling”的第一轮产品化整理，完成了第一版资源加载管线基线，并沉淀了通用游戏流程、scene lifecycle 启动边界、sprite animation 数据契约、deterministic playback timing helpers、ECS animation component/system、示例级动画集成、动画 runtime 边界文档、第一版 runtime event bus、deterministic scheduler、scene-level runtime services integration、runtime services 只读 tooling 可见性、runtime services 边界文档、第一版 input action mapping、示例级 input action 集成、input action 只读 tooling 可见性、input action 边界文档、pointer button action binding baseline、browser pointer button bridge baseline、dodge-blocks pointer action consumption、pointer/input runtime boundary closeout、collision pair query baseline、collision pair 只读 tooling snapshot、dodge-blocks collision tooling visibility、collision query runtime boundary closeout、audio data contract baseline、audio runtime service integration、audio runtime 只读 tooling visibility、dodge-blocks audio runtime intent consumption、audio runtime boundary closeout、audio playback adapter contract baseline、audio playback system draining integration、browser audio playback adapter baseline、system observability snapshot 强化、runtime debug panel 可读性整理、dodge-blocks runtime observability 集成验证、runtime observability 边界文档、scene config validation baseline、opt-in safe scene bootstrap validation gate、dodge-blocks scene config 消费验证、scene config 边界文档、explicit ViewComponent sync contract、sprite-capable render node capability guard、Node-safe render-types subpath、render/view contract package doc、runtime phase cleanup hardening、Game.tick error boundary contract、runtime ownership boundary、tile map data contract baseline、level spawn/region data primitives、scene config level/map declaration integration、dodge-blocks level config consumption、level/map runtime boundary closeout 和 normalized directional movement baseline。
 
 ## 产品边界
 
@@ -739,44 +739,35 @@ npm run verify:package
 
 ## 这个项目接下来更应该做什么
 
-如果我们把目标定义为“做游戏引擎依赖包”，那接下来的重点不应该是继续打磨 demo 外观，也不应该滑向可视化编辑器，而应该继续把当前已经有的 runtime、framework、adapter、package API 和只读 developer tooling 往产品化方向推进。
+如果我们把目标定义为“做前端游戏引擎依赖包”，那接下来的重点不应该继续滑向只读 tooling polish，也不应该在这个仓库里做编辑器，而应该优先补“开发者真的拿它复刻一个简单 4399 小游戏时会缺的基础能力”。
 
-`0.7.x` 已经把 selection-aware read-only runtime tooling 阶段收口了，`0.8.x` 完成了资源加载和 asset pipeline 基线，`0.9.x` 完成了 Game Flow 和 Scene Lifecycle 基线，`0.10.x` 完成了 package-facing API boundary 基线，`0.11.x` 已经把 sprite animation 从数据契约推进到 playback helper、ECS component/system、示例集成、tooling 可见性和 runtime 边界文档，`0.12.x` 已经完成 deterministic EventBus、RuntimeScheduler、opt-in scene runtime services、runtime services tooling visibility 和 runtime services 边界文档，`0.13.x` 已经完成 input action mapping、示例集成、tooling visibility 和边界文档，`0.14.x` 已经完成 runtime observability hardening、示例验证和边界文档，`0.15.x` 已经完成 data-driven scene contract hardening，`0.16.x` 完成 render/view contract hardening，`0.17.x` 完成 runtime/game loop hardening，`0.18.x` 完成 level/map runtime primitives，`0.19.x` 完成 pointer/input runtime primitives，`0.20.x` 完成 collision query runtime primitives。下一阶段更值得优先投入的是这些方向：
+当前已经可以支撑一个轻量浏览器小游戏原型：有主循环、场景、ECS、输入动作、碰撞查询、GameFlow、资源加载、sprite animation、audio intent/playback、level layout、相机基础和浏览器 runtime。但它还不是成熟商业引擎。要更舒服地做 4399 风格小游戏，下一阶段更值得优先投入的是这些方向：
 
-1. 更克制的只读 runtime observability / inspector
-   - 系统状态查看
-   - 输入状态查看
-   - asset loading 状态展示
-   - inspector 面板的可读性和可访问性 polish
-   - 不提供场景编辑、组件改值、资源管理或关卡制作入口
+1. Playable movement primitives
+   - 方向输入转移动向量
+   - 斜向移动归一化
+   - 简单速度限制和边界限制
+   - 从示例里抽掉一部分重复玩法数学
 
-2. 更正式的资源加载
-   - 图片加载
-   - 资源缓存
-   - 加载状态和错误处理
-   - 精灵帧、图集和动画资源管理
+2. Actor / prefab-like runtime helpers
+   - 玩家、敌人、投射物、道具、拾取物这类常见实体组合
+   - transform / size / view / collider / animation 的轻量组合入口
+   - 仍然是代码和 runtime API，不是拖拽搭场景
 
-3. 更完整的数据驱动能力
-   - 组件配置
-   - 配置校验和默认值
-   - 为配置化内容和多项目复用打基础
+3. Runtime HUD / game UI helpers
+   - 分数、状态、提示、结算 overlay
+   - UI 层和 gameplay 层的边界
+   - screen-space 节点，不做编辑器 UI
 
-4. 更完整的游戏流和 UI 状态
-   - 在 `StateMachine` 之上沉淀 `GameFlow`
-   - 暂停、重开、结算、菜单等通用状态模型
-   - UI 层和玩法层的关系约束
+4. Tile / level visual consumption
+   - 消费已有 `TileMap` / `LevelLayout`
+   - 让地图数据能生成运行时显示层
+   - 不做 tile map 编辑器、画刷或保存工作流
 
-5. 地图和关卡能力
-   - TileMap 和坐标 helper
-   - 出生点和区域管理
-   - scene config level/map 声明与校验
-   - 后续再考虑示例消费、运行时加载边界和只读 tooling 可见性
-
-6. 引擎包 API 友好结构
-   - 组件 schema
-   - 实体选择和层级信息
-   - 资源引用检查
-   - 让运行时结构适合被上层工具或独立产品消费
+5. Stronger playable example
+   - 示例更像“小游戏消费者项目”
+   - 证明引擎 API 能支撑可玩循环
+   - tooling 保持辅助观察，不抢产品主线
 
 ## 当前阶段的一个重要判断
 
