@@ -1943,6 +1943,79 @@ test("camera system can follow an entity using transform position and offset", (
   assert.equal(renderScene.layers.world.y, 200);
 });
 
+test("camera system exposes copied viewport state and visible world bounds", () => {
+  const scene = new Scene("CameraViewportScene");
+  const renderScene = createFakeRenderScene(800, 600);
+  const camera = new CameraSystem(scene, renderScene);
+
+  scene.addSystem(camera);
+  scene.start();
+
+  camera.moveTo(100, 50);
+  camera.setZoom(2);
+
+  const state = camera.getViewportState();
+
+  assert.deepEqual(state, {
+    x: 100,
+    y: 50,
+    zoom: 2,
+    viewportWidth: 800,
+    viewportHeight: 600,
+    worldLayerX: 200,
+    worldLayerY: 200,
+    visibleWorldBounds: {
+      x: -100,
+      y: -100,
+      width: 400,
+      height: 300,
+      minX: -100,
+      minY: -100,
+      maxX: 300,
+      maxY: 200
+    }
+  });
+
+  state.visibleWorldBounds.x = 999;
+  assert.equal(camera.getViewportState().visibleWorldBounds.x, -100);
+});
+
+test("camera system converts between world and viewport coordinates", () => {
+  const scene = new Scene("CameraCoordinateScene");
+  const renderScene = createFakeRenderScene(800, 600);
+  const camera = new CameraSystem(scene, renderScene);
+
+  camera.moveTo(100, 50);
+  camera.setZoom(2);
+
+  assert.deepEqual(camera.worldToViewport({ x: 100, y: 50 }), { x: 400, y: 300 });
+  assert.deepEqual(camera.worldToViewport({ x: 120, y: 80 }), { x: 440, y: 360 });
+  assert.deepEqual(camera.viewportToWorld({ x: 400, y: 300 }), { x: 100, y: 50 });
+  assert.deepEqual(camera.viewportToWorld({ x: 440, y: 360 }), { x: 120, y: 80 });
+});
+
+test("camera system coordinate conversion stays aligned with render layer mapping", () => {
+  const scene = new Scene("CameraCoordinateRenderScene");
+  const renderScene = createFakeRenderScene(960, 540);
+  const camera = new CameraSystem(scene, renderScene);
+
+  scene.addSystem(camera);
+  scene.start();
+  camera.moveTo(240, 120);
+  camera.setZoom(1.5);
+  scene.lateUpdate(1 / 60);
+
+  const point = { x: 300, y: 180 };
+  const viewportPoint = camera.worldToViewport(point);
+  const worldPoint = camera.viewportToWorld(viewportPoint);
+
+  assert.deepEqual(viewportPoint, {
+    x: point.x * renderScene.layers.world.scaleX + renderScene.layers.world.x,
+    y: point.y * renderScene.layers.world.scaleY + renderScene.layers.world.y
+  });
+  assert.deepEqual(worldPoint, point);
+});
+
 function createAnimationAssets() {
   const assets = new AssetRegistry();
   assets.loadManifest({

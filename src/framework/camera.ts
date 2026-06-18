@@ -3,6 +3,33 @@ import type { Entity } from "../core/index.js";
 import { System } from "../core/index.js";
 import { TransformComponent } from "./transform.js";
 
+export type CameraPoint = {
+  x: number;
+  y: number;
+};
+
+export type CameraWorldBounds = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+};
+
+export type CameraViewportState = {
+  x: number;
+  y: number;
+  zoom: number;
+  viewportWidth: number;
+  viewportHeight: number;
+  worldLayerX: number;
+  worldLayerY: number;
+  visibleWorldBounds: CameraWorldBounds;
+};
+
 export class CameraSystem extends System {
   override priority = -100;
   public x = 0;
@@ -40,6 +67,53 @@ export class CameraSystem extends System {
     this.followOffsetY = 0;
   }
 
+  getViewportState(): CameraViewportState {
+    const viewportWidth = this.renderScene.width;
+    const viewportHeight = this.renderScene.height;
+    const worldLayerX = this.getWorldLayerX();
+    const worldLayerY = this.getWorldLayerY();
+    const visibleWorldWidth = viewportWidth / this.zoom;
+    const visibleWorldHeight = viewportHeight / this.zoom;
+    const minX = this.x - visibleWorldWidth / 2;
+    const minY = this.y - visibleWorldHeight / 2;
+    const maxX = minX + visibleWorldWidth;
+    const maxY = minY + visibleWorldHeight;
+
+    return {
+      x: this.x,
+      y: this.y,
+      zoom: this.zoom,
+      viewportWidth,
+      viewportHeight,
+      worldLayerX,
+      worldLayerY,
+      visibleWorldBounds: {
+        x: minX,
+        y: minY,
+        width: visibleWorldWidth,
+        height: visibleWorldHeight,
+        minX,
+        minY,
+        maxX,
+        maxY
+      }
+    };
+  }
+
+  worldToViewport(point: CameraPoint): CameraPoint {
+    return {
+      x: point.x * this.zoom + this.getWorldLayerX(),
+      y: point.y * this.zoom + this.getWorldLayerY()
+    };
+  }
+
+  viewportToWorld(point: CameraPoint): CameraPoint {
+    return {
+      x: (point.x - this.getWorldLayerX()) / this.zoom,
+      y: (point.y - this.getWorldLayerY()) / this.zoom
+    };
+  }
+
   override lateUpdate(): void {
     if (this.followTarget) {
       const transform = this.followTarget.getComponent(TransformComponent);
@@ -52,7 +126,15 @@ export class CameraSystem extends System {
     const worldLayer = this.renderScene.layers.world;
     worldLayer.scaleX = this.zoom;
     worldLayer.scaleY = this.zoom;
-    worldLayer.x = this.renderScene.width / 2 - this.x * this.zoom;
-    worldLayer.y = this.renderScene.height / 2 - this.y * this.zoom;
+    worldLayer.x = this.getWorldLayerX();
+    worldLayer.y = this.getWorldLayerY();
+  }
+
+  private getWorldLayerX(): number {
+    return this.renderScene.width / 2 - this.x * this.zoom;
+  }
+
+  private getWorldLayerY(): number {
+    return this.renderScene.height / 2 - this.y * this.zoom;
   }
 }
