@@ -1170,3 +1170,7 @@
 收口第二个 playable example 阶段：
 
 - [v0.25.4](version/v0.25.4.md)
+
+完成两个 playable examples 后，下一阶段建议从重复痛点反推 framework extraction：
+
+- [v0.26.0](version/v0.26.0.md)

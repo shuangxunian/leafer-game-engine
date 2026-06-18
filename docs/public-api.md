@@ -76,6 +76,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.25.4` closes the second playable example stage with documentation and package-boundary coverage only. `examples/dodge-blocks` and `examples/collect-stars` now stand as two downstream-style browser examples with different gameplay loops consuming the same public package APIs. No new framework API is added in this closeout; future extraction should wait for repeated friction across examples, and the boundary remains engine-package runtime/framework/docs work, not an editor, launcher, gallery, marketplace, authoring workflow, or publishing product.
 
+`v0.26.0` starts the framework extraction stage from two playable examples. This planning pass adds no new public API; it documents candidate extraction areas such as bounded directional movement, gameplay loop state helpers, actor/runtime spawn helpers, and read-only gameplay snapshot conventions. Any later helper must be backed by repeated example friction and remain runtime/framework package work, not a visual editor, prefab authoring tool, launcher, gallery, marketplace, persistence layer, or publishing workflow.
+
 ---
 
 ## Package Entrypoints

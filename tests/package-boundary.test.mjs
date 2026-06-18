@@ -368,7 +368,7 @@ test("camera runtime contract stage docs are discoverable from roadmap", async (
   assert.equal(publicApi.includes("not visual scene editing, camera timeline authoring"), true);
   assert.equal(publicApi.includes("`v0.23.2` adds camera bounds and follow clamping primitives"), true);
   assert.equal(publicApi.includes("not camera authoring UI, editor gizmos"), true);
-  assert.equal(readme.includes("`v0.25.4` Second Playable Example Docs And Stage Closeout"), true);
+  assert.equal(readme.includes("`v0.26.0` Framework Extraction From Two Playable Examples Sprint"), true);
   assert.equal(readme.includes("`0.23.x` camera runtime contract hardening 阶段已经完成 viewport/coordinate conversion baseline 和 bounds/follow clamping primitives"), true);
   assert.equal(readme.includes("`v0.23.3` camera read-only tooling visibility 已记录但暂缓"), true);
 });
@@ -429,7 +429,7 @@ test("playable game kit stage docs are discoverable from roadmap and README", as
   assert.equal(publicApi.includes("createTileMapLayerView"), true);
   assert.equal(publicApi.includes("`v0.24.5` closes the playable 2D game kit stage"), true);
   assert.equal(publicApi.includes("DodgeGameSystem"), true);
-  assert.equal(readme.includes("`v0.25.4` Second Playable Example Docs And Stage Closeout"), true);
+  assert.equal(readme.includes("`v0.26.0` Framework Extraction From Two Playable Examples Sprint"), true);
   assert.equal(readme.includes("复刻一个简单 4399 小游戏"), true);
   assert.equal(readme.includes("Playable movement primitives"), true);
   assert.equal(readme.includes("actor template composition baseline"), true);
@@ -493,10 +493,39 @@ test("second playable example stage docs are discoverable from roadmap and READM
   assert.equal(publicApi.includes("collect-stars"), true);
   assert.equal(publicApi.includes("package-style imports"), true);
   assert.equal(publicApi.includes("not an editor, example marketplace, visual launcher product"), true);
-  assert.equal(readme.includes("`v0.25.4` Second Playable Example Docs And Stage Closeout"), true);
+  assert.equal(readme.includes("`v0.26.0` Framework Extraction From Two Playable Examples Sprint"), true);
   assert.equal(readme.includes("`dodge-blocks` 与 `collect-stars` 两个 playable examples"), true);
   assert.equal(readme.includes("当前 examples 的意义"), true);
   assert.equal(readme.includes("More playable example pressure tests"), true);
+});
+
+test("framework extraction planning docs start from two examples without editor scope", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.26.0.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  assert.equal(roadmap.includes("version/v0.26.0.md"), true);
+  assert.equal(roadmap.includes("从重复痛点反推 framework extraction"), true);
+  assert.equal(stage.includes("Framework Extraction From Two Playable Examples Sprint"), true);
+  assert.equal(stage.includes("does not add public framework API by itself"), true);
+  assert.equal(stage.includes("Bounded Directional Movement"), true);
+  assert.equal(stage.includes("Gameplay Loop State Helpers"), true);
+  assert.equal(stage.includes("Actor And Runtime Spawn Helpers"), true);
+  assert.equal(stage.includes("HUD And Gameplay Snapshot Conventions"), true);
+  assert.equal(stage.includes("examples remain downstream consumers"), true);
+  assert.equal(stage.includes("visual editor UI"), true);
+  assert.equal(stage.includes("example launcher or game gallery product"), true);
+  assert.equal(stage.includes("large gameplay framework abstractions before small helpers prove themselves"), true);
+  assert.equal(stage.includes("v0.26.1"), true);
+  assert.equal(stage.includes("v0.26.5"), true);
+  assert.equal(publicApi.includes("`v0.26.0` starts the framework extraction stage from two playable examples"), true);
+  assert.equal(publicApi.includes("adds no new public API"), true);
+  assert.equal(publicApi.includes("bounded directional movement"), true);
+  assert.equal(publicApi.includes("not a visual editor, prefab authoring tool, launcher, gallery"), true);
+  assert.equal(readme.includes("`v0.26.0` Framework Extraction From Two Playable Examples Sprint"), true);
+  assert.equal(readme.includes("`0.26.x` 开始从两个示例的重复痛点反推小型 framework extraction"), true);
+  assert.equal(readme.includes("不能把示例玩法、编辑器、launcher、gallery 或内容生产流程塞进引擎本体"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
