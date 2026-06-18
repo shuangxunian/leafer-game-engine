@@ -74,6 +74,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.25.3` hardens `collect-stars` package API consumption without adding new public API. The example now splits input actions, player movement, actor templates, and gameplay-loop system code into local downstream-style modules, and creates player/star ECS data through `defineActorTemplate(...)` plus `instantiateEntityTemplate(...)`. This proves the existing package-facing actor/template APIs can support a second example while avoiding a collect-stars-specific framework abstraction, editor surface, or launcher product.
 
+`v0.25.4` closes the second playable example stage with documentation and package-boundary coverage only. `examples/dodge-blocks` and `examples/collect-stars` now stand as two downstream-style browser examples with different gameplay loops consuming the same public package APIs. No new framework API is added in this closeout; future extraction should wait for repeated friction across examples, and the boundary remains engine-package runtime/framework/docs work, not an editor, launcher, gallery, marketplace, authoring workflow, or publishing product.
+
 ---
 
 ## Package Entrypoints

@@ -1166,3 +1166,7 @@
 继续硬化第二示例的 package API consumption：
 
 - [v0.25.3](version/v0.25.3.md)
+
+收口第二个 playable example 阶段：
+
+- [v0.25.4](version/v0.25.4.md)

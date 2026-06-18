@@ -368,7 +368,7 @@ test("camera runtime contract stage docs are discoverable from roadmap", async (
   assert.equal(publicApi.includes("not visual scene editing, camera timeline authoring"), true);
   assert.equal(publicApi.includes("`v0.23.2` adds camera bounds and follow clamping primitives"), true);
   assert.equal(publicApi.includes("not camera authoring UI, editor gizmos"), true);
-  assert.equal(readme.includes("`v0.25.3` Collect Stars Package API Consumption Hardening"), true);
+  assert.equal(readme.includes("`v0.25.4` Second Playable Example Docs And Stage Closeout"), true);
   assert.equal(readme.includes("`0.23.x` camera runtime contract hardening 阶段已经完成 viewport/coordinate conversion baseline 和 bounds/follow clamping primitives"), true);
   assert.equal(readme.includes("`v0.23.3` camera read-only tooling visibility 已记录但暂缓"), true);
 });
@@ -429,7 +429,7 @@ test("playable game kit stage docs are discoverable from roadmap and README", as
   assert.equal(publicApi.includes("createTileMapLayerView"), true);
   assert.equal(publicApi.includes("`v0.24.5` closes the playable 2D game kit stage"), true);
   assert.equal(publicApi.includes("DodgeGameSystem"), true);
-  assert.equal(readme.includes("`v0.25.3` Collect Stars Package API Consumption Hardening"), true);
+  assert.equal(readme.includes("`v0.25.4` Second Playable Example Docs And Stage Closeout"), true);
   assert.equal(readme.includes("复刻一个简单 4399 小游戏"), true);
   assert.equal(readme.includes("Playable movement primitives"), true);
   assert.equal(readme.includes("actor template composition baseline"), true);
@@ -445,6 +445,7 @@ test("second playable example stage docs are discoverable from roadmap and READM
   const shellPatch = await readFile(new URL("../docs/version/v0.25.1.md", import.meta.url), "utf8");
   const gameplayPatch = await readFile(new URL("../docs/version/v0.25.2.md", import.meta.url), "utf8");
   const hardeningPatch = await readFile(new URL("../docs/version/v0.25.3.md", import.meta.url), "utf8");
+  const closeoutPatch = await readFile(new URL("../docs/version/v0.25.4.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
@@ -452,6 +453,7 @@ test("second playable example stage docs are discoverable from roadmap and READM
   assert.equal(roadmap.includes("version/v0.25.1.md"), true);
   assert.equal(roadmap.includes("version/v0.25.2.md"), true);
   assert.equal(roadmap.includes("version/v0.25.3.md"), true);
+  assert.equal(roadmap.includes("version/v0.25.4.md"), true);
   assert.equal(roadmap.includes("第二个 playable example"), true);
   assert.equal(stage.includes("Second Playable Example Sprint"), true);
   assert.equal(stage.includes("outside a single dodge-blocks sample"), true);
@@ -459,7 +461,10 @@ test("second playable example stage docs are discoverable from roadmap and READM
   assert.equal(stage.includes("v0.25.1.md"), true);
   assert.equal(stage.includes("v0.25.2.md"), true);
   assert.equal(stage.includes("v0.25.3.md"), true);
+  assert.equal(stage.includes("v0.25.4.md"), true);
   assert.equal(stage.includes("second example shell and routing/build baseline"), true);
+  assert.equal(stage.includes("The `0.25.x` stage is closed through `v0.25.4`"), true);
+  assert.equal(stage.includes("did not add a new framework abstraction"), true);
   assert.equal(stage.includes("broad framework abstractions before two examples prove the need"), true);
   assert.equal(shellPatch.includes("Second Example Shell And Routing Baseline"), true);
   assert.equal(shellPatch.includes("examples/collect-stars"), true);
@@ -473,16 +478,25 @@ test("second playable example stage docs are discoverable from roadmap and READM
   assert.equal(hardeningPatch.includes("defineActorTemplate(...)` and `instantiateEntityTemplate(...)"), true);
   assert.equal(hardeningPatch.includes("does not add a visual editor"), true);
   assert.equal(hardeningPatch.includes("new framework helpers extracted from collect-stars"), true);
+  assert.equal(closeoutPatch.includes("Second Playable Example Docs And Stage Closeout"), true);
+  assert.equal(closeoutPatch.includes("examples/dodge-blocks"), true);
+  assert.equal(closeoutPatch.includes("examples/collect-stars"), true);
+  assert.equal(closeoutPatch.includes("No new framework API is added"), true);
+  assert.equal(closeoutPatch.includes("not become editor, authoring, launcher, template marketplace"), true);
   assert.equal(publicApi.includes("`v0.25.0` starts the second playable example stage"), true);
   assert.equal(publicApi.includes("`v0.25.1` adds the second example shell"), true);
   assert.equal(publicApi.includes("`v0.25.2` turns `collect-stars` into a minimal playable collection loop"), true);
   assert.equal(publicApi.includes("`v0.25.3` hardens `collect-stars` package API consumption"), true);
+  assert.equal(publicApi.includes("`v0.25.4` closes the second playable example stage"), true);
+  assert.equal(publicApi.includes("two downstream-style browser examples with different gameplay loops"), true);
   assert.equal(publicApi.includes("defineActorTemplate(...)` plus `instantiateEntityTemplate(...)"), true);
   assert.equal(publicApi.includes("collect-stars"), true);
   assert.equal(publicApi.includes("package-style imports"), true);
   assert.equal(publicApi.includes("not an editor, example marketplace, visual launcher product"), true);
-  assert.equal(readme.includes("`v0.25.3` Collect Stars Package API Consumption Hardening"), true);
-  assert.equal(readme.includes("第二个 playable example 验证这些能力不是 dodge-blocks 专用"), true);
+  assert.equal(readme.includes("`v0.25.4` Second Playable Example Docs And Stage Closeout"), true);
+  assert.equal(readme.includes("`dodge-blocks` 与 `collect-stars` 两个 playable examples"), true);
+  assert.equal(readme.includes("当前 examples 的意义"), true);
+  assert.equal(readme.includes("More playable example pressure tests"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -662,12 +676,13 @@ test("collect-stars example gameplay loop is routed and package-facing", async (
   assert.equal(sceneSource.includes("createTileMapLayerView"), true);
   assert.equal(bootSource.includes("startSceneWithLifecycle"), true);
   assert.equal(bootSource.includes("BrowserKeyboardBridge"), true);
-  assert.equal(docs.includes("v0.25.3` package API consumption hardening"), true);
+  assert.equal(docs.includes("v0.25.4` stage closeout"), true);
   assert.equal(docs.includes("package-style imports"), true);
   assert.equal(docs.includes("使用 `limitMovementVector(...)` 保持斜向移动速度一致"), true);
   assert.equal(docs.includes("将 input actions、player controller、actor templates 和 gameplay system 拆成示例本地模块"), true);
   assert.equal(docs.includes("使用 `defineActorTemplate(...)` 和 `instantiateEntityTemplate(...)` 创建 player/star ECS 数据"), true);
   assert.equal(docs.includes("运行时生成 star entity，并通过 `CollisionSystem` 判断收集"), true);
+  assert.equal(docs.includes("`0.25.x` 已经完成第二示例阶段收口"), true);
   assert.equal(docs.includes("不提供编辑器、示例市场、可视化 launcher"), true);
 });
 
