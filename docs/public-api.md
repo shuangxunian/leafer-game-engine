@@ -66,6 +66,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.24.5` closes the playable 2D game kit stage. `examples/dodge-blocks` now exposes a small read-only gameplay snapshot from its example-owned `DodgeGameSystem`, covering phase, score, best score, survival time, active state, and hazard count. This keeps the example easy to inspect as a downstream-style mini-game without adding a generic framework snapshot API, editor UI, gameplay debugger, persistence, leaderboard backend, or content-production workflow.
 
+`v0.25.0` starts the second playable example stage. This is a package-consumption proof stage: the next example should use existing public entrypoints through package-style imports and expose real friction before new framework abstractions are added. It is not an editor, example marketplace, visual launcher product, asset manager, or content publishing workflow.
+
 ---
 
 ## Package Entrypoints

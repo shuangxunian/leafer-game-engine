@@ -1148,3 +1148,9 @@
 `0.24.x` 最后建议收口：
 
 - [v0.24.5](version/v0.24.5.md)
+
+完成 `0.24.x` 后，下一阶段建议进入：
+
+- [v0.25.0](version/v0.25.0.md)
+
+这一阶段建议优先增加第二个 playable example，验证现有 framework/runtime 能力不是 dodge-blocks 专用。
