@@ -27,6 +27,7 @@
 - input 是否能驱动玩家移动
 - input action mapping 是否能把物理键盘和 pointer button input 转换成语义玩法动作
 - framework movement vector helper 是否能避免玩家斜向移动比横向/纵向更快
+- framework random placement helper 是否能在 hazard spawn region 内生成 top-left 位置
 - collision 是否能判断玩家和障碍物接触
 - audio runtime 是否能记录语义音频 intent，并可选交给 browser playback adapter 消费
 - `GameFlow` 是否能管理 ready / running / paused / ended
@@ -192,6 +193,7 @@ browser runtime
 - player 的 `ViewComponent`、`PlayerControllerComponent` 和 `SpriteAnimationComponent` 仍在代码中装配
 - player movement、start/restart 和 pause/resume 使用 `InputActionMap`，而不是在 gameplay 代码里硬编码物理键
 - player movement 使用 framework `limitMovementVector(...)`，避免同时按两个方向时移动速度变成斜向超速
+- hazard spawn top-left 位置使用 framework `randomPositionInBounds(...)`，但 size、speed、spawn cadence 和 gameplay rules 仍由示例拥有
 - `confirm` 同时消费 keyboard 和 primary pointer button bindings，验证 browser pointer bridge 到 semantic action 的链路
 - gameplay phase 使用 framework `GameFlow`，而不是示例内的本地 phase state machine
 - gameplay state 通过 `DodgeGameSystem.getGameplaySnapshot()` 以只读数据暴露，方便确认 playable loop 已经闭环，不提供运行时修改入口

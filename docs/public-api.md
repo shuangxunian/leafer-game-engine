@@ -84,6 +84,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.26.3` adds `attachActorSpriteView(...)` to the Node-safe `framework` entrypoint. The helper creates a sprite through an injected `RenderAdapter`, optionally assigns a sprite asset, attaches the node to a render scene layer, and adds a `ViewComponent` to an existing entity. Both playable examples consume it for sprite-backed actor views. This is a small runtime view-attachment helper, not a generic actor spawn system, prefab format, scene hierarchy editor, asset browser, visual editor, launcher, gallery, marketplace, or content workflow.
 
+`v0.26.4` adds `randomPositionInBounds(...)` to the Node-safe `framework` entrypoint. The helper selects a random top-left `{ x, y }` position within rectangular bounds while accounting for optional bounds origin, entity width/height, and symmetric padding. Both playable examples consume it for runtime actor placement. This is reusable runtime math, not a generic spawn system, spawn scheduler, random service, enemy abstraction, collectable abstraction, map-aware placement engine, visual editor, launcher, gallery, marketplace, or content workflow.
+
 ---
 
 ## Package Entrypoints

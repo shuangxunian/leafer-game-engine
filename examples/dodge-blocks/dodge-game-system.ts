@@ -10,7 +10,8 @@ import {
   ColliderComponent,
   TransformComponent,
   clampPositionToBounds,
-  getAudioRuntime
+  getAudioRuntime,
+  randomPositionInBounds
 } from "@shuangxunian/leafer-game-engine/framework";
 import { hazardFactory } from "./factories.js";
 import { DODGE_INPUT_ACTION } from "./input-actions.js";
@@ -214,12 +215,23 @@ export class DodgeGameSystem extends System {
   private spawnHazard(): void {
     const size = randomBetween(HAZARD_MIN_SIZE, HAZARD_MAX_SIZE);
     const spawnRegion = this.level?.hazardSpawnRegion;
-    const minX = spawnRegion?.x ?? 24;
-    const maxX = spawnRegion
-      ? Math.max(minX, spawnRegion.x + spawnRegion.width - size)
-      : Math.max(minX, this.renderScene.width - size - 24);
-    const minY = spawnRegion ? spawnRegion.y - size : -size - 120;
-    const maxY = spawnRegion ? spawnRegion.y + spawnRegion.height - size : -size - 20;
+    const spawnBounds = spawnRegion
+      ? {
+        x: spawnRegion.x,
+        y: spawnRegion.y - size,
+        width: spawnRegion.width,
+        height: spawnRegion.height + size
+      }
+      : {
+        x: 24,
+        y: -size - 120,
+        width: Math.max(0, this.renderScene.width - 48),
+        height: 100 + size
+      };
+    const position = randomPositionInBounds(spawnBounds, {
+      width: size,
+      height: size
+    });
     const hazard = hazardFactory.create(
       {
         scene: this.scene,
@@ -232,8 +244,8 @@ export class DodgeGameSystem extends System {
         name: `Hazard-${this.hazards.size + 1}`,
         size,
         speedY: randomBetween(HAZARD_MIN_SPEED, HAZARD_MAX_SPEED),
-        x: randomBetween(minX, maxX),
-        y: randomBetween(minY, maxY)
+        x: position.x,
+        y: position.y
       }
     );
 

@@ -8,7 +8,8 @@ import {
   InputSystem,
   TransformComponent,
   attachActorSpriteView,
-  instantiateEntityTemplate
+  instantiateEntityTemplate,
+  randomPositionInBounds
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
   COLLECT_PLAYER_SIZE,
@@ -125,9 +126,20 @@ export class CollectStarsGameSystem extends System {
   private spawnStar(): void {
     this.clearStar();
     const maxStarY = this.playfield.y + this.playfield.height - COLLECT_STAR_SIZE;
-    const x = randomBetween(this.playfield.x, this.playfield.x + this.playfield.width - COLLECT_STAR_SIZE);
-    const y = randomBetween(Math.min(this.playfield.y + 72, maxStarY), maxStarY);
-    const star = instantiateEntityTemplate(this.scene, createStarActorTemplate(x, y));
+    const minStarY = Math.min(this.playfield.y + 72, maxStarY);
+    const position = randomPositionInBounds(
+      {
+        x: this.playfield.x,
+        y: minStarY,
+        width: this.playfield.width,
+        height: this.playfield.y + this.playfield.height - minStarY
+      },
+      {
+        width: COLLECT_STAR_SIZE,
+        height: COLLECT_STAR_SIZE
+      }
+    );
+    const star = instantiateEntityTemplate(this.scene, createStarActorTemplate(position.x, position.y));
     attachActorSpriteView(star, {
       renderAdapter: this.renderAdapter,
       renderScene: this.renderScene,
@@ -163,9 +175,4 @@ export class CollectStarsGameSystem extends System {
 
     this.hud.status.setText("Collect as many stars as you can before time runs out.");
   }
-}
-
-function randomBetween(min: number, max: number): number {
-  if (max <= min) return min;
-  return min + Math.random() * Math.max(0, max - min);
 }

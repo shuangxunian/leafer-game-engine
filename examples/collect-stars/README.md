@@ -2,7 +2,7 @@
 
 `collect-stars` 是 `leaferGame` 的第二个示例方向，用来验证引擎 API 不只适用于 `dodge-blocks`。
 
-当前版本推进到 `v0.26.3` actor sprite view attachment helper baseline：它已经不只是 shell，可以启动、移动玩家、收集星星、更新分数和倒计时，并在时间结束后重开；同时本地玩法代码已经拆成更接近下游小游戏项目的模块结构，作为第二个 downstream-style playable example 验证引擎 API 不只适用于 `dodge-blocks`。
+当前版本推进到 `v0.26.4` random position in bounds helper baseline：它已经不只是 shell，可以启动、移动玩家、收集星星、更新分数和倒计时，并在时间结束后重开；同时本地玩法代码已经拆成更接近下游小游戏项目的模块结构，作为第二个 downstream-style playable example 验证引擎 API 不只适用于 `dodge-blocks`。
 
 ## Current Scope
 
@@ -19,6 +19,7 @@
 - 使用 `createHudText(...)` 创建 screen-space HUD
 - 使用 `createTileMap(...)` 和 `createTileMapLayerView(...)` 创建 world-space playfield visual layer
 - 使用 `attachActorSpriteView(...)` 装配 player/star 的 sprite-backed render view
+- 使用 `randomPositionInBounds(...)` 在 playfield 内生成 star top-left 位置
 - 运行时生成 star entity，并通过 `CollisionSystem` 判断收集
 - 通过 `getGameplaySnapshot()` 暴露只读 phase、score、remaining time、active star 和 gameplay active state
 
@@ -46,3 +47,5 @@
 `v0.26.2` 对齐了两个 playable examples 的只读 gameplay snapshot 约定。这个 snapshot 仍然属于示例本地玩法系统，用于观察当前玩法循环是否正常，不是 framework 级 scoring/timer API，也不是可修改状态的编辑器入口。
 
 `v0.26.3` 把 player/star 重复的 sprite view 装配切到 framework `attachActorSpriteView(...)`。这只是运行时 view attachment helper，不是 prefab 系统、spawn 系统、编辑器或资源管理器。
+
+`v0.26.4` 把 star top-left 随机位置计算切到 framework `randomPositionInBounds(...)`。这只是 bounds 内 placement math，不是 spawn system、随机表、地图放置引擎或编辑器。

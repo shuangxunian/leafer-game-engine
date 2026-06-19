@@ -1186,3 +1186,7 @@
 继续从 actor/view 装配重复代码中抽取小型 runtime helper：
 
 - [v0.26.3](version/v0.26.3.md)
+
+继续审计 runtime spawn/random placement 重复逻辑：
+
+- [v0.26.4](version/v0.26.4.md)

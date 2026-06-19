@@ -58,6 +58,30 @@ export function clampPositionToBounds(
   };
 }
 
+export function randomPositionInBounds(
+  bounds: MovementBounds,
+  size: MovementSize = {},
+  random: () => number = Math.random
+): MovementVector {
+  const boundsX = readFiniteNumber(bounds.x ?? 0, "bounds.x");
+  const boundsY = readFiniteNumber(bounds.y ?? 0, "bounds.y");
+  const boundsWidth = readNonNegativeFiniteNumber(bounds.width, "bounds.width");
+  const boundsHeight = readNonNegativeFiniteNumber(bounds.height, "bounds.height");
+  const padding = readNonNegativeFiniteNumber(bounds.padding ?? 0, "bounds.padding");
+  const width = readNonNegativeFiniteNumber(size.width ?? 0, "size.width");
+  const height = readNonNegativeFiniteNumber(size.height ?? 0, "size.height");
+
+  const minX = boundsX + padding;
+  const minY = boundsY + padding;
+  const maxX = Math.max(minX, boundsX + boundsWidth - width - padding);
+  const maxY = Math.max(minY, boundsY + boundsHeight - height - padding);
+
+  return {
+    x: randomBetween(minX, maxX, random, "x"),
+    y: randomBetween(minY, maxY, random, "y")
+  };
+}
+
 export class VelocityComponent extends Component {
   constructor(
     public vx = 0,
@@ -92,4 +116,15 @@ function readNonNegativeFiniteNumber(value: number, label: string): number {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+function randomBetween(min: number, max: number, random: () => number, axis: "x" | "y"): number {
+  if (max <= min) return min;
+
+  const value = random();
+  if (!Number.isFinite(value) || value < 0 || value > 1) {
+    throw new Error(`Movement randomPositionInBounds random() for ${axis} must return a finite number between 0 and 1.`);
+  }
+
+  return min + (max - min) * value;
 }

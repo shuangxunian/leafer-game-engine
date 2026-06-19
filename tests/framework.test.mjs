@@ -48,6 +48,7 @@ import {
   isSpriteCapableRenderNode,
   clampPositionToBounds,
   limitMovementVector,
+  randomPositionInBounds,
   createHudText,
   normalizeKeyboardKey,
   normalizePointerButton,
@@ -2144,6 +2145,59 @@ test("movement position clamping reports invalid numeric inputs", () => {
   assert.throws(
     () => clampPositionToBounds({ x: 0, y: 0 }, { width: 10, height: 10 }, { width: -1 }),
     /size.width must be a finite number greater than or equal to 0/
+  );
+});
+
+test("random position in bounds uses deterministic random values with size and padding", () => {
+  const randomValues = [0.25, 0.75];
+  const position = randomPositionInBounds(
+    { x: 10, y: 20, width: 100, height: 80, padding: 5 },
+    { width: 20, height: 30 },
+    () => randomValues.shift()
+  );
+
+  assert.deepEqual(position, {
+    x: 32.5,
+    y: 55
+  });
+});
+
+test("random position in bounds defaults to origin and anchors oversized actors", () => {
+  assert.deepEqual(
+    randomPositionInBounds(
+      { width: 100, height: 80 },
+      { width: 20, height: 30 },
+      () => 1
+    ),
+    { x: 80, y: 50 }
+  );
+
+  assert.deepEqual(
+    randomPositionInBounds(
+      { x: 10, y: 20, width: 30, height: 40, padding: 5 },
+      { width: 80, height: 90 },
+      () => 0.75
+    ),
+    { x: 15, y: 25 }
+  );
+});
+
+test("random position in bounds reports invalid inputs", () => {
+  assert.throws(
+    () => randomPositionInBounds({ width: -1, height: 10 }),
+    /bounds.width must be a finite number greater than or equal to 0/
+  );
+  assert.throws(
+    () => randomPositionInBounds({ width: 10, height: 10 }, { height: -1 }),
+    /size.height must be a finite number greater than or equal to 0/
+  );
+  assert.throws(
+    () => randomPositionInBounds({ width: 10, height: 10 }, {}, () => Number.NaN),
+    /random\(\) for x must return a finite number between 0 and 1/
+  );
+  assert.throws(
+    () => randomPositionInBounds({ width: 10, height: 10 }, {}, () => 1.1),
+    /random\(\) for x must return a finite number between 0 and 1/
   );
 });
 
