@@ -5,7 +5,7 @@ import {
   CollisionSystem,
   GameFlow,
   InputSystem,
-  ViewComponent,
+  attachActorSpriteView,
   createHudText,
   createTileMap,
   createTileMapLayerView,
@@ -135,16 +135,6 @@ export class CollectStarsScene extends Scene {
   }
 
   private createPlayer(playfield: PlayfieldBounds): Entity {
-    const marker = this.renderAdapter.createSprite();
-    marker.setAsset({
-      id: "collector-player",
-      fill: "#f8d66d",
-      width: COLLECT_PLAYER_SIZE,
-      height: COLLECT_PLAYER_SIZE,
-      cornerRadius: 20
-    });
-    this.renderScene.layers.world.addChild(marker);
-
     const player = instantiateEntityTemplate(this, createCollectorActorTemplate(playfield));
     player.addComponent(
       new CollectStarsPlayerController(
@@ -153,7 +143,17 @@ export class CollectStarsScene extends Scene {
         () => this.flow.is("running")
       )
     );
-    player.addComponent(new ViewComponent(marker));
+    attachActorSpriteView(player, {
+      renderAdapter: this.renderAdapter,
+      renderScene: this.renderScene,
+      asset: {
+        id: "collector-player",
+        fill: "#f8d66d",
+        width: COLLECT_PLAYER_SIZE,
+        height: COLLECT_PLAYER_SIZE,
+        cornerRadius: 20
+      }
+    });
     return player;
   }
 }

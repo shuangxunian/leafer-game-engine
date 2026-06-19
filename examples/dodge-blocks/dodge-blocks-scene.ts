@@ -16,8 +16,8 @@ import {
   InputSystem,
   SpriteAnimationComponent,
   SpriteAnimationSystem,
-  ViewComponent,
   addAudioRuntime,
+  attachActorSpriteView,
   bootstrapSceneFromConfig,
   createBrowserImageSpriteLoader,
   createHudText,
@@ -295,9 +295,6 @@ export class DodgeBlocksScene extends Scene {
     });
 
     let dodgeSystem!: DodgeGameSystem;
-    const playerNode = this.renderAdapter.createSprite("player");
-    playerNode.setAsset(this.assets.requireSprite("player"));
-    this.renderScene.layers.world.addChild(playerNode);
     player.addComponent(
       new PlayerControllerComponent(
         260,
@@ -311,7 +308,11 @@ export class DodgeBlocksScene extends Scene {
         () => dodgeSystem.isGameplayActive()
       )
     );
-    player.addComponent(new ViewComponent(playerNode));
+    attachActorSpriteView(player, {
+      renderAdapter: this.renderAdapter,
+      renderScene: this.renderScene,
+      asset: this.assets.requireSprite("player")
+    });
     player.addComponent(new SpriteAnimationComponent("player-idle"));
 
     dodgeSystem = this.addSystem(

@@ -7,7 +7,7 @@ import {
   GameFlow,
   InputSystem,
   TransformComponent,
-  ViewComponent,
+  attachActorSpriteView,
   instantiateEntityTemplate
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
@@ -124,21 +124,21 @@ export class CollectStarsGameSystem extends System {
 
   private spawnStar(): void {
     this.clearStar();
-    const node = this.renderAdapter.createSprite();
-    node.setAsset({
-      id: "collect-star",
-      fill: "#82f7ff",
-      width: COLLECT_STAR_SIZE,
-      height: COLLECT_STAR_SIZE,
-      cornerRadius: 14
-    });
-    this.renderScene.layers.world.addChild(node);
-
     const maxStarY = this.playfield.y + this.playfield.height - COLLECT_STAR_SIZE;
     const x = randomBetween(this.playfield.x, this.playfield.x + this.playfield.width - COLLECT_STAR_SIZE);
     const y = randomBetween(Math.min(this.playfield.y + 72, maxStarY), maxStarY);
     const star = instantiateEntityTemplate(this.scene, createStarActorTemplate(x, y));
-    star.addComponent(new ViewComponent(node));
+    attachActorSpriteView(star, {
+      renderAdapter: this.renderAdapter,
+      renderScene: this.renderScene,
+      asset: {
+        id: "collect-star",
+        fill: "#82f7ff",
+        width: COLLECT_STAR_SIZE,
+        height: COLLECT_STAR_SIZE,
+        cornerRadius: 14
+      }
+    });
     this.star = star;
   }
 

@@ -26,6 +26,7 @@ import {
   addRuntimeServices,
   advanceSpriteAnimationPlayback,
   createAudioRuntimeState,
+  attachActorSpriteView,
   createRuntimeServices,
   createSpriteAnimationPlayback,
   defineAudioAsset,
@@ -2016,6 +2017,58 @@ test("view component owns and destroys its render node", () => {
   view.destroy();
 
   assert.equal(destroyCalls, 1);
+});
+
+test("actor sprite view helper attaches a sprite view to an entity on the world layer", () => {
+  const scene = new Scene("ActorSpriteViewScene");
+  const worldChildren = [];
+  const renderAdapter = createFakeTextRenderAdapter();
+  const renderScene = createFakeTileRenderScene(worldChildren);
+  const actor = scene.world.createEntity("Actor");
+  actor.addComponent(new TransformComponent());
+
+  const view = attachActorSpriteView(actor, {
+    renderAdapter,
+    renderScene,
+    asset: { id: "actor", fill: "#ffcc00", width: 24, height: 24 }
+  });
+
+  assert.deepEqual(worldChildren, [view.node]);
+  assert.equal(view.node.asset.id, "actor");
+  assert.equal(actor.getComponent(ViewComponent), view.view);
+});
+
+test("actor sprite view helper can target a custom layer and reports missing layers", () => {
+  const scene = new Scene("ActorSpriteViewLayerScene");
+  const backgroundChildren = [];
+  const renderAdapter = createFakeTextRenderAdapter();
+  const renderScene = createFakeTileRenderScene([], backgroundChildren);
+  const backgroundActor = scene.world.createEntity("BackgroundActor");
+  backgroundActor.addComponent(new TransformComponent());
+
+  const view = attachActorSpriteView(backgroundActor, {
+    renderAdapter,
+    renderScene,
+    asset: "background-actor",
+    layer: "background"
+  });
+
+  assert.deepEqual(backgroundChildren, [view.node]);
+  assert.equal(view.node.asset, "background-actor");
+
+  const missingLayerScene = createFakeRenderScene(800, 600);
+  delete missingLayerScene.layers.overlay;
+  const overlayActor = scene.world.createEntity("OverlayActor");
+  assert.throws(
+    () =>
+      attachActorSpriteView(overlayActor, {
+        renderAdapter,
+        renderScene: missingLayerScene,
+        layer: "overlay"
+      }),
+    /Render scene layer "overlay" was not found/
+  );
+  assert.equal(overlayActor.getComponent(ViewComponent), undefined);
 });
 
 test("movement vector limiting keeps arcade directional movement consistent", () => {

@@ -1,10 +1,17 @@
-import type { RenderAdapter, RenderScene } from "../adapter/index.js";
+import type {
+  RenderAdapter,
+  RenderScene,
+  RenderSceneLayerName,
+  RenderSprite,
+  RenderSpriteAsset
+} from "../adapter/index.js";
 import type { Component, Entity, Scene } from "../core/index.js";
 import type { AssetRegistry } from "./assets.js";
 import { ColliderComponent } from "./collision.js";
 import { SizeComponent } from "./size.js";
 import { TransformComponent } from "./transform.js";
 import { VelocityComponent } from "./movement.js";
+import { ViewComponent } from "./view.js";
 
 export type EntityFactoryContext = {
   assets?: AssetRegistry;
@@ -70,6 +77,18 @@ export type InstantiateEntityTemplateOptions = {
   registry?: EntityTemplateRegistry;
 };
 
+export type ActorSpriteViewOptions = {
+  asset?: string | RenderSpriteAsset;
+  layer?: RenderSceneLayerName;
+  renderAdapter: RenderAdapter;
+  renderScene: RenderScene;
+};
+
+export type ActorSpriteView = {
+  node: RenderSprite;
+  view: ViewComponent;
+};
+
 export class EntityTemplateRegistry {
   private readonly factories = new Map<string, EntityTemplateFactory>();
 
@@ -120,6 +139,26 @@ export function instantiateEntityTemplate(
   }
 
   return entity;
+}
+
+export function attachActorSpriteView(
+  entity: Entity,
+  options: ActorSpriteViewOptions
+): ActorSpriteView {
+  const targetLayer = options.layer ?? "world";
+  const renderLayer = options.renderScene.layers[targetLayer];
+  if (!renderLayer) {
+    throw new Error(`Render scene layer "${targetLayer}" was not found.`);
+  }
+
+  const node = options.renderAdapter.createSprite();
+  if (options.asset !== undefined) {
+    node.setAsset(options.asset);
+  }
+
+  renderLayer.addChild(node);
+  const view = entity.addComponent(new ViewComponent(node));
+  return { node, view };
 }
 
 export function defineActorTemplate(definition: ActorTemplateDefinition): EntityTemplate {

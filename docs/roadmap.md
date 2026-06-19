@@ -1182,3 +1182,7 @@
 下一步对齐两个示例的只读 gameplay snapshot 约定：
 
 - [v0.26.2](version/v0.26.2.md)
+
+继续从 actor/view 装配重复代码中抽取小型 runtime helper：
+
+- [v0.26.3](version/v0.26.3.md)

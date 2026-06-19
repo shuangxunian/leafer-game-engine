@@ -1,11 +1,11 @@
 import type { Entity } from "@shuangxunian/leafer-game-engine/core";
 import {
   ColliderComponent,
+  attachActorSpriteView,
   defineEntityFactory,
   SizeComponent,
   TransformComponent,
-  VelocityComponent,
-  ViewComponent
+  VelocityComponent
 } from "@shuangxunian/leafer-game-engine/framework";
 import type { EntityFactoryContext } from "@shuangxunian/leafer-game-engine/framework";
 
@@ -20,10 +20,6 @@ type HazardFactoryOptions = {
 
 export const hazardFactory = defineEntityFactory<HazardFactoryOptions>(
   ({ assets, scene, renderAdapter, renderScene }: EntityFactoryContext, options): Entity => {
-    const hazardNode = renderAdapter.createSprite("hazard");
-    hazardNode.setAsset(assets?.getSprite("hazard") ?? "hazard");
-    renderScene.layers.world.addChild(hazardNode);
-
     const hazard = scene.world.createEntity(options.name);
     const transform = hazard.addComponent(new TransformComponent());
     transform.x = options.x;
@@ -32,7 +28,11 @@ export const hazardFactory = defineEntityFactory<HazardFactoryOptions>(
     hazard.addComponent(new SizeComponent(options.size, options.size));
     hazard.addComponent(new ColliderComponent("hazard"));
     hazard.addComponent(new VelocityComponent(0, options.speedY, options.canMove));
-    hazard.addComponent(new ViewComponent(hazardNode));
+    attachActorSpriteView(hazard, {
+      renderAdapter,
+      renderScene,
+      asset: assets?.getSprite("hazard") ?? "hazard"
+    });
 
     return hazard;
   }

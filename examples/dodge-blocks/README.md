@@ -17,6 +17,7 @@
 - `SpriteAnimationComponent` / `SpriteAnimationSystem` 是否能作为示例消费者接入
 - entity template 是否能创建玩家基础数据组件
 - actor template helper 是否能组合玩家 transform / size / collider 基础组件
+- actor sprite view helper 是否能把已有 entity 连接到 sprite-backed render node
 - safe scene bootstrap 是否能在创建玩家前验证静态配置
 - level layout 是否能声明 player spawn、playfield bounds 和 hazard spawn region
 - tile map 是否能作为最小运行时数据契约被示例消费
@@ -185,6 +186,7 @@ browser runtime
 - player 的 `transform`、`size`、`collider` 来自 scene config entity template
 - player 的基础 entity template 由 framework `defineActorTemplate(...)` 组合，示例不用手写重复的 transform / size / collider 声明
 - player 静态基础数据通过 `bootstrapSceneFromConfig(..., { validateBeforeBootstrap: true })` 创建
+- player 和 hazard 的 sprite-backed render view 通过 framework `attachActorSpriteView(...)` 装配
 - player 初始位置和重置位置读取 scene config level layout 的 `player-start` spawn
 - player movement bounds 读取 scene config level layout 的 `playfield` region
 - player 的 `ViewComponent`、`PlayerControllerComponent` 和 `SpriteAnimationComponent` 仍在代码中装配

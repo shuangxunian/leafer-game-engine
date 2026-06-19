@@ -82,6 +82,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.26.2` adds no new public package API. It aligns `examples/collect-stars` with the existing `dodge-blocks` read-only gameplay snapshot convention by exposing an example-owned `getGameplaySnapshot()` path for phase, score, remaining time, active star state, and gameplay activity. This documents a downstream example pattern, not a framework scoring system, timer system, mutable inspector, visual editor, gameplay debugger UI, launcher, gallery, leaderboard, account system, or publishing workflow.
 
+`v0.26.3` adds `attachActorSpriteView(...)` to the Node-safe `framework` entrypoint. The helper creates a sprite through an injected `RenderAdapter`, optionally assigns a sprite asset, attaches the node to a render scene layer, and adds a `ViewComponent` to an existing entity. Both playable examples consume it for sprite-backed actor views. This is a small runtime view-attachment helper, not a generic actor spawn system, prefab format, scene hierarchy editor, asset browser, visual editor, launcher, gallery, marketplace, or content workflow.
+
 ---
 
 ## Package Entrypoints
