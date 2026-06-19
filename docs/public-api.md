@@ -86,6 +86,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.26.4` adds `randomPositionInBounds(...)` to the Node-safe `framework` entrypoint. The helper selects a random top-left `{ x, y }` position within rectangular bounds while accounting for optional bounds origin, entity width/height, and symmetric padding. Both playable examples consume it for runtime actor placement. This is reusable runtime math, not a generic spawn system, spawn scheduler, random service, enemy abstraction, collectable abstraction, map-aware placement engine, visual editor, launcher, gallery, marketplace, or content workflow.
 
+`v0.26.5` closes the framework extraction stage from two playable examples without adding new public package API. The extracted package-facing helpers are `clampPositionToBounds(...)`, `attachActorSpriteView(...)`, and `randomPositionInBounds(...)`; the gameplay snapshot pattern remains example-owned. Player controllers, scoring/timer rules, spawn cadence, enemy/collectable behavior, prefab formats, editor UI, launcher/gallery surfaces, persistence, and content workflows remain outside the engine package.
+
 ---
 
 ## Package Entrypoints

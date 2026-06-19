@@ -1190,3 +1190,7 @@
 继续审计 runtime spawn/random placement 重复逻辑：
 
 - [v0.26.4](version/v0.26.4.md)
+
+`0.26.x` 最后建议收口：
+
+- [v0.26.5](version/v0.26.5.md)
