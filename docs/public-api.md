@@ -80,6 +80,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.26.1` adds `clampPositionToBounds(...)` to the Node-safe `framework` entrypoint. The helper clamps a desired `{ x, y }` position to rectangular bounds while accounting for optional bounds origin, entity width/height, and symmetric padding. Both `examples/dodge-blocks` and `examples/collect-stars` now consume it for player movement bounds. This is reusable runtime math extracted from repeated example friction, not a generic player controller, collision resolver, level editor, prefab authoring tool, input rebinding UI, launcher, gallery, or content workflow.
 
+`v0.26.2` adds no new public package API. It aligns `examples/collect-stars` with the existing `dodge-blocks` read-only gameplay snapshot convention by exposing an example-owned `getGameplaySnapshot()` path for phase, score, remaining time, active star state, and gameplay activity. This documents a downstream example pattern, not a framework scoring system, timer system, mutable inspector, visual editor, gameplay debugger UI, launcher, gallery, leaderboard, account system, or publishing workflow.
+
 ---
 
 ## Package Entrypoints

@@ -25,6 +25,7 @@ export async function bootCollectStarsExample(runtime: BrowserRuntime): Promise<
   };
 
   console.log("Collect Stars gameplay bootstrapped:", {
-    phase: scene.gameFlow.getPhase()
+    phase: scene.gameFlow.getPhase(),
+    gameplay: scene.getGameplaySnapshot()
   });
 }

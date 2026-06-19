@@ -1,10 +1,10 @@
 import { System } from "@shuangxunian/leafer-game-engine/core";
 import type { Entity, Scene } from "@shuangxunian/leafer-game-engine/core";
 import type { RenderAdapter, RenderScene, RenderText } from "@shuangxunian/leafer-game-engine/adapter";
+import type { GameFlowPhase, InputActionMap } from "@shuangxunian/leafer-game-engine/framework";
 import {
   CollisionSystem,
   GameFlow,
-  InputActionMap,
   InputSystem,
   TransformComponent,
   ViewComponent,
@@ -25,6 +25,15 @@ export type CollectStarsHud = {
   status: RenderText;
 };
 
+export type CollectStarsGameplaySnapshot = {
+  phase: GameFlowPhase;
+  score: number;
+  timeRemainingSeconds: number;
+  roundSeconds: number;
+  hasActiveStar: boolean;
+  isGameplayActive: boolean;
+};
+
 export class CollectStarsGameSystem extends System {
   override priority = 200;
   private score = 0;
@@ -42,6 +51,17 @@ export class CollectStarsGameSystem extends System {
     private readonly hud: CollectStarsHud
   ) {
     super(scene);
+  }
+
+  getGameplaySnapshot(): CollectStarsGameplaySnapshot {
+    return {
+      phase: this.flow.getPhase(),
+      score: this.score,
+      timeRemainingSeconds: this.timeRemaining,
+      roundSeconds: COLLECT_ROUND_SECONDS,
+      hasActiveStar: this.star !== undefined,
+      isGameplayActive: this.flow.is("running")
+    };
   }
 
   override start(): void {

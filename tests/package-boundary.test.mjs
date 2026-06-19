@@ -368,7 +368,7 @@ test("camera runtime contract stage docs are discoverable from roadmap", async (
   assert.equal(publicApi.includes("not visual scene editing, camera timeline authoring"), true);
   assert.equal(publicApi.includes("`v0.23.2` adds camera bounds and follow clamping primitives"), true);
   assert.equal(publicApi.includes("not camera authoring UI, editor gizmos"), true);
-  assert.equal(readme.includes("`v0.26.1` Bounded Position Clamp Helper Baseline"), true);
+  assert.equal(readme.includes("`v0.26.2` Gameplay Snapshot Convention Baseline"), true);
   assert.equal(readme.includes("`0.23.x` camera runtime contract hardening 阶段已经完成 viewport/coordinate conversion baseline 和 bounds/follow clamping primitives"), true);
   assert.equal(readme.includes("`v0.23.3` camera read-only tooling visibility 已记录但暂缓"), true);
 });
@@ -429,7 +429,7 @@ test("playable game kit stage docs are discoverable from roadmap and README", as
   assert.equal(publicApi.includes("createTileMapLayerView"), true);
   assert.equal(publicApi.includes("`v0.24.5` closes the playable 2D game kit stage"), true);
   assert.equal(publicApi.includes("DodgeGameSystem"), true);
-  assert.equal(readme.includes("`v0.26.1` Bounded Position Clamp Helper Baseline"), true);
+  assert.equal(readme.includes("`v0.26.2` Gameplay Snapshot Convention Baseline"), true);
   assert.equal(readme.includes("复刻一个简单 4399 小游戏"), true);
   assert.equal(readme.includes("Playable movement primitives"), true);
   assert.equal(readme.includes("actor template composition baseline"), true);
@@ -493,7 +493,7 @@ test("second playable example stage docs are discoverable from roadmap and READM
   assert.equal(publicApi.includes("collect-stars"), true);
   assert.equal(publicApi.includes("package-style imports"), true);
   assert.equal(publicApi.includes("not an editor, example marketplace, visual launcher product"), true);
-  assert.equal(readme.includes("`v0.26.1` Bounded Position Clamp Helper Baseline"), true);
+  assert.equal(readme.includes("`v0.26.2` Gameplay Snapshot Convention Baseline"), true);
   assert.equal(readme.includes("`dodge-blocks` 与 `collect-stars` 两个 playable examples"), true);
   assert.equal(readme.includes("当前 examples 的意义"), true);
   assert.equal(readme.includes("More playable example pressure tests"), true);
@@ -503,13 +503,16 @@ test("framework extraction planning docs start from two examples without editor 
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.26.0.md", import.meta.url), "utf8");
   const movementPatch = await readFile(new URL("../docs/version/v0.26.1.md", import.meta.url), "utf8");
+  const snapshotPatch = await readFile(new URL("../docs/version/v0.26.2.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
   assert.equal(roadmap.includes("version/v0.26.0.md"), true);
   assert.equal(roadmap.includes("version/v0.26.1.md"), true);
+  assert.equal(roadmap.includes("version/v0.26.2.md"), true);
   assert.equal(roadmap.includes("从重复痛点反推 framework extraction"), true);
   assert.equal(roadmap.includes("重复移动边界逻辑"), true);
+  assert.equal(roadmap.includes("只读 gameplay snapshot 约定"), true);
   assert.equal(stage.includes("Framework Extraction From Two Playable Examples Sprint"), true);
   assert.equal(stage.includes("does not add public framework API by itself"), true);
   assert.equal(stage.includes("Bounded Directional Movement"), true);
@@ -528,15 +531,24 @@ test("framework extraction planning docs start from two examples without editor 
   assert.equal(movementPatch.includes("does not add a visual editor"), true);
   assert.equal(movementPatch.includes("does not include:"), true);
   assert.equal(movementPatch.includes("a generic player controller component"), true);
+  assert.equal(snapshotPatch.includes("Gameplay Snapshot Convention Baseline"), true);
+  assert.equal(snapshotPatch.includes("adds no new public package API"), true);
+  assert.equal(snapshotPatch.includes("CollectStarsGameSystem.getGameplaySnapshot()"), true);
+  assert.equal(snapshotPatch.includes("example-owned read-only gameplay snapshot pattern"), true);
+  assert.equal(snapshotPatch.includes("does not include:"), true);
+  assert.equal(snapshotPatch.includes("a generic score system"), true);
   assert.equal(publicApi.includes("`v0.26.0` starts the framework extraction stage from two playable examples"), true);
   assert.equal(publicApi.includes("adds no new public API"), true);
   assert.equal(publicApi.includes("bounded directional movement"), true);
   assert.equal(publicApi.includes("`v0.26.1` adds `clampPositionToBounds(...)`"), true);
   assert.equal(publicApi.includes("Both `examples/dodge-blocks` and `examples/collect-stars` now consume it"), true);
+  assert.equal(publicApi.includes("`v0.26.2` adds no new public package API"), true);
+  assert.equal(publicApi.includes("phase, score, remaining time, active star state"), true);
   assert.equal(publicApi.includes("not a visual editor, prefab authoring tool, launcher, gallery"), true);
-  assert.equal(readme.includes("`v0.26.1` Bounded Position Clamp Helper Baseline"), true);
+  assert.equal(readme.includes("`v0.26.2` Gameplay Snapshot Convention Baseline"), true);
   assert.equal(readme.includes("`0.26.x` 开始从两个示例的重复痛点反推小型 framework extraction"), true);
   assert.equal(readme.includes("第一项已抽出 `clampPositionToBounds(...)` 这种纯 runtime movement math"), true);
+  assert.equal(readme.includes("第二项已对齐两个示例的 example-owned read-only gameplay snapshot 约定"), true);
   assert.equal(readme.includes("不能把示例玩法、编辑器、launcher、gallery 或内容生产流程塞进引擎本体"), true);
 });
 
@@ -716,17 +728,25 @@ test("collect-stars example gameplay loop is routed and package-facing", async (
   assert.equal(gameSystemSource.includes("instantiateEntityTemplate"), true);
   assert.equal(gameSystemSource.includes("createStarActorTemplate"), true);
   assert.equal(gameSystemSource.includes('collisions?.hasCollision(this.player, "star")'), true);
+  assert.equal(gameSystemSource.includes("CollectStarsGameplaySnapshot"), true);
+  assert.equal(gameSystemSource.includes("getGameplaySnapshot()"), true);
+  assert.equal(gameSystemSource.includes("timeRemainingSeconds"), true);
+  assert.equal(gameSystemSource.includes("hasActiveStar"), true);
+  assert.equal(sceneSource.includes("getGameplaySnapshot()"), true);
   assert.equal(sceneSource.includes("createHudText"), true);
   assert.equal(sceneSource.includes("createTileMapLayerView"), true);
   assert.equal(bootSource.includes("startSceneWithLifecycle"), true);
   assert.equal(bootSource.includes("BrowserKeyboardBridge"), true);
-  assert.equal(docs.includes("v0.25.4` stage closeout"), true);
+  assert.equal(bootSource.includes("gameplay: scene.getGameplaySnapshot()"), true);
+  assert.equal(docs.includes("`v0.26.2` gameplay snapshot convention baseline"), true);
   assert.equal(docs.includes("package-style imports"), true);
   assert.equal(docs.includes("使用 `limitMovementVector(...)` 保持斜向移动速度一致"), true);
   assert.equal(docs.includes("将 input actions、player controller、actor templates 和 gameplay system 拆成示例本地模块"), true);
   assert.equal(docs.includes("使用 `defineActorTemplate(...)` 和 `instantiateEntityTemplate(...)` 创建 player/star ECS 数据"), true);
   assert.equal(docs.includes("运行时生成 star entity，并通过 `CollisionSystem` 判断收集"), true);
+  assert.equal(docs.includes("通过 `getGameplaySnapshot()` 暴露只读 phase"), true);
   assert.equal(docs.includes("`0.25.x` 已经完成第二示例阶段收口"), true);
+  assert.equal(docs.includes("`v0.26.2` 对齐了两个 playable examples 的只读 gameplay snapshot 约定"), true);
   assert.equal(docs.includes("不提供编辑器、示例市场、可视化 launcher"), true);
 });
 
@@ -746,12 +766,31 @@ test("dodge-blocks gameplay consumes input action mappings instead of direct phy
 
 test("playable examples consume shared bounded movement helper", async () => {
   const dodgePlayer = await readFile(new URL("player-controller.ts", dodgeBlocksExampleUrl), "utf8");
+  const dodgeGameSystem = await readFile(new URL("dodge-game-system.ts", dodgeBlocksExampleUrl), "utf8");
   const collectPlayer = await readFile(new URL("player-controller.ts", collectStarsExampleUrl), "utf8");
 
   assert.equal(dodgePlayer.includes("clampPositionToBounds"), true);
+  assert.equal(dodgeGameSystem.includes("clampPositionToBounds"), true);
   assert.equal(collectPlayer.includes("clampPositionToBounds"), true);
   assert.equal(dodgePlayer.includes("function clamp("), false);
+  assert.equal(dodgeGameSystem.includes("function clamp("), false);
   assert.equal(collectPlayer.includes("function clamp("), false);
+});
+
+test("playable examples keep gameplay snapshots example-owned and read-only", async () => {
+  const dodgeGameSystem = await readFile(new URL("dodge-game-system.ts", dodgeBlocksExampleUrl), "utf8");
+  const collectScene = await readFile(new URL("collect-stars-scene.ts", collectStarsExampleUrl), "utf8");
+  const collectGameSystem = await readFile(new URL("collect-stars-game-system.ts", collectStarsExampleUrl), "utf8");
+  const collectBoot = await readFile(new URL("boot.ts", collectStarsExampleUrl), "utf8");
+
+  assert.equal(dodgeGameSystem.includes("export type DodgeGameplaySnapshot"), true);
+  assert.equal(dodgeGameSystem.includes("getGameplaySnapshot(): DodgeGameplaySnapshot"), true);
+  assert.equal(collectGameSystem.includes("export type CollectStarsGameplaySnapshot"), true);
+  assert.equal(collectGameSystem.includes("getGameplaySnapshot(): CollectStarsGameplaySnapshot"), true);
+  assert.equal(collectScene.includes("getGameplaySnapshot(): CollectStarsGameplaySnapshot | undefined"), true);
+  assert.equal(collectBoot.includes("gameplay: scene.getGameplaySnapshot()"), true);
+  assert.equal(collectGameSystem.includes("setGameplaySnapshot"), false);
+  assert.equal(collectScene.includes("setGameplaySnapshot"), false);
 });
 
 test("dodge-blocks example consumes pointer button input through semantic actions", async () => {

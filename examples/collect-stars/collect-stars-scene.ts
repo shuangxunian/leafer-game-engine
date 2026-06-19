@@ -21,15 +21,21 @@ import {
 } from "./collect-stars-actors.js";
 import type { PlayfieldBounds } from "./collect-stars-actors.js";
 import { CollectStarsGameSystem } from "./collect-stars-game-system.js";
+import type { CollectStarsGameplaySnapshot } from "./collect-stars-game-system.js";
 import { createCollectStarsInputActions } from "./input-actions.js";
 import { CollectStarsPlayerController } from "./player-controller.js";
 
 export class CollectStarsScene extends Scene {
   private readonly flow = new GameFlow({ initialPhase: "ready" });
   private readonly inputActions = createCollectStarsInputActions();
+  private gameSystem?: CollectStarsGameSystem;
 
   get gameFlow(): GameFlow {
     return this.flow;
+  }
+
+  getGameplaySnapshot(): CollectStarsGameplaySnapshot | undefined {
+    return this.gameSystem?.getGameplaySnapshot();
   }
 
   constructor(
@@ -65,21 +71,20 @@ export class CollectStarsScene extends Scene {
       fontSize: 18
     });
 
-    this.addSystem(
-      new CollectStarsGameSystem(
-        this,
-        this.renderAdapter,
-        this.renderScene,
-        player,
-        this.flow,
-        this.inputActions,
-        playfield,
-        {
-          score: scoreNode,
-          status: statusNode
-        }
-      )
+    this.gameSystem = new CollectStarsGameSystem(
+      this,
+      this.renderAdapter,
+      this.renderScene,
+      player,
+      this.flow,
+      this.inputActions,
+      playfield,
+      {
+        score: scoreNode,
+        status: statusNode
+      }
     );
+    this.addSystem(this.gameSystem);
   }
 
   override destroy(): void {

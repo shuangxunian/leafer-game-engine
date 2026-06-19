@@ -9,6 +9,7 @@ import {
   InputSystem,
   ColliderComponent,
   TransformComponent,
+  clampPositionToBounds,
   getAudioRuntime
 } from "@shuangxunian/leafer-game-engine/framework";
 import { hazardFactory } from "./factories.js";
@@ -191,20 +192,22 @@ export class DodgeGameSystem extends System {
 
     const transform = this.player.getComponent(TransformComponent);
     if (transform) {
-      const playfield = this.level?.playfield;
-      const minX = playfield?.x ?? 18;
-      const minY = playfield?.y ?? 18;
-      const maxX = playfield
-        ? playfield.x + playfield.width - PLAYER_SIZE
-        : this.renderScene.width - PLAYER_SIZE - 18;
-      const maxY = playfield
-        ? playfield.y + playfield.height - PLAYER_SIZE
-        : this.renderScene.height - PLAYER_SIZE - 18;
+      const playfield = this.level?.playfield ?? {
+        x: 18,
+        y: 18,
+        width: Math.max(0, this.renderScene.width - 36),
+        height: Math.max(0, this.renderScene.height - 36)
+      };
       const startX = this.level?.playerSpawn.x ?? 120;
       const startY = this.level?.playerSpawn.y ?? this.renderScene.height / 2 - PLAYER_SIZE / 2;
+      const position = clampPositionToBounds(
+        { x: startX, y: startY },
+        playfield,
+        { width: PLAYER_SIZE, height: PLAYER_SIZE }
+      );
 
-      transform.x = clamp(startX, minX, maxX);
-      transform.y = clamp(startY, minY, maxY);
+      transform.x = position.x;
+      transform.y = position.y;
     }
   }
 
@@ -303,10 +306,6 @@ export class DodgeGameSystem extends System {
 
 function randomBetween(min: number, max: number): number {
   return min + Math.random() * (max - min);
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
 }
 
 export const DODGE_GAME_CONFIG = {

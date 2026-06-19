@@ -2,7 +2,7 @@
 
 `collect-stars` 是 `leaferGame` 的第二个示例方向，用来验证引擎 API 不只适用于 `dodge-blocks`。
 
-当前版本推进到 `v0.25.4` stage closeout：它已经不只是 shell，可以启动、移动玩家、收集星星、更新分数和倒计时，并在时间结束后重开；同时本地玩法代码已经拆成更接近下游小游戏项目的模块结构，作为第二个 downstream-style playable example 验证引擎 API 不只适用于 `dodge-blocks`。
+当前版本推进到 `v0.26.2` gameplay snapshot convention baseline：它已经不只是 shell，可以启动、移动玩家、收集星星、更新分数和倒计时，并在时间结束后重开；同时本地玩法代码已经拆成更接近下游小游戏项目的模块结构，作为第二个 downstream-style playable example 验证引擎 API 不只适用于 `dodge-blocks`。
 
 ## Current Scope
 
@@ -19,6 +19,7 @@
 - 使用 `createHudText(...)` 创建 screen-space HUD
 - 使用 `createTileMap(...)` 和 `createTileMapLayerView(...)` 创建 world-space playfield visual layer
 - 运行时生成 star entity，并通过 `CollisionSystem` 判断收集
+- 通过 `getGameplaySnapshot()` 暴露只读 phase、score、remaining time、active star 和 gameplay active state
 
 ## Controls
 
@@ -33,9 +34,12 @@
 - 不生成 hazards
 - 不接入 audio cues
 - 不接入 tooling panel
+- 不提供可修改玩法状态的 inspector 或 gameplay debugger UI
 - 不做 persisted best score、leaderboard、accounts 或 online service
 - 不提供编辑器、示例市场、可视化 launcher、资产管理器或内容生产流程
 
 ## Stage Closeout
 
 `0.25.x` 已经完成第二示例阶段收口。后续如果继续推进，应优先观察 `dodge-blocks` 与 `collect-stars` 是否暴露出重复痛点，再决定是否提炼新的 runtime/framework helper；不应该为了示例数量扩张而在当前仓库里做 editor、launcher、gallery、marketplace 或内容发布工作流。
+
+`v0.26.2` 对齐了两个 playable examples 的只读 gameplay snapshot 约定。这个 snapshot 仍然属于示例本地玩法系统，用于观察当前玩法循环是否正常，不是 framework 级 scoring/timer API，也不是可修改状态的编辑器入口。
