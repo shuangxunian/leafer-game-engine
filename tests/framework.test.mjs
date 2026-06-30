@@ -8,6 +8,7 @@ import {
   AudioPlaybackSystem,
   AssetRegistry,
   BrowserPointerButtonBridge,
+  BrowserPointerPositionBridge,
   CameraSystem,
   EventBus,
   GameFlow,
@@ -808,6 +809,30 @@ test("input action map supports pointer button bindings", () => {
   assert.throws(() => definePointerButtonBinding(""), /Pointer button input binding must be a non-empty string/);
 });
 
+test("input system stores copied pointer position state", () => {
+  const input = new InputSystem();
+
+  input.setPointerPosition({ x: 12, y: 34 });
+
+  const position = input.getPointerPosition();
+  assert.deepEqual(position, { x: 12, y: 34 });
+
+  position.x = 99;
+  assert.deepEqual(input.getPointerPosition(), { x: 12, y: 34 });
+
+  input.clearPointerPosition();
+  assert.equal(input.getPointerPosition(), undefined);
+
+  assert.throws(
+    () => input.setPointerPosition({ x: Number.NaN, y: 0 }),
+    /Pointer position x must be a finite number/
+  );
+  assert.throws(
+    () => input.setPointerPosition({ x: 0, y: Number.POSITIVE_INFINITY }),
+    /Pointer position y must be a finite number/
+  );
+});
+
 test("browser pointer button bridge writes normalized button state into input system", () => {
   const input = new InputSystem();
   const target = createFakeEventTarget();
@@ -835,6 +860,52 @@ test("browser pointer button bridge writes normalized button state into input sy
   target.dispatch("pointerup", { button: 0 });
   assert.equal(input.isPressed(getPointerButtonInputId("primary")), false);
   assert.equal(actions.isPressed(input, "select"), false);
+});
+
+test("browser pointer position bridge writes client position into input system", () => {
+  const input = new InputSystem();
+  const target = createFakeEventTarget();
+  const bridge = new BrowserPointerPositionBridge(input, target);
+
+  bridge.attach();
+  bridge.attach();
+  assert.equal(target.listenerCount("pointermove"), 1);
+
+  target.dispatch("pointermove", { clientX: 10, clientY: 20 });
+  assert.deepEqual(input.getPointerPosition(), { x: 10, y: 20 });
+
+  target.dispatch("pointerdown", { clientX: 12, clientY: 22 });
+  assert.deepEqual(input.getPointerPosition(), { x: 12, y: 22 });
+
+  target.dispatch("pointerup", { clientX: 14, clientY: 24 });
+  assert.deepEqual(input.getPointerPosition(), { x: 14, y: 24 });
+
+  target.dispatch("pointermove", {});
+  assert.deepEqual(input.getPointerPosition(), { x: 14, y: 24 });
+});
+
+test("browser pointer position bridge clears position on cancel, blur and detach", () => {
+  const input = new InputSystem();
+  const target = createFakeEventTarget();
+  const bridge = new BrowserPointerPositionBridge(input, target);
+
+  bridge.attach();
+  target.dispatch("pointermove", { clientX: 10, clientY: 20 });
+  target.dispatch("pointercancel", {});
+  assert.equal(input.getPointerPosition(), undefined);
+
+  target.dispatch("pointerdown", { clientX: 30, clientY: 40 });
+  target.dispatch("blur", {});
+  assert.equal(input.getPointerPosition(), undefined);
+
+  target.dispatch("pointermove", { clientX: 50, clientY: 60 });
+  bridge.detach();
+  bridge.detach();
+  assert.equal(input.getPointerPosition(), undefined);
+  assert.equal(target.listenerCount("pointermove"), 0);
+
+  target.dispatch("pointermove", { clientX: 70, clientY: 80 });
+  assert.equal(input.getPointerPosition(), undefined);
 });
 
 test("browser pointer button bridge handles secondary, auxiliary, cancel, blur and detach cleanup", () => {

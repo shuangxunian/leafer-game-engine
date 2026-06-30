@@ -12,6 +12,11 @@ export type PointerButtonInputBinding = Readonly<{
   button: PointerButton;
 }>;
 
+export type PointerPosition = Readonly<{
+  x: number;
+  y: number;
+}>;
+
 export type InputBinding = KeyboardInputBinding | PointerButtonInputBinding;
 
 export type InputActionDefinition = Readonly<{
@@ -28,6 +33,7 @@ export class InputSystem extends System {
   override priority = -200;
   private pressed = new Set<string>();
   private justPressed = new Set<string>();
+  private pointerPosition?: PointerPosition;
 
   press(action: string): void {
     if (!this.pressed.has(action)) {
@@ -46,6 +52,21 @@ export class InputSystem extends System {
 
   wasPressed(action: string): boolean {
     return this.justPressed.has(action);
+  }
+
+  setPointerPosition(position: PointerPosition): void {
+    this.pointerPosition = {
+      x: assertFinitePointerCoordinate(position.x, "x"),
+      y: assertFinitePointerCoordinate(position.y, "y")
+    };
+  }
+
+  getPointerPosition(): PointerPosition | undefined {
+    return this.pointerPosition ? { ...this.pointerPosition } : undefined;
+  }
+
+  clearPointerPosition(): void {
+    this.pointerPosition = undefined;
   }
 
   override lateUpdate(): void {
@@ -243,6 +264,14 @@ function wasBindingPressed(input: InputSystem, binding: InputBinding): boolean {
   }
 
   return input.wasPressed(binding.key);
+}
+
+function assertFinitePointerCoordinate(value: number, axis: "x" | "y"): number {
+  if (!Number.isFinite(value)) {
+    throw new Error(`Pointer position ${axis} must be a finite number.`);
+  }
+
+  return value;
 }
 
 function copyAction(action: InputActionDefinition): InputActionDefinition {
