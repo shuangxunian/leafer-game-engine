@@ -70,7 +70,8 @@ for (const requiredFile of [
   "docs/scene-config.md",
   "docs/level-map.md",
   "docs/render-view-contract.md",
-  "docs/runtime-ownership.md"
+  "docs/runtime-ownership.md",
+  "docs/sprite-rendering.md"
 ]) {
   assertHasFile(packageFiles, requiredFile);
 }

@@ -1238,3 +1238,7 @@
 继续用示例证明 source-backed sprite asset consumption：
 
 - [v0.28.3](version/v0.28.3.md)
+
+继续补 sprite rendering 的 package-facing 边界文档：
+
+- [v0.28.4](version/v0.28.4.md)

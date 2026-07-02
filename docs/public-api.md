@@ -34,6 +34,8 @@ For the render/view boundary across render nodes, view synchronization, sprite-c
 
 For the runtime ownership boundary across `Game`, `Scene`, browser runtime, render scene lifecycle, tooling, and downstream error policy, see [Runtime Ownership Boundary](runtime-ownership.md).
 
+For the sprite rendering boundary across `RenderSpriteAsset.source`, Leafer image-backed rendering, asset registry render handoff, framework DOM-free constraints, and example-owned image-like assets, see [Sprite Rendering Boundary](sprite-rendering.md).
+
 `0.18.x` closed level/map runtime primitives. The Node-safe `framework` entrypoint now exposes `TileMap`, `defineTileMap(...)`, and `createTileMap(...)` for validated tile map data, defensive copying, tile lookup, and tile/world coordinate conversion. It also exposes `LevelLayout`, `defineLevelLayout(...)`, and `createLevelLayout(...)` for spawn point and rectangular region metadata. Scene config can now optionally declare `level.tileMap` and `level.layout`; successful bootstrap returns `TileMap` / `LevelLayout` helpers without generating entities, systems, render nodes, collisions, or editor state. `examples/dodge-blocks` consumes that path as a downstream-style package example by reading player spawn and playfield region metadata from the bootstrapped level layout.
 
 For the level/map boundary across tile data, coordinate helpers, spawn/region metadata, scene config integration, example consumption, and non-editor data-contract limits, see [Level/Map Runtime Boundary](level-map.md).
@@ -109,6 +111,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 `v0.28.2` adds the asset loading to render asset handoff baseline. `AssetRegistry.getSpriteRenderAsset(id)` and `AssetRegistry.requireSpriteRenderAsset(id)` return copied `RenderSpriteAsset` data without registry-only metadata, `SpriteAnimationSystem` applies those render assets to sprite-capable view nodes, and `attachActorSpriteView(...)` can resolve a registered sprite through `assets + assetId`. Render nodes still receive stable asset metadata and `source` strings; the browser adapter owns how that source is rendered. This is not a DOM image object pipeline, bundler plugin, CDN policy, asset browser, atlas packer, editor, launcher, gallery, marketplace, SDK wrapper, monetization, or publishing workflow.
 
 `v0.28.3` adds no new public package API. It updates `examples/dodge-blocks` to consume source-backed sprite assets through the existing `assets + assetId` render handoff path for player and hazard views. This proves image-like example sprite consumption through package-facing APIs while keeping art data example-owned and avoiding asset authoring tools, visual asset managers, bundled asset libraries, marketplaces, launchers, galleries, SDK wrappers, monetization, or publishing workflows.
+
+`v0.28.4` adds no new public package API. It publishes the sprite rendering package boundary in `docs/sprite-rendering.md`, covering `RenderSpriteAsset.source`, Leafer `Image.url` mapping, `AssetRegistry.getSpriteRenderAsset(id)` / `requireSpriteRenderAsset(id)`, `SpriteAnimationSystem`, `attachActorSpriteView(...)`, example-owned data URI or local static image-like sources, and the rule that `/framework` stays DOM-free by passing metadata and `source` strings rather than browser `Image` objects. This is package documentation and publish-boundary work, not an asset editor, visual asset manager, atlas packer, image cropper, CDN pipeline, bundled art library, launcher, gallery, marketplace, SDK wrapper, monetization, or publishing workflow.
 
 ---
 
@@ -294,6 +298,8 @@ This command builds the library through `npm pack --dry-run --json` and checks t
 - `docs/scene-config.md`
 - `docs/level-map.md`
 - `docs/render-view-contract.md`
+- `docs/runtime-ownership.md`
+- `docs/sprite-rendering.md`
 - all JS and type declaration targets from `package.json` exports
 
 It also checks that development-only paths such as `src`, `tests`, `examples`, `dist`, `scripts`, and `node_modules` are not included.

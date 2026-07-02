@@ -65,6 +65,7 @@ test("package publish files include library output and docs", () => {
     "docs/level-map.md",
     "docs/render-view-contract.md",
     "docs/runtime-ownership.md",
+    "docs/sprite-rendering.md",
     "README.md",
     "LICENSE"
   ]);
@@ -717,7 +718,7 @@ test("dodge-blocks consumes source-backed sprites through render handoff", async
   assert.equal(stage.includes("visual asset manager, atlas packer"), true);
   assert.equal(publicApi.includes("`v0.28.3` adds no new public package API"), true);
   assert.equal(publicApi.includes("source-backed sprite assets through the existing `assets + assetId` render handoff"), true);
-  assert.equal(readme.includes("`v0.28.3` Example Image Asset Consumption"), true);
+  assert.equal(readme.includes("在 `v0.28.3` 让 `dodge-blocks` 示例通过 `assets + assetId` 消费 source-backed sprite assets"), true);
   assert.equal(readme.includes("通过 `assets + assetId` 消费 source-backed sprite assets"), true);
   assert.equal(sceneSource.includes("source: createSpriteDataUri"), true);
   assert.equal(sceneSource.includes("assetId: \"player\""), true);
@@ -729,6 +730,39 @@ test("dodge-blocks consumes source-backed sprites through render handoff", async
   assert.equal(docs.includes("source-backed sprite assets"), true);
   assert.equal(docs.includes("assets + assetId"), true);
   assert.equal(docs.includes("不是素材编辑器、素材市场或发布管线"), true);
+});
+
+test("sprite rendering package boundary ships without asset authoring scope", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.28.4.md", import.meta.url), "utf8");
+  const docs = await readFile(new URL("../docs/sprite-rendering.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  assert.equal(roadmap.includes("version/v0.28.4.md"), true);
+  assert.equal(stage.includes("Sprite Rendering Package Boundary"), true);
+  assert.equal(stage.includes("does not add public package API"), true);
+  assert.equal(stage.includes("No runtime behavior changes are added"), true);
+  assert.equal(stage.includes("passes ids, dimensions, fills, frame metadata"), true);
+  assert.equal(docs.includes("RenderSpriteAsset.source"), true);
+  assert.equal(docs.includes("Image.url"), true);
+  assert.equal(docs.includes("AssetRegistry.getSpriteRenderAsset(id)"), true);
+  assert.equal(docs.includes("AssetRegistry.requireSpriteRenderAsset(id)"), true);
+  assert.equal(docs.includes("SpriteAnimationSystem"), true);
+  assert.equal(docs.includes("attachActorSpriteView(...)"), true);
+  assert.equal(docs.includes("assets + assetId"), true);
+  assert.equal(docs.includes("data URI or local static image-like sources"), true);
+  assert.equal(docs.includes("The `/framework` entrypoint stays DOM-free."), true);
+  assert.equal(docs.includes("they should not create browser `Image`"), true);
+  assert.equal(docs.includes("a visual asset manager"), true);
+  assert.equal(docs.includes("an atlas packer"), true);
+  assert.equal(docs.includes("a marketplace"), true);
+  assert.equal(publicApi.includes("`v0.28.4` adds no new public package API"), true);
+  assert.equal(publicApi.includes("For the sprite rendering boundary"), true);
+  assert.equal(publicApi.includes("docs/sprite-rendering.md"), true);
+  assert.equal(readme.includes("`v0.28.4` Sprite Rendering Package Boundary"), true);
+  assert.equal(readme.includes("sprite rendering package boundary 文档"), true);
+  assert.equal(readme.includes("docs/sprite-rendering.md"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
