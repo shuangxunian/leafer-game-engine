@@ -102,6 +102,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.27.6` closes the pointer-first puzzle interaction stage without adding new public package API. The stage leaves package-facing runtime helpers for pointer position, rectangle hit testing / entity picking, and source-target selection state, plus an example-owned `pour-sort` playable loop that proves those helpers can support a simple rule-driven browser puzzle. Water-sort rules, drag/drop state, undo, hints, level progression, galgame dialogue/choice flow, visual authoring tools, launcher/gallery surfaces, marketplace flows, SDK integration, accounts, ads, monetization, and publishing workflows remain outside the engine package.
 
+`v0.28.0` starts the real sprite / image rendering stage. This planning pass adds no new public API; it focuses the next work on making sprite asset `source` values visibly render through the Leafer adapter and proving image-like sprite consumption in examples. The stage remains adapter/runtime/example integration work, not a visual asset manager, atlas packer, sprite editor, image cropper, asset browser UI, CDN pipeline, bundled art library, marketplace, launcher, gallery, SDK wrapper, monetization, or publishing workflow.
+
 ---
 
 ## Package Entrypoints

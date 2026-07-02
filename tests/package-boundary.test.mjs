@@ -624,6 +624,30 @@ test("pointer-first puzzle stage closes without swallowing puzzle rules", async 
   assert.equal(pourSortScene.includes("export function isPourSortSolved"), true);
 });
 
+test("real sprite image rendering stage starts without asset authoring scope", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.28.0.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  assert.equal(roadmap.includes("version/v0.28.0.md"), true);
+  assert.equal(stage.includes("Real Sprite / Image Rendering Sprint"), true);
+  assert.equal(stage.includes("does not add public package API by itself"), true);
+  assert.equal(stage.includes("sprite assets with `source` can visibly render through the Leafer adapter"), true);
+  assert.equal(stage.includes("map `RenderSpriteAsset.source` into the Leafer render node"), true);
+  assert.equal(stage.includes("preserve existing fill/width/height/cornerRadius rectangle behavior"), true);
+  assert.equal(stage.includes("Asset Loading To Render Asset Handoff"), true);
+  assert.equal(stage.includes("Example Image Asset Consumption"), true);
+  assert.equal(stage.includes("does not add a visual asset manager"), true);
+  assert.equal(stage.includes("atlas packer"), true);
+  assert.equal(stage.includes("bundled art library"), true);
+  assert.equal(publicApi.includes("`v0.28.0` starts the real sprite / image rendering stage"), true);
+  assert.equal(publicApi.includes("adds no new public API"), true);
+  assert.equal(publicApi.includes("not a visual asset manager, atlas packer"), true);
+  assert.equal(readme.includes("`v0.28.0` Real Sprite / Image Rendering Sprint"), true);
+  assert.equal(readme.includes("asset 的 `source` 能真正抵达 Leafer render node"), true);
+});
+
 test("core package subpath can be imported by package name in Node", async () => {
   const core = await import(`${packageJson.name}/core`);
 

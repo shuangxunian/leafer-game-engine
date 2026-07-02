@@ -1222,3 +1222,7 @@
 收口 `0.27.x` pointer-first puzzle interaction 阶段，记录已经抽出的 pointer/picking/selection helper、example-owned puzzle rules，以及 galgame / 互动叙事仍待后续专门补齐：
 
 - [v0.27.6](version/v0.27.6.md)
+
+完成 pointer-first puzzle baseline 后，下一阶段建议补 1.0 前必须完成的真实 sprite / image rendering，让 asset `source` 能真正抵达 Leafer render node：
+
+- [v0.28.0](version/v0.28.0.md)
