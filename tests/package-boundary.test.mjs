@@ -585,7 +585,7 @@ test("framework extraction planning docs start from two examples without editor 
   assert.equal(publicApi.includes("gameplay snapshot pattern remains example-owned"), true);
   assert.equal(publicApi.includes("not a visual editor, prefab authoring tool, launcher, gallery"), true);
   assert.equal(readme.includes("`v0.26.5` Framework Extraction Closeout From Two Playable Examples"), true);
-  assert.equal(readme.includes("`0.26.x` framework extraction from two playable examples 阶段和 `0.27.x` pointer-first puzzle interaction 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.26.x` framework extraction from two playable examples 阶段、`0.27.x` pointer-first puzzle interaction 阶段和 `0.28.x` real sprite / image rendering 阶段都已经收口"), true);
   assert.equal(readme.includes("抽出了 `clampPositionToBounds(...)`、`attachActorSpriteView(...)` 和 `randomPositionInBounds(...)`"), true);
   assert.equal(readme.includes("gameplay snapshot 固定为 example-owned read-only 约定"), true);
   assert.equal(readme.includes("framework extraction closeout"), true);
@@ -617,7 +617,7 @@ test("pointer-first puzzle stage closes without swallowing puzzle rules", async 
   assert.equal(publicApi.includes("without adding new public package API"), true);
   assert.equal(publicApi.includes("Water-sort rules, drag/drop state, undo, hints"), true);
   assert.equal(readme.includes("`v0.27.6` Pointer-First Puzzle Interaction Stage Closeout"), true);
-  assert.equal(readme.includes("`0.27.x` pointer-first puzzle interaction 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.27.x` pointer-first puzzle interaction 阶段和 `0.28.x` real sprite / image rendering 阶段都已经收口"), true);
   assert.equal(readme.includes("GitHub 仓库已创建；当前不使用 GitHub CI"), true);
   assert.equal(frameworkSource.includes("pourTopColor"), false);
   assert.equal(frameworkSource.includes("isPourSortSolved"), false);
@@ -645,7 +645,7 @@ test("real sprite image rendering stage starts without asset authoring scope", a
   assert.equal(publicApi.includes("`v0.28.0` starts the real sprite / image rendering stage"), true);
   assert.equal(publicApi.includes("adds no new public API"), true);
   assert.equal(publicApi.includes("not a visual asset manager, atlas packer"), true);
-  assert.equal(readme.includes("`0.28.x` 开始补 1.0 前必须完成的真实 sprite / image rendering"), true);
+  assert.equal(readme.includes("`0.28.x` 已补齐 1.0 前必须完成的真实 sprite / image rendering baseline"), true);
   assert.equal(readme.includes("`RenderSpriteAsset.source`"), true);
 });
 
@@ -667,7 +667,7 @@ test("image-backed leafer sprite adapter baseline keeps asset authoring out of s
   assert.equal(publicApi.includes("`v0.28.1` adds the image-backed Leafer sprite adapter baseline"), true);
   assert.equal(publicApi.includes("without changing the public render contract"), true);
   assert.equal(publicApi.includes("not an asset authoring API"), true);
-  assert.equal(readme.includes("在 `v0.28.1` 让 `RenderSpriteAsset.source` 映射到 Leafer `Image.url`"), true);
+  assert.equal(readme.includes("`v0.28.1` 让 `RenderSpriteAsset.source` 映射到 Leafer `Image.url`"), true);
   assert.equal(readme.includes("映射到 Leafer `Image.url`"), true);
   assert.equal(leaferAdapter.includes("Image as LeaferImage"), true);
   assert.equal(leaferAdapter.includes("this.image.url = asset.source"), true);
@@ -692,7 +692,7 @@ test("asset loading to render asset handoff keeps asset tooling out of scope", a
   assert.equal(stage.includes("bundler plugin"), true);
   assert.equal(publicApi.includes("`v0.28.2` adds the asset loading to render asset handoff baseline"), true);
   assert.equal(publicApi.includes("Render nodes still receive stable asset metadata and `source` strings"), true);
-  assert.equal(readme.includes("在 `v0.28.2` 让 `AssetRegistry` 输出干净的 render asset 副本"), true);
+  assert.equal(readme.includes("`v0.28.2` 让 `AssetRegistry` 输出干净的 render asset 副本"), true);
   assert.equal(readme.includes("AssetRegistry` 输出干净的 render asset 副本"), true);
   assert.equal(assetsSource.includes("getSpriteRenderAsset"), true);
   assert.equal(assetsSource.includes("requireSpriteRenderAsset"), true);
@@ -718,7 +718,7 @@ test("dodge-blocks consumes source-backed sprites through render handoff", async
   assert.equal(stage.includes("visual asset manager, atlas packer"), true);
   assert.equal(publicApi.includes("`v0.28.3` adds no new public package API"), true);
   assert.equal(publicApi.includes("source-backed sprite assets through the existing `assets + assetId` render handoff"), true);
-  assert.equal(readme.includes("在 `v0.28.3` 让 `dodge-blocks` 示例通过 `assets + assetId` 消费 source-backed sprite assets"), true);
+  assert.equal(readme.includes("`v0.28.3` 让 `dodge-blocks` 示例通过 `assets + assetId` 消费 source-backed sprite assets"), true);
   assert.equal(readme.includes("通过 `assets + assetId` 消费 source-backed sprite assets"), true);
   assert.equal(sceneSource.includes("source: createSpriteDataUri"), true);
   assert.equal(sceneSource.includes("assetId: \"player\""), true);
@@ -760,9 +760,42 @@ test("sprite rendering package boundary ships without asset authoring scope", as
   assert.equal(publicApi.includes("`v0.28.4` adds no new public package API"), true);
   assert.equal(publicApi.includes("For the sprite rendering boundary"), true);
   assert.equal(publicApi.includes("docs/sprite-rendering.md"), true);
-  assert.equal(readme.includes("`v0.28.4` Sprite Rendering Package Boundary"), true);
+  assert.equal(readme.includes("`v0.28.4` 补齐 sprite rendering package boundary 文档"), true);
   assert.equal(readme.includes("sprite rendering package boundary 文档"), true);
   assert.equal(readme.includes("docs/sprite-rendering.md"), true);
+});
+
+test("real sprite image rendering stage closes at package boundary", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.28.0.md", import.meta.url), "utf8");
+  const closeoutPatch = await readFile(new URL("../docs/version/v0.28.5.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const frameworkSource = await readFile(new URL("../src/framework/index.ts", import.meta.url), "utf8");
+
+  assert.equal(roadmap.includes("version/v0.28.5.md"), true);
+  assert.equal(stage.includes("The `0.28.x` stage is complete through `v0.28.5`"), true);
+  assert.equal(stage.includes("v0.28.5.md"), true);
+  assert.equal(stage.includes("The stage is closed through `v0.28.5`"), true);
+  assert.equal(stage.includes("responsive Web runtime behavior"), true);
+  assert.equal(closeoutPatch.includes("Real Sprite / Image Rendering Stage Closeout"), true);
+  assert.equal(closeoutPatch.includes("No new public package API is added in this closeout"), true);
+  assert.equal(closeoutPatch.includes("`RenderSpriteAsset.source` reaches the native Leafer `Image.url`"), true);
+  assert.equal(closeoutPatch.includes("fill-only sprite assets keep the existing placeholder rectangle behavior"), true);
+  assert.equal(closeoutPatch.includes("AssetRegistry.getSpriteRenderAsset(id)"), true);
+  assert.equal(closeoutPatch.includes("SpriteAnimationSystem"), true);
+  assert.equal(closeoutPatch.includes("assets + assetId"), true);
+  assert.equal(closeoutPatch.includes("`/framework` DOM-free constraints"), true);
+  assert.equal(closeoutPatch.includes("visual asset management"), true);
+  assert.equal(closeoutPatch.includes("responsive Web runtime behavior across container sizes"), true);
+  assert.equal(publicApi.includes("`v0.28.5` closes the real sprite / image rendering stage"), true);
+  assert.equal(publicApi.includes("without adding new public package API"), true);
+  assert.equal(publicApi.includes("Responsive runtime behavior, drag/drop state"), true);
+  assert.equal(readme.includes("`v0.28.5` Real Sprite / Image Rendering Stage Closeout"), true);
+  assert.equal(readme.includes("`0.28.x` real sprite / image rendering 阶段都已经收口"), true);
+  assert.equal(readme.includes("下一阶段建议进入 `0.29.x` responsive Web runtime"), true);
+  assert.equal(frameworkSource.includes("HTMLImageElement"), false);
+  assert.equal(frameworkSource.includes("new Image("), false);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {

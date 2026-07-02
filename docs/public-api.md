@@ -114,6 +114,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.28.4` adds no new public package API. It publishes the sprite rendering package boundary in `docs/sprite-rendering.md`, covering `RenderSpriteAsset.source`, Leafer `Image.url` mapping, `AssetRegistry.getSpriteRenderAsset(id)` / `requireSpriteRenderAsset(id)`, `SpriteAnimationSystem`, `attachActorSpriteView(...)`, example-owned data URI or local static image-like sources, and the rule that `/framework` stays DOM-free by passing metadata and `source` strings rather than browser `Image` objects. This is package documentation and publish-boundary work, not an asset editor, visual asset manager, atlas packer, image cropper, CDN pipeline, bundled art library, launcher, gallery, marketplace, SDK wrapper, monetization, or publishing workflow.
 
+`v0.28.5` closes the real sprite / image rendering stage without adding new public package API. The stage leaves source-backed Leafer sprite rendering, copied asset-registry render handoff, source-backed example consumption, and package-facing sprite rendering boundary docs in place. Responsive runtime behavior, drag/drop state, UI/dialogue flow, quick-start game kit helpers, visual asset management, asset authoring, launcher/gallery surfaces, marketplace flows, SDK wrappers, monetization, and publishing workflows remain outside this stage.
+
 ---
 
 ## Package Entrypoints

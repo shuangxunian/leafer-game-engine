@@ -1242,3 +1242,7 @@
 继续补 sprite rendering 的 package-facing 边界文档：
 
 - [v0.28.4](version/v0.28.4.md)
+
+收口 `0.28.x` real sprite / image rendering 阶段：
+
+- [v0.28.5](version/v0.28.5.md)
