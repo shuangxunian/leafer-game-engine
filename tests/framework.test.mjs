@@ -30,6 +30,7 @@ import {
   createAudioRuntimeState,
   attachActorSpriteView,
   createRuntimeServices,
+  createSourceTargetSelectionState,
   createSpriteAnimationPlayback,
   defineAudioAsset,
   defineAudioChannel,
@@ -55,11 +56,16 @@ import {
   pickTopEntityAtPoint,
   pointInRect,
   randomPositionInBounds,
+  clearSourceTargetSelection,
+  clearSourceTargetTarget,
   createHudText,
   normalizeKeyboardKey,
   normalizePointerButton,
   pauseSpriteAnimationPlayback,
   resumeSpriteAnimationPlayback,
+  getSourceTargetSelectionPair,
+  selectSourceTargetSource,
+  selectSourceTargetTarget,
   stopSpriteAnimationPlayback,
   createLevelLayout,
   createTileMapLayerView,
@@ -1042,6 +1048,80 @@ test("entity hit testing can use collider rectangles, layers and filters", () =>
     ).map((hit) => hit.entityName),
     ["inactive"]
   );
+});
+
+test("source-target selection tracks source, target and immutable phase changes", () => {
+  const scene = new Scene("SourceTargetSelectionScene");
+  const bottleA = scene.world.createEntity("bottle-a");
+  const bottleB = scene.world.createEntity("bottle-b");
+  const bottleC = scene.world.createEntity("bottle-c");
+
+  const empty = createSourceTargetSelectionState();
+  assert.deepEqual(empty, { phase: "empty" });
+  assert.equal(getSourceTargetSelectionPair(empty), undefined);
+
+  const sourceSelected = selectSourceTargetSource(empty, bottleA);
+  assert.equal(empty.phase, "empty");
+  assert.equal(sourceSelected.phase, "source-selected");
+  assert.equal(sourceSelected.source?.entity, bottleA);
+  assert.equal(sourceSelected.source?.entityId, bottleA.id);
+  assert.equal(sourceSelected.source?.entityName, "bottle-a");
+  assert.equal(sourceSelected.target, undefined);
+
+  const targetSelected = selectSourceTargetTarget(sourceSelected, bottleB);
+  assert.equal(sourceSelected.phase, "source-selected");
+  assert.equal(sourceSelected.target, undefined);
+  assert.equal(targetSelected.phase, "target-selected");
+  assert.equal(targetSelected.source?.entity, bottleA);
+  assert.equal(targetSelected.target?.entity, bottleB);
+
+  const pair = getSourceTargetSelectionPair(targetSelected);
+  assert.equal(pair?.source.entity, bottleA);
+  assert.equal(pair?.target.entity, bottleB);
+  assert.notEqual(pair?.source, targetSelected.source);
+  assert.notEqual(pair?.target, targetSelected.target);
+
+  const nextSource = selectSourceTargetSource(targetSelected, bottleC);
+  assert.equal(nextSource.phase, "source-selected");
+  assert.equal(nextSource.source?.entity, bottleC);
+  assert.equal(nextSource.target, undefined);
+  assert.equal(targetSelected.target?.entity, bottleB);
+});
+
+test("source-target selection reports invalid target transitions clearly", () => {
+  const scene = new Scene("InvalidSourceTargetSelectionScene");
+  const source = scene.world.createEntity("source");
+  const target = scene.world.createEntity("target");
+
+  assert.throws(
+    () => selectSourceTargetTarget(createSourceTargetSelectionState(), target),
+    /Cannot select a source-target target before selecting a source/
+  );
+
+  const sourceSelected = selectSourceTargetSource(createSourceTargetSelectionState(), source);
+  assert.throws(
+    () => selectSourceTargetTarget(sourceSelected, source),
+    /Cannot select the same entity as both source and target/
+  );
+
+  const sameEntitySelection = selectSourceTargetTarget(sourceSelected, source, { allowSameEntity: true });
+  assert.equal(sameEntitySelection.phase, "target-selected");
+  assert.equal(sameEntitySelection.source?.entity, source);
+  assert.equal(sameEntitySelection.target?.entity, source);
+
+  const targetSelected = selectSourceTargetTarget(sourceSelected, target);
+  const targetCleared = clearSourceTargetTarget(targetSelected);
+  assert.deepEqual(targetCleared, {
+    phase: "source-selected",
+    source: {
+      entity: source,
+      entityId: source.id,
+      entityName: "source"
+    }
+  });
+  assert.notEqual(targetCleared.source, sourceSelected.source);
+  assert.deepEqual(clearSourceTargetSelection(), { phase: "empty" });
+  assert.deepEqual(clearSourceTargetTarget(createSourceTargetSelectionState()), { phase: "empty" });
 });
 
 test("tile map data contract copies layers and supports tile lookup", () => {

@@ -1194,3 +1194,19 @@
 `0.26.x` 最后建议收口：
 
 - [v0.26.5](version/v0.26.5.md)
+
+完成 `0.26.x` framework extraction 后，下一阶段建议用 pointer-first / UI-heavy 小游戏继续压力测试引擎包边界：
+
+- [v0.27.0](version/v0.27.0.md)
+
+第一批先补 pointer position runtime contract：
+
+- [v0.27.1](version/v0.27.1.md)
+
+继续补 pointer-first 小游戏常用的命中测试 / picking baseline：
+
+- [v0.27.2](version/v0.27.2.md)
+
+继续补 source-target selection state pattern，让点选来源再点目标的规则游戏有轻量状态基础：
+
+- [v0.27.3](version/v0.27.3.md)

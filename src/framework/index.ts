@@ -17,6 +17,7 @@ export * from "./runtime-services.js";
 export * from "./scene-config.js";
 export * from "./scheduler.js";
 export * from "./schema.js";
+export * from "./selection.js";
 export * from "./size.js";
 export * from "./state.js";
 export * from "./tile-map.js";
