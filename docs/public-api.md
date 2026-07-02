@@ -116,6 +116,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.28.5` closes the real sprite / image rendering stage without adding new public package API. The stage leaves source-backed Leafer sprite rendering, copied asset-registry render handoff, source-backed example consumption, and package-facing sprite rendering boundary docs in place. Responsive runtime behavior, drag/drop state, UI/dialogue flow, quick-start game kit helpers, visual asset management, asset authoring, launcher/gallery surfaces, marketplace flows, SDK wrappers, monetization, and publishing workflows remain outside this stage.
 
+`v0.29.0` starts the responsive Web runtime stage without adding new public package API. The stage focuses the next work on render scene resize behavior, browser resize bridging, pointer coordinate consistency after resize, DPR / high-density display documentation or minimal handling, and example verification across desktop and mobile-ish viewports. This remains runtime/adapter/example verification work, not a responsive page builder, visual layout editor, mobile app shell, WeChat SDK wrapper, launcher, gallery, marketplace, monetization, or publishing workflow.
+
 ---
 
 ## Package Entrypoints

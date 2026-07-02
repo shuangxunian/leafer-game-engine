@@ -1246,3 +1246,7 @@
 收口 `0.28.x` real sprite / image rendering 阶段：
 
 - [v0.28.5](version/v0.28.5.md)
+
+完成 real sprite / image rendering baseline 后，下一阶段建议补 responsive Web runtime，让容器尺寸变化、viewport 状态和 pointer 坐标转换在桌面和 mobile-ish 视口下保持一致：
+
+- [v0.29.0](version/v0.29.0.md)

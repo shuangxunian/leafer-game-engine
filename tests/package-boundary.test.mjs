@@ -791,11 +791,42 @@ test("real sprite image rendering stage closes at package boundary", async () =>
   assert.equal(publicApi.includes("`v0.28.5` closes the real sprite / image rendering stage"), true);
   assert.equal(publicApi.includes("without adding new public package API"), true);
   assert.equal(publicApi.includes("Responsive runtime behavior, drag/drop state"), true);
-  assert.equal(readme.includes("`v0.28.5` Real Sprite / Image Rendering Stage Closeout"), true);
+  assert.equal(readme.includes("并在 `v0.28.5` 收口该阶段"), true);
   assert.equal(readme.includes("`0.28.x` real sprite / image rendering 阶段都已经收口"), true);
-  assert.equal(readme.includes("下一阶段建议进入 `0.29.x` responsive Web runtime"), true);
+  assert.equal(readme.includes("`0.29.x` 开始补 1.0 前需要的 responsive Web runtime"), true);
   assert.equal(frameworkSource.includes("HTMLImageElement"), false);
   assert.equal(frameworkSource.includes("new Image("), false);
+});
+
+test("responsive web runtime stage starts without platform wrapper scope", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.29.0.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  assert.equal(roadmap.includes("version/v0.29.0.md"), true);
+  assert.equal(roadmap.includes("responsive Web runtime"), true);
+  assert.equal(stage.includes("Responsive Web Runtime Sprint"), true);
+  assert.equal(stage.includes("does not add public package"), true);
+  assert.equal(stage.includes("runtime behavior across browser container sizes"), true);
+  assert.equal(stage.includes("render scene viewport metadata"), true);
+  assert.equal(stage.includes("camera viewport/world coordinate conversion helpers"), true);
+  assert.equal(stage.includes("browser pointer position and pointer button bridges"), true);
+  assert.equal(stage.includes("Render Scene Resize Contract"), true);
+  assert.equal(stage.includes("Browser Resize Bridge"), true);
+  assert.equal(stage.includes("Pointer Coordinates After Resize"), true);
+  assert.equal(stage.includes("Example Responsive Verification"), true);
+  assert.equal(stage.includes("DPR / high-density display behavior"), true);
+  assert.equal(stage.includes("does not add a responsive page builder"), true);
+  assert.equal(stage.includes("mobile app shell"), true);
+  assert.equal(stage.includes("visual layout editor"), true);
+  assert.equal(stage.includes("WeChat SDK wrapper"), true);
+  assert.equal(publicApi.includes("`v0.29.0` starts the responsive Web runtime stage"), true);
+  assert.equal(publicApi.includes("without adding new public package API"), true);
+  assert.equal(publicApi.includes("pointer coordinate consistency after resize"), true);
+  assert.equal(readme.includes("`v0.29.0` Responsive Web Runtime Sprint"), true);
+  assert.equal(readme.includes("容器 resize、viewport 状态更新、resize 后 pointer 坐标一致性"), true);
+  assert.equal(readme.includes("不做 responsive page builder、mobile app shell、launcher、gallery、SDK wrapper 或发布平台"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
