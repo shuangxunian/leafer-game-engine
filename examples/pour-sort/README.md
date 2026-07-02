@@ -1,8 +1,8 @@
 # Pour Sort
 
-`pour-sort` is the first pointer-first puzzle example shell for `leaferGame`.
+`pour-sort` is the first pointer-first puzzle example for `leaferGame`.
 
-It validates the route, browser boot path, local pointer coordinates, rectangle/entity picking, and source-target selection state needed by pouring, sorting, grouping, matching, and click-first puzzle games.
+It validates the route, browser boot path, local pointer coordinates, rectangle/entity picking, source-target selection state, and a tiny example-owned bottle-pouring loop needed by pouring, sorting, grouping, matching, and click-first puzzle games.
 
 Current scope:
 
@@ -11,14 +11,16 @@ Current scope:
 - map pointer events to local game coordinates
 - pick bottle entities through framework hit testing
 - store source-target selection through framework selection helpers
-- update HUD text with the selected source or source-target pair
+- validate simple top-color pours in example-owned code
+- render liquid color segments
+- update HUD text with selection, move count, invalid move feedback, and solved state
+- expose a read-only gameplay snapshot
 
-Out of scope for this shell:
+Out of scope for this example:
 
-- water-sort rules
-- moving liquid segments
+- generic puzzle rules inside the engine package
 - undo, hints, score, progression, or level authoring
 - visual editor selection handles
 - launcher, gallery, marketplace, SDK, account, ads, or publishing workflows
 
-The next slice can turn this shell into a small playable loop while keeping exact puzzle rules example-owned.
+The exact puzzle rules stay example-owned. The engine package supplies the runtime primitives; it does not become a water-sort framework.

@@ -1,9 +1,10 @@
 import { Scene, System } from "@shuangxunian/leafer-game-engine/core";
 import type { Entity } from "@shuangxunian/leafer-game-engine/core";
-import type { RenderAdapter, RenderScene, RenderText } from "@shuangxunian/leafer-game-engine/adapter";
+import type { RenderAdapter, RenderScene, RenderSprite, RenderText } from "@shuangxunian/leafer-game-engine/adapter";
 import {
   InputSystem,
   attachActorSpriteView,
+  clearSourceTargetSelection,
   createHudText,
   createSourceTargetSelectionState,
   defineActorTemplate,
@@ -21,24 +22,51 @@ const BOTTLE_HEIGHT = 168;
 const BOTTLE_GAP = 28;
 const BOTTLE_TOP = 250;
 const BOTTLE_LAYER = "bottle";
+const BOTTLE_CAPACITY = 2;
+const LIQUID_HEIGHT = 58;
+const LIQUID_INSET = 10;
 
 const BOTTLES = [
-  { id: "bottle-a", label: "A", fill: "#6cb7ff" },
-  { id: "bottle-b", label: "B", fill: "#ffcf7a" },
-  { id: "bottle-c", label: "C", fill: "#91d18b" },
-  { id: "bottle-d", label: "D", fill: "#d69df8" }
+  { id: "bottle-a", label: "A", initial: ["blue", "yellow"] },
+  { id: "bottle-b", label: "B", initial: ["yellow", "blue"] },
+  { id: "bottle-c", label: "C", initial: [] },
+  { id: "bottle-d", label: "D", initial: [] }
 ] as const;
 
+const LIQUID_COLORS = {
+  blue: "#6cb7ff",
+  yellow: "#ffcf7a"
+} as const;
+
+type LiquidColor = keyof typeof LIQUID_COLORS;
+type PuzzlePhase = "playing" | "won";
+
+type BottleRuntime = {
+  entity: Entity;
+  label: string;
+  colors: LiquidColor[];
+  x: number;
+  y: number;
+};
+
 export type PourSortGameplaySnapshot = Readonly<{
-  bottleNames: string[];
-  phase: SourceTargetSelectionState["phase"];
+  bottles: ReadonlyArray<Readonly<{
+    colors: readonly LiquidColor[];
+    name: string;
+  }>>;
+  moves: number;
+  puzzlePhase: PuzzlePhase;
+  selectionPhase: SourceTargetSelectionState["phase"];
   sourceName?: string;
   targetName?: string;
 }>;
 
 export class PourSortScene extends Scene {
-  private readonly bottleEntities: Entity[] = [];
+  private readonly bottles: BottleRuntime[] = [];
+  private readonly liquidNodes: RenderSprite[] = [];
   private selection = createSourceTargetSelectionState();
+  private moves = 0;
+  private puzzlePhase: PuzzlePhase = "playing";
   private statusNode?: RenderText;
   private hintNode?: RenderText;
   private selectionSystem?: PourSortSelectionSystem;
@@ -52,8 +80,13 @@ export class PourSortScene extends Scene {
 
   getGameplaySnapshot(): PourSortGameplaySnapshot {
     return {
-      bottleNames: this.bottleEntities.map((entity) => entity.name),
-      phase: this.selection.phase,
+      bottles: this.bottles.map((bottle) => ({
+        colors: [...bottle.colors],
+        name: bottle.entity.name
+      })),
+      moves: this.moves,
+      puzzlePhase: this.puzzlePhase,
+      selectionPhase: this.selection.phase,
       sourceName: this.selection.source?.entityName,
       targetName: this.selection.target?.entityName
     };
@@ -69,14 +102,14 @@ export class PourSortScene extends Scene {
     this.selectionSystem = new PourSortSelectionSystem(
       this,
       input,
-      this.bottleEntities,
+      this.bottles.map((bottle) => bottle.entity),
       () => this.selection,
       (selection) => {
-        this.selection = selection;
-        this.syncHud();
+        this.applySelection(selection);
       }
     );
     this.addSystem(this.selectionSystem);
+    this.renderLiquids();
     this.syncHud();
   }
 
@@ -106,13 +139,19 @@ export class PourSortScene extends Scene {
         renderScene: this.renderScene,
         asset: {
           id: bottle.id,
-          fill: bottle.fill,
+          fill: "#244056",
           width: BOTTLE_WIDTH,
           height: BOTTLE_HEIGHT,
           cornerRadius: 18
         }
       });
-      this.bottleEntities.push(entity);
+      this.bottles.push({
+        entity,
+        label: bottle.label,
+        colors: [...bottle.initial] as LiquidColor[],
+        x: startX + index * (BOTTLE_WIDTH + BOTTLE_GAP),
+        y: BOTTLE_TOP
+      });
 
       createHudText(this.renderAdapter, this.renderScene, {
         text: bottle.label,
@@ -144,22 +183,94 @@ export class PourSortScene extends Scene {
     });
   }
 
-  private syncHud(): void {
+  private applySelection(selection: SourceTargetSelectionState): void {
+    if (this.puzzlePhase === "won") {
+      this.selection = clearSourceTargetSelection();
+      this.syncHud();
+      return;
+    }
+
+    const pair = getSourceTargetSelectionPair(selection);
+    if (!pair) {
+      this.selection = selection;
+      this.syncHud();
+      return;
+    }
+
+    const source = this.findBottle(pair.source.entityId);
+    const target = this.findBottle(pair.target.entityId);
+    if (!source || !target) {
+      this.selection = clearSourceTargetSelection();
+      this.syncHud("Selected bottle disappeared.");
+      return;
+    }
+
+    const result = pourTopColor(source.colors, target.colors, BOTTLE_CAPACITY);
+    this.selection = clearSourceTargetSelection();
+
+    if (!result.ok) {
+      this.syncHud(result.reason);
+      return;
+    }
+
+    source.colors = result.source;
+    target.colors = result.target;
+    this.moves += 1;
+    this.puzzlePhase = isPourSortSolved(this.bottles.map((bottle) => bottle.colors), BOTTLE_CAPACITY)
+      ? "won"
+      : "playing";
+    this.renderLiquids();
+    this.syncHud(`Poured ${result.color} from ${source.label} to ${target.label}.`);
+  }
+
+  private syncHud(message?: string): void {
+    if (this.puzzlePhase === "won") {
+      this.statusNode?.setText(`Solved in ${this.moves} moves.`);
+      this.hintNode?.setText("The puzzle loop is example-owned; engine helpers only supplied input, picking, and selection.");
+      return;
+    }
+
     const pair = getSourceTargetSelectionPair(this.selection);
     if (pair) {
       this.statusNode?.setText(`Source ${pair.source.entityName} -> target ${pair.target.entityName}`);
-      this.hintNode?.setText("Selection pair captured. Pour rules land in the next gameplay slice.");
+      this.hintNode?.setText(message ?? "Trying the move.");
       return;
     }
 
     if (this.selection.source) {
       this.statusNode?.setText(`Source ${this.selection.source.entityName} selected`);
-      this.hintNode?.setText("Pick another bottle as the target.");
+      this.hintNode?.setText(message ?? "Pick another bottle as the target.");
       return;
     }
 
-    this.statusNode?.setText("Pick a source bottle.");
-    this.hintNode?.setText("This shell validates pointer position, picking, and source-target selection only.");
+    this.statusNode?.setText(`Moves ${this.moves}. Pick a source bottle.`);
+    this.hintNode?.setText(message ?? "Pour matching top colors into empty or matching bottles.");
+  }
+
+  private renderLiquids(): void {
+    this.liquidNodes.forEach((node) => node.destroy());
+    this.liquidNodes.length = 0;
+
+    for (const bottle of this.bottles) {
+      bottle.colors.forEach((color, index) => {
+        const node = this.renderAdapter.createSprite();
+        node.setAsset({
+          id: `${bottle.entity.name}-${color}-${index}`,
+          fill: LIQUID_COLORS[color],
+          width: BOTTLE_WIDTH - LIQUID_INSET * 2,
+          height: LIQUID_HEIGHT,
+          cornerRadius: 10
+        });
+        node.x = bottle.x + LIQUID_INSET;
+        node.y = bottle.y + BOTTLE_HEIGHT - LIQUID_INSET - LIQUID_HEIGHT * (index + 1);
+        this.renderScene.layers.world.addChild(node);
+        this.liquidNodes.push(node);
+      });
+    }
+  }
+
+  private findBottle(entityId: number): BottleRuntime | undefined {
+    return this.bottles.find((bottle) => bottle.entity.id === entityId);
   }
 }
 
@@ -201,4 +312,54 @@ class PourSortSelectionSystem extends System {
 
     this.setSelection(selectSourceTargetTarget(selection, hit.entity));
   }
+}
+
+type PourResult =
+  | Readonly<{
+      color: LiquidColor;
+      ok: true;
+      source: LiquidColor[];
+      target: LiquidColor[];
+    }>
+  | Readonly<{
+      ok: false;
+      reason: string;
+    }>;
+
+export function pourTopColor(
+  source: readonly LiquidColor[],
+  target: readonly LiquidColor[],
+  capacity = BOTTLE_CAPACITY
+): PourResult {
+  if (source.length === 0) {
+    return { ok: false, reason: "Source bottle is empty." };
+  }
+
+  if (target.length >= capacity) {
+    return { ok: false, reason: "Target bottle is full." };
+  }
+
+  const color = source[source.length - 1];
+  const targetTop = target[target.length - 1];
+  if (targetTop !== undefined && targetTop !== color) {
+    return { ok: false, reason: "Top colors do not match." };
+  }
+
+  return {
+    color,
+    ok: true,
+    source: source.slice(0, -1),
+    target: [...target, color]
+  };
+}
+
+export function isPourSortSolved(
+  bottles: readonly (readonly LiquidColor[])[],
+  capacity = BOTTLE_CAPACITY
+): boolean {
+  return bottles.every((bottle) => {
+    if (bottle.length === 0) return true;
+    if (bottle.length !== capacity) return false;
+    return bottle.every((color) => color === bottle[0]);
+  });
 }

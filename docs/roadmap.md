@@ -1214,3 +1214,7 @@
 继续补第三个 pointer-first puzzle example shell，用路由和示例骨架验证已有 pointer/picking/selection 能力：
 
 - [v0.27.4](version/v0.27.4.md)
+
+继续把 pointer puzzle shell 做到可玩闭环，但规则仍留在 example-owned 代码里：
+
+- [v0.27.5](version/v0.27.5.md)

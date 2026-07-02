@@ -98,6 +98,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.27.4` adds no new public package API. It adds `examples/pour-sort` as a routed pointer-first puzzle shell that consumes existing package APIs for browser pointer position, pointer button input, entity picking, source-target selection state, actor view attachment, and HUD text. The route is local example/build coverage for a future puzzle loop; water-sort rules, move validation, liquid rendering, undo, hints, level authoring, visual editor selection handles, launcher/gallery surfaces, marketplace flows, and platform SDK integration remain outside the engine package.
 
+`v0.27.5` adds no new public package API. It turns `examples/pour-sort` into a minimal playable pointer puzzle loop with example-owned bottle state, top-color pour validation, rendered liquid segments, move count, invalid-move feedback, solved-state detection, and a read-only gameplay snapshot. This proves existing pointer position, entity picking, selection state, actor view, and HUD helpers can support a simple bottle-pouring-style browser game while keeping exact puzzle rules, level progression, undo, hints, authoring workflows, and editor UI outside the engine package.
+
 ---
 
 ## Package Entrypoints

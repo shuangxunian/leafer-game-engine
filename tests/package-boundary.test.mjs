@@ -816,7 +816,7 @@ test("collect-stars example gameplay loop is routed and package-facing", async (
   assert.equal(docs.includes("不提供编辑器、示例市场、可视化 launcher"), true);
 });
 
-test("pour-sort example shell is routed and package-facing", async () => {
+test("pour-sort example playable loop is routed and package-facing", async () => {
   const index = await readFile(new URL("../index.html", import.meta.url), "utf8");
   const examplesEntry = await readFile(new URL("main.ts", examplesRootUrl), "utf8");
   const sceneSource = await readFile(new URL("pour-sort-scene.ts", pourSortExampleUrl), "utf8");
@@ -834,11 +834,18 @@ test("pour-sort example shell is routed and package-facing", async () => {
   assert.equal(sceneSource.includes("selectSourceTargetSource"), true);
   assert.equal(sceneSource.includes("selectSourceTargetTarget"), true);
   assert.equal(sceneSource.includes("getGameplaySnapshot"), true);
+  assert.equal(sceneSource.includes("pourTopColor"), true);
+  assert.equal(sceneSource.includes("isPourSortSolved"), true);
+  assert.equal(sceneSource.includes("renderLiquids"), true);
+  assert.equal(sceneSource.includes("puzzlePhase"), true);
+  assert.equal(sceneSource.includes("moves"), true);
   assert.equal(bootSource.includes("BrowserPointerPositionBridge"), true);
   assert.equal(bootSource.includes("BrowserPointerButtonBridge"), true);
   assert.equal(bootSource.includes("getBoundingClientRect"), true);
-  assert.equal(docs.includes("pointer-first puzzle example shell"), true);
-  assert.equal(docs.includes("water-sort rules"), true);
+  assert.equal(docs.includes("pointer-first puzzle example"), true);
+  assert.equal(docs.includes("validate simple top-color pours in example-owned code"), true);
+  assert.equal(docs.includes("render liquid color segments"), true);
+  assert.equal(docs.includes("exact puzzle rules stay example-owned"), true);
   assert.equal(docs.includes("visual editor selection handles"), true);
 });
 
@@ -885,6 +892,8 @@ test("playable examples keep gameplay snapshots example-owned and read-only", as
   assert.equal(collectBoot.includes("gameplay: scene.getGameplaySnapshot()"), true);
   assert.equal(pourSortScene.includes("export type PourSortGameplaySnapshot"), true);
   assert.equal(pourSortScene.includes("getGameplaySnapshot(): PourSortGameplaySnapshot"), true);
+  assert.equal(pourSortScene.includes("puzzlePhase"), true);
+  assert.equal(pourSortScene.includes("selectionPhase"), true);
   assert.equal(pourSortBoot.includes("gameplay: scene.getGameplaySnapshot()"), true);
   assert.equal(collectGameSystem.includes("setGameplaySnapshot"), false);
   assert.equal(collectScene.includes("setGameplaySnapshot"), false);
