@@ -104,6 +104,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.28.0` starts the real sprite / image rendering stage. This planning pass adds no new public API; it focuses the next work on making sprite asset `source` values visibly render through the Leafer adapter and proving image-like sprite consumption in examples. The stage remains adapter/runtime/example integration work, not a visual asset manager, atlas packer, sprite editor, image cropper, asset browser UI, CDN pipeline, bundled art library, marketplace, launcher, gallery, SDK wrapper, monetization, or publishing workflow.
 
+`v0.28.1` adds the image-backed Leafer sprite adapter baseline without changing the public render contract. `RenderSpriteAsset.source` now maps to the native Leafer `Image.url`, while fill-only assets keep the existing fill/width/height/cornerRadius placeholder behavior. This is adapter behavior behind the existing `RenderSprite.setAsset(...)` surface; it is not an asset authoring API, visual asset manager, atlas packer, sprite editor, image cropper, bundled asset library, launcher, gallery, marketplace, SDK wrapper, monetization, or publishing workflow.
+
 ---
 
 ## Package Entrypoints

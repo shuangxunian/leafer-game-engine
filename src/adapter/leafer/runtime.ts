@@ -1,4 +1,4 @@
-import { Group, Leafer, Rect, Text } from "leafer-ui";
+import { Group, Image as LeaferImage, Leafer, Text } from "leafer-ui";
 import type {
   RenderAdapter,
   RenderContainer,
@@ -118,23 +118,29 @@ class LeaferContainerWrapper extends LeaferNodeWrapper implements RenderContaine
 }
 
 class LeaferSpriteWrapper extends LeaferNodeWrapper implements RenderSprite {
-  constructor(private readonly rect: Rect) {
-    super(rect);
-    this.rect.width = 52;
-    this.rect.height = 52;
-    this.rect.cornerRadius = 14;
+  constructor(private readonly image: LeaferImage) {
+    super(image);
+    this.image.width = 52;
+    this.image.height = 52;
+    this.image.cornerRadius = 14;
   }
 
   setAsset(asset: string | RenderSpriteAsset): void {
     if (typeof asset === "string") {
-      this.rect.fill = asset === "player" ? "#ffcf7a" : "#6cb7ff";
+      this.image.url = "";
+      this.image.fill = asset === "player" ? "#ffcf7a" : "#6cb7ff";
       return;
     }
 
-    this.rect.fill = asset.fill ?? "#6cb7ff";
-    this.rect.width = asset.width ?? this.rect.width;
-    this.rect.height = asset.height ?? this.rect.height;
-    this.rect.cornerRadius = asset.cornerRadius ?? this.rect.cornerRadius;
+    this.image.url = "";
+    this.image.fill = asset.fill ?? "#6cb7ff";
+    this.image.width = asset.width ?? this.image.width;
+    this.image.height = asset.height ?? this.image.height;
+    this.image.cornerRadius = asset.cornerRadius ?? this.image.cornerRadius;
+
+    if (asset.source) {
+      this.image.url = asset.source;
+    }
   }
 }
 
@@ -227,7 +233,7 @@ export class LeaferRenderAdapter implements RenderAdapter {
   }
 
   createSprite(assetId = ""): RenderSprite {
-    const sprite = new LeaferSpriteWrapper(new Rect());
+    const sprite = new LeaferSpriteWrapper(new LeaferImage());
     sprite.setAsset(assetId);
     return sprite;
   }

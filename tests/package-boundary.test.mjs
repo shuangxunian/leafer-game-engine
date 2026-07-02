@@ -644,8 +644,32 @@ test("real sprite image rendering stage starts without asset authoring scope", a
   assert.equal(publicApi.includes("`v0.28.0` starts the real sprite / image rendering stage"), true);
   assert.equal(publicApi.includes("adds no new public API"), true);
   assert.equal(publicApi.includes("not a visual asset manager, atlas packer"), true);
-  assert.equal(readme.includes("`v0.28.0` Real Sprite / Image Rendering Sprint"), true);
-  assert.equal(readme.includes("asset 的 `source` 能真正抵达 Leafer render node"), true);
+  assert.equal(readme.includes("`0.28.x` 开始补 1.0 前必须完成的真实 sprite / image rendering"), true);
+  assert.equal(readme.includes("`RenderSpriteAsset.source`"), true);
+});
+
+test("image-backed leafer sprite adapter baseline keeps asset authoring out of scope", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.28.1.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const leaferAdapter = await readFile(new URL("../src/adapter/leafer/runtime.ts", import.meta.url), "utf8");
+
+  assert.equal(roadmap.includes("version/v0.28.1.md"), true);
+  assert.equal(stage.includes("Image-Backed Leafer Sprite Adapter Baseline"), true);
+  assert.equal(stage.includes("maps `RenderSpriteAsset.source` to the native Leafer `Image.url`"), true);
+  assert.equal(stage.includes("fill/width/height/cornerRadius placeholder behavior"), true);
+  assert.equal(stage.includes("clears the previous image URL"), true);
+  assert.equal(stage.includes("does not add or change public package API"), true);
+  assert.equal(stage.includes("visual asset manager, atlas packer"), true);
+  assert.equal(stage.includes("asset loading to render asset handoff"), true);
+  assert.equal(publicApi.includes("`v0.28.1` adds the image-backed Leafer sprite adapter baseline"), true);
+  assert.equal(publicApi.includes("without changing the public render contract"), true);
+  assert.equal(publicApi.includes("not an asset authoring API"), true);
+  assert.equal(readme.includes("`v0.28.1` Image-Backed Leafer Sprite Adapter Baseline"), true);
+  assert.equal(readme.includes("映射到 Leafer `Image.url`"), true);
+  assert.equal(leaferAdapter.includes("Image as LeaferImage"), true);
+  assert.equal(leaferAdapter.includes("this.image.url = asset.source"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {

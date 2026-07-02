@@ -1226,3 +1226,7 @@
 完成 pointer-first puzzle baseline 后，下一阶段建议补 1.0 前必须完成的真实 sprite / image rendering，让 asset `source` 能真正抵达 Leafer render node：
 
 - [v0.28.0](version/v0.28.0.md)
+
+第一批先补 Leafer adapter 的 image-backed sprite baseline：
+
+- [v0.28.1](version/v0.28.1.md)

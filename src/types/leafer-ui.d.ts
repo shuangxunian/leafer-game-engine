@@ -43,6 +43,10 @@ declare module "leafer-ui" {
     destroy(): void;
   }
 
+  export class Image extends Rect {
+    url?: string;
+  }
+
   export class Text {
     x?: number;
     y?: number;
