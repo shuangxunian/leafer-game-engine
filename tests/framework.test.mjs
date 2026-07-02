@@ -10,6 +10,7 @@ import {
   BrowserPointerButtonBridge,
   BrowserPointerPositionBridge,
   CameraSystem,
+  ColliderComponent,
   EventBus,
   GameFlow,
   InputActionMap,
@@ -42,13 +43,17 @@ import {
   drainAudioRuntimeOperations,
   getAudioRuntime,
   getAudioPlayback,
+  getEntityHitRect,
   getPointerButtonInputId,
   getSpriteAnimationPlaybackFrameId,
   getSpriteAnimationPlaybackFrameIndex,
   getRuntimeServices,
+  hitTestEntitiesAtPoint,
   isSpriteCapableRenderNode,
   clampPositionToBounds,
   limitMovementVector,
+  pickTopEntityAtPoint,
+  pointInRect,
   randomPositionInBounds,
   createHudText,
   normalizeKeyboardKey,
@@ -938,6 +943,105 @@ test("browser pointer button bridge handles secondary, auxiliary, cancel, blur a
 
   target.dispatch("pointerdown", { button: 0 });
   assert.equal(input.isPressed(getPointerButtonInputId("primary")), false);
+});
+
+test("point hit testing includes rect edges and reports invalid inputs", () => {
+  const rect = { x: 10, y: 20, width: 30, height: 40 };
+
+  assert.equal(pointInRect({ x: 10, y: 20 }, rect), true);
+  assert.equal(pointInRect({ x: 40, y: 60 }, rect), true);
+  assert.equal(pointInRect({ x: 41, y: 60 }, rect), false);
+  assert.equal(pointInRect({ x: 40, y: 61 }, rect), false);
+
+  assert.throws(
+    () => pointInRect({ x: Number.NaN, y: 20 }, rect),
+    /Hit test point x must be a finite number/
+  );
+  assert.throws(
+    () => pointInRect({ x: 10, y: 20 }, { x: 0, y: 0, width: -1, height: 10 }),
+    /Hit test rect width must be a finite number greater than or equal to 0/
+  );
+});
+
+test("entity hit testing uses transform and size by default", () => {
+  const scene = new Scene("EntityHitTestScene");
+  const first = scene.world.createEntity("first");
+  const firstTransform = first.addComponent(new TransformComponent());
+  firstTransform.x = 10;
+  firstTransform.y = 20;
+  first.addComponent(new SizeComponent(30, 40));
+
+  const second = scene.world.createEntity("second");
+  const secondTransform = second.addComponent(new TransformComponent());
+  secondTransform.x = 15;
+  secondTransform.y = 25;
+  second.addComponent(new SizeComponent(20, 20));
+
+  const misses = scene.world.createEntity("missing-size");
+  misses.addComponent(new TransformComponent());
+
+  assert.deepEqual(getEntityHitRect(first), {
+    x: 10,
+    y: 20,
+    width: 30,
+    height: 40
+  });
+
+  const hits = hitTestEntitiesAtPoint({ x: 20, y: 30 }, scene.world.getEntities());
+  assert.deepEqual(hits.map((hit) => hit.entityName), ["first", "second"]);
+
+  hits[0].rect.x = 999;
+  assert.deepEqual(getEntityHitRect(first), {
+    x: 10,
+    y: 20,
+    width: 30,
+    height: 40
+  });
+
+  assert.equal(pickTopEntityAtPoint({ x: 20, y: 30 }, scene.world.getEntities())?.entityName, "second");
+  assert.equal(hitTestEntitiesAtPoint({ x: 200, y: 300 }, scene.world.getEntities()).length, 0);
+});
+
+test("entity hit testing can use collider rectangles, layers and filters", () => {
+  const scene = new Scene("ColliderHitTestScene");
+  const slot = scene.world.createEntity("slot");
+  const slotTransform = slot.addComponent(new TransformComponent());
+  slotTransform.x = 100;
+  slotTransform.y = 120;
+  slot.addComponent(new SizeComponent(50, 50));
+  slot.addComponent(new ColliderComponent("slot", 30, 20, 5, 6));
+
+  const inactive = scene.world.createEntity("inactive");
+  const inactiveTransform = inactive.addComponent(new TransformComponent());
+  inactiveTransform.x = 105;
+  inactiveTransform.y = 126;
+  inactive.addComponent(new SizeComponent(30, 20));
+  inactive.deactivate();
+
+  assert.deepEqual(getEntityHitRect(slot, { rectSource: "collider" }), {
+    x: 105,
+    y: 126,
+    width: 30,
+    height: 20
+  });
+  assert.equal(getEntityHitRect(slot, { rectSource: "collider", layer: "piece" }), undefined);
+
+  assert.deepEqual(
+    hitTestEntitiesAtPoint(
+      { x: 106, y: 127 },
+      scene.world.entities,
+      { rectSource: "collider", layer: "slot" }
+    ).map((hit) => hit.entityName),
+    ["slot"]
+  );
+  assert.deepEqual(
+    hitTestEntitiesAtPoint(
+      { x: 106, y: 127 },
+      scene.world.entities,
+      { includeInactive: true, filter: (entity) => entity.name !== "slot" }
+    ).map((hit) => hit.entityName),
+    ["inactive"]
+  );
 });
 
 test("tile map data contract copies layers and supports tile lookup", () => {
