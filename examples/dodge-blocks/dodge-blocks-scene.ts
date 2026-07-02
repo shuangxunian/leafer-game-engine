@@ -311,7 +311,8 @@ export class DodgeBlocksScene extends Scene {
     attachActorSpriteView(player, {
       renderAdapter: this.renderAdapter,
       renderScene: this.renderScene,
-      asset: this.assets.requireSprite("player")
+      assets: this.assets,
+      assetId: "player"
     });
     player.addComponent(new SpriteAnimationComponent("player-idle"));
 

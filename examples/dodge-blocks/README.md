@@ -187,7 +187,7 @@ browser runtime
 - player 的 `transform`、`size`、`collider` 来自 scene config entity template
 - player 的基础 entity template 由 framework `defineActorTemplate(...)` 组合，示例不用手写重复的 transform / size / collider 声明
 - player 静态基础数据通过 `bootstrapSceneFromConfig(..., { validateBeforeBootstrap: true })` 创建
-- player 和 hazard 的 sprite-backed render view 通过 framework `attachActorSpriteView(...)` 装配
+- player 和 hazard 的 source-backed sprite assets 通过 framework `attachActorSpriteView(...)` 的 `assets + assetId` render handoff 装配成 sprite-backed render view
 - player 初始位置和重置位置读取 scene config level layout 的 `player-start` spawn
 - player movement bounds 读取 scene config level layout 的 `playfield` region
 - player 的 `ViewComponent`、`PlayerControllerComponent` 和 `SpriteAnimationComponent` 仍在代码中装配
@@ -201,6 +201,6 @@ browser runtime
 - audio runtime 使用 framework `AudioRuntimeSystem`，browser playback 使用 runtime `BrowserAudioPlaybackAdapter`，示例只证明 opt-in playback consumption，不引入 Web Audio graph、mixer、音频编辑器或音频内容生产能力
 - hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度，不适合放进静态 scene config；scene config 只声明 `hazard-spawn` region 作为运行时参考数据
 
-这个示例不会把 level/map 声明变成编辑器、地图编辑器、tileset 管理器或自动生成器。它只是证明下游游戏可以显式读取引擎返回的 `TileMap` / `LevelLayout` helper，并用 framework 的 runtime helper 或自己的游戏代码决定如何使用这些运行时数据。
+这个示例不会把 level/map 声明变成编辑器、地图编辑器、tileset 管理器或自动生成器；source-backed sprite asset consumption 也不是素材编辑器、素材市场或发布管线。它只是证明下游游戏可以显式读取引擎返回的 `TileMap` / `LevelLayout` helper，并用 framework 的 runtime helper 或自己的游戏代码决定如何使用这些运行时数据。
 
 后续新增资源加载、数据驱动场景、关卡配置和 runtime tooling 能力时，这个示例可以继续作为集成验证样例。

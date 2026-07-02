@@ -691,13 +691,44 @@ test("asset loading to render asset handoff keeps asset tooling out of scope", a
   assert.equal(stage.includes("bundler plugin"), true);
   assert.equal(publicApi.includes("`v0.28.2` adds the asset loading to render asset handoff baseline"), true);
   assert.equal(publicApi.includes("Render nodes still receive stable asset metadata and `source` strings"), true);
-  assert.equal(readme.includes("`v0.28.2` Asset Loading To Render Asset Handoff"), true);
+  assert.equal(readme.includes("在 `v0.28.2` 让 `AssetRegistry` 输出干净的 render asset 副本"), true);
   assert.equal(readme.includes("AssetRegistry` 输出干净的 render asset 副本"), true);
   assert.equal(assetsSource.includes("getSpriteRenderAsset"), true);
   assert.equal(assetsSource.includes("requireSpriteRenderAsset"), true);
   assert.equal(animationSource.includes("requireSpriteRenderAsset(frame.spriteId)"), true);
   assert.equal(factorySource.includes("assetId?: string"), true);
   assert.equal(factorySource.includes("requireSpriteRenderAsset(options.assetId)"), true);
+});
+
+test("dodge-blocks consumes source-backed sprites through render handoff", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.28.3.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const sceneSource = await readFile(new URL("dodge-blocks-scene.ts", dodgeBlocksExampleUrl), "utf8");
+  const factorySource = await readFile(new URL("factories.ts", dodgeBlocksExampleUrl), "utf8");
+  const docs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
+
+  assert.equal(roadmap.includes("version/v0.28.3.md"), true);
+  assert.equal(stage.includes("Example Image Asset Consumption"), true);
+  assert.equal(stage.includes("generated image-like data URI `source` values"), true);
+  assert.equal(stage.includes("no longer passes registry-only sprite records directly"), true);
+  assert.equal(stage.includes("does not add public package API"), true);
+  assert.equal(stage.includes("visual asset manager, atlas packer"), true);
+  assert.equal(publicApi.includes("`v0.28.3` adds no new public package API"), true);
+  assert.equal(publicApi.includes("source-backed sprite assets through the existing `assets + assetId` render handoff"), true);
+  assert.equal(readme.includes("`v0.28.3` Example Image Asset Consumption"), true);
+  assert.equal(readme.includes("通过 `assets + assetId` 消费 source-backed sprite assets"), true);
+  assert.equal(sceneSource.includes("source: createSpriteDataUri"), true);
+  assert.equal(sceneSource.includes("assetId: \"player\""), true);
+  assert.equal(sceneSource.includes("assets: this.assets"), true);
+  assert.equal(sceneSource.includes("asset: this.assets.requireSprite(\"player\")"), false);
+  assert.equal(factorySource.includes("assetId: \"hazard\""), true);
+  assert.equal(factorySource.includes("assets"), true);
+  assert.equal(factorySource.includes("assets?.getSprite(\"hazard\")"), false);
+  assert.equal(docs.includes("source-backed sprite assets"), true);
+  assert.equal(docs.includes("assets + assetId"), true);
+  assert.equal(docs.includes("不是素材编辑器、素材市场或发布管线"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {

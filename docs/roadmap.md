@@ -1234,3 +1234,7 @@
 下一步补 asset loading 到 render asset 的明确 handoff：
 
 - [v0.28.2](version/v0.28.2.md)
+
+继续用示例证明 source-backed sprite asset consumption：
+
+- [v0.28.3](version/v0.28.3.md)

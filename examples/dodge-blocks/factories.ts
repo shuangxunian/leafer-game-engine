@@ -31,7 +31,8 @@ export const hazardFactory = defineEntityFactory<HazardFactoryOptions>(
     attachActorSpriteView(hazard, {
       renderAdapter,
       renderScene,
-      asset: assets?.getSprite("hazard") ?? "hazard"
+      assets,
+      assetId: "hazard"
     });
 
     return hazard;
