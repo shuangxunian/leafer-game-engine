@@ -1218,3 +1218,7 @@
 继续把 pointer puzzle shell 做到可玩闭环，但规则仍留在 example-owned 代码里：
 
 - [v0.27.5](version/v0.27.5.md)
+
+收口 `0.27.x` pointer-first puzzle interaction 阶段，记录已经抽出的 pointer/picking/selection helper、example-owned puzzle rules，以及 galgame / 互动叙事仍待后续专门补齐：
+
+- [v0.27.6](version/v0.27.6.md)

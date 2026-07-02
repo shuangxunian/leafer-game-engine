@@ -495,7 +495,7 @@ test("second playable example stage docs are discoverable from roadmap and READM
   assert.equal(publicApi.includes("package-style imports"), true);
   assert.equal(publicApi.includes("not an editor, example marketplace, visual launcher product"), true);
   assert.equal(readme.includes("`v0.26.5` Framework Extraction Closeout From Two Playable Examples"), true);
-  assert.equal(readme.includes("`dodge-blocks` 与 `collect-stars` 两个 playable examples"), true);
+  assert.equal(readme.includes("`dodge-blocks`、`collect-stars` 和 `pour-sort` 三个 playable examples"), true);
   assert.equal(readme.includes("当前 examples 的意义"), true);
   assert.equal(readme.includes("More playable example pressure tests"), true);
 });
@@ -584,11 +584,44 @@ test("framework extraction planning docs start from two examples without editor 
   assert.equal(publicApi.includes("gameplay snapshot pattern remains example-owned"), true);
   assert.equal(publicApi.includes("not a visual editor, prefab authoring tool, launcher, gallery"), true);
   assert.equal(readme.includes("`v0.26.5` Framework Extraction Closeout From Two Playable Examples"), true);
-  assert.equal(readme.includes("`0.26.x` framework extraction from two playable examples 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.26.x` framework extraction from two playable examples 阶段和 `0.27.x` pointer-first puzzle interaction 阶段都已经收口"), true);
   assert.equal(readme.includes("抽出了 `clampPositionToBounds(...)`、`attachActorSpriteView(...)` 和 `randomPositionInBounds(...)`"), true);
   assert.equal(readme.includes("gameplay snapshot 固定为 example-owned read-only 约定"), true);
   assert.equal(readme.includes("framework extraction closeout"), true);
   assert.equal(readme.includes("不能把示例玩法、编辑器、launcher、gallery 或内容生产流程塞进引擎本体"), true);
+});
+
+test("pointer-first puzzle stage closes without swallowing puzzle rules", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.27.0.md", import.meta.url), "utf8");
+  const closeoutPatch = await readFile(new URL("../docs/version/v0.27.6.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const frameworkSource = await readFile(new URL("../src/framework/index.ts", import.meta.url), "utf8");
+  const pourSortScene = await readFile(new URL("pour-sort-scene.ts", pourSortExampleUrl), "utf8");
+
+  assert.equal(roadmap.includes("version/v0.27.6.md"), true);
+  assert.equal(stage.includes("The `0.27.x` stage is closed through `v0.27.6`"), true);
+  assert.equal(stage.includes("keeping puzzle rules example-owned"), true);
+  assert.equal(stage.includes("galgame dialogue/choice-flow primitives"), true);
+  assert.equal(closeoutPatch.includes("Pointer-First Puzzle Interaction Stage Closeout"), true);
+  assert.equal(closeoutPatch.includes("No new public package API is added in this closeout"), true);
+  assert.equal(closeoutPatch.includes("InputSystem.setPointerPosition(...)"), true);
+  assert.equal(closeoutPatch.includes("hitTestEntitiesAtPoint(...)"), true);
+  assert.equal(closeoutPatch.includes("createSourceTargetSelectionState(...)"), true);
+  assert.equal(closeoutPatch.includes("The exact puzzle rules stay in `examples/pour-sort`"), true);
+  assert.equal(closeoutPatch.includes("galgame / interactive narrative prototypes"), true);
+  assert.equal(closeoutPatch.includes("does not add a visual editor"), true);
+  assert.equal(publicApi.includes("`v0.27.6` closes the pointer-first puzzle interaction stage"), true);
+  assert.equal(publicApi.includes("without adding new public package API"), true);
+  assert.equal(publicApi.includes("Water-sort rules, drag/drop state, undo, hints"), true);
+  assert.equal(readme.includes("`v0.27.6` Pointer-First Puzzle Interaction Stage Closeout"), true);
+  assert.equal(readme.includes("`0.27.x` pointer-first puzzle interaction 阶段都已经收口"), true);
+  assert.equal(readme.includes("GitHub 仓库已创建；当前不使用 GitHub CI"), true);
+  assert.equal(frameworkSource.includes("pourTopColor"), false);
+  assert.equal(frameworkSource.includes("isPourSortSolved"), false);
+  assert.equal(pourSortScene.includes("export function pourTopColor"), true);
+  assert.equal(pourSortScene.includes("export function isPourSortSolved"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
