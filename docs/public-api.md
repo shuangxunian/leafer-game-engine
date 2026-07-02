@@ -96,6 +96,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.27.3` adds source-target selection state helpers to the `framework` entrypoint. `createSourceTargetSelectionState(...)`, `selectSourceTargetSource(...)`, `selectSourceTargetTarget(...)`, `clearSourceTargetTarget(...)`, `clearSourceTargetSelection(...)`, and `getSourceTargetSelectionPair(...)` provide a small immutable state pattern for games that select one entity and then target another entity. This supports sorting, grouping, matching, pouring, and point-and-click puzzle flows while keeping move validation, puzzle rules, visual feedback, undo, hints, progression, and editor selection UI outside the engine package.
 
+`v0.27.4` adds no new public package API. It adds `examples/pour-sort` as a routed pointer-first puzzle shell that consumes existing package APIs for browser pointer position, pointer button input, entity picking, source-target selection state, actor view attachment, and HUD text. The route is local example/build coverage for a future puzzle loop; water-sort rules, move validation, liquid rendering, undo, hints, level authoring, visual editor selection handles, launcher/gallery surfaces, marketplace flows, and platform SDK integration remain outside the engine package.
+
 ---
 
 ## Package Entrypoints

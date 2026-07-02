@@ -2,9 +2,10 @@ import { createBrowserRuntime } from "@shuangxunian/leafer-game-engine";
 import type { BrowserRuntime } from "@shuangxunian/leafer-game-engine/runtime";
 import { bootCollectStarsExample } from "./collect-stars/boot.js";
 import { bootDodgeBlocksExample } from "./dodge-blocks/boot.js";
+import { bootPourSortExample } from "./pour-sort/boot.js";
 import "./styles.css";
 
-type ExampleId = "dodge-blocks" | "collect-stars";
+type ExampleId = "dodge-blocks" | "collect-stars" | "pour-sort";
 
 type ExampleRoute = {
   id: ExampleId;
@@ -25,6 +26,12 @@ const EXAMPLES: Record<ExampleId, ExampleRoute> = {
     title: "Collect Stars Shell",
     hint: "Second example shell for the 0.25.x reuse sprint. Gameplay loop lands after this routing baseline.",
     boot: bootCollectStarsExample
+  },
+  "pour-sort": {
+    id: "pour-sort",
+    title: "Pour Sort Shell",
+    hint: "Pointer-first puzzle shell that validates local pointer coordinates, entity picking, and source-target selection.",
+    boot: bootPourSortExample
   }
 };
 
@@ -45,7 +52,8 @@ route.boot(runtime).catch((error: unknown) => {
 });
 
 function resolveExampleId(value: string | null): ExampleId {
-  return value === "collect-stars" ? "collect-stars" : "dodge-blocks";
+  if (value === "collect-stars" || value === "pour-sort") return value;
+  return "dodge-blocks";
 }
 
 function setText(id: string, text: string): void {

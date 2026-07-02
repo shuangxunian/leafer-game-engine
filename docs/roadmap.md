@@ -1210,3 +1210,7 @@
 继续补 source-target selection state pattern，让点选来源再点目标的规则游戏有轻量状态基础：
 
 - [v0.27.3](version/v0.27.3.md)
+
+继续补第三个 pointer-first puzzle example shell，用路由和示例骨架验证已有 pointer/picking/selection 能力：
+
+- [v0.27.4](version/v0.27.4.md)

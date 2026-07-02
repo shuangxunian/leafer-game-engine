@@ -8,6 +8,7 @@ const packageJson = JSON.parse(
 const examplesRootUrl = new URL("../examples/", import.meta.url);
 const dodgeBlocksExampleUrl = new URL("../examples/dodge-blocks/", import.meta.url);
 const collectStarsExampleUrl = new URL("../examples/collect-stars/", import.meta.url);
+const pourSortExampleUrl = new URL("../examples/pour-sort/", import.meta.url);
 
 function assertExports(moduleExports, names) {
   for (const name of names) {
@@ -612,6 +613,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "AudioPlaybackSystem",
     "AssetRegistry",
     "BrowserPointerButtonBridge",
+    "BrowserPointerPositionBridge",
     "CameraSystem",
     "CollisionSystem",
     "EventBus",
@@ -634,8 +636,11 @@ test("framework package subpath can be imported by package name in Node", async 
     "addRuntimeServices",
     "attachActorSpriteView",
     "bootstrapSceneFromConfig",
+    "clearSourceTargetSelection",
+    "clearSourceTargetTarget",
     "createAudioRuntimeState",
     "createLevelLayout",
+    "createSourceTargetSelectionState",
     "createTileMap",
     "createSpriteAnimationPlayback",
     "createDefaultComponentSchemaRegistry",
@@ -655,19 +660,26 @@ test("framework package subpath can be imported by package name in Node", async 
     "defineSpriteFrame",
     "dispatchAudioRuntimeOperation",
     "drainAudioRuntimeOperations",
+    "getEntityHitRect",
     "getAudioPlayback",
     "getAudioRuntime",
     "getPointerButtonInputId",
     "getSpriteAnimationPlaybackFrameId",
     "getSpriteAnimationPlaybackFrameIndex",
     "getRuntimeServices",
+    "getSourceTargetSelectionPair",
+    "hitTestEntitiesAtPoint",
     "isSpriteCapableRenderNode",
     "clampPositionToBounds",
     "limitMovementVector",
     "loadAssetManifestAsync",
     "normalizeKeyboardKey",
     "normalizePointerButton",
+    "pickTopEntityAtPoint",
+    "pointInRect",
     "randomPositionInBounds",
+    "selectSourceTargetSource",
+    "selectSourceTargetTarget",
     "validateSceneConfig"
   ]);
   assert.equal(typeof framework.CollisionSystem.prototype.getCollisionPairs, "function");
@@ -697,6 +709,11 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.drainAudioRuntimeOperations, "function");
   assert.equal(typeof framework.getAudioPlayback, "function");
   assert.equal(typeof framework.getAudioRuntime, "function");
+  assert.equal(typeof framework.pointInRect, "function");
+  assert.equal(typeof framework.pickTopEntityAtPoint, "function");
+  assert.equal(typeof framework.createSourceTargetSelectionState, "function");
+  assert.equal(typeof framework.selectSourceTargetSource, "function");
+  assert.equal(typeof framework.selectSourceTargetTarget, "function");
 });
 
 test("tooling package subpath can be imported by package name in Node", async () => {
@@ -799,6 +816,32 @@ test("collect-stars example gameplay loop is routed and package-facing", async (
   assert.equal(docs.includes("不提供编辑器、示例市场、可视化 launcher"), true);
 });
 
+test("pour-sort example shell is routed and package-facing", async () => {
+  const index = await readFile(new URL("../index.html", import.meta.url), "utf8");
+  const examplesEntry = await readFile(new URL("main.ts", examplesRootUrl), "utf8");
+  const sceneSource = await readFile(new URL("pour-sort-scene.ts", pourSortExampleUrl), "utf8");
+  const bootSource = await readFile(new URL("boot.ts", pourSortExampleUrl), "utf8");
+  const docs = await readFile(new URL("README.md", pourSortExampleUrl), "utf8");
+
+  assert.equal(index.includes("?example=pour-sort"), true);
+  assert.equal(index.includes("Pour Sort Shell"), true);
+  assert.equal(examplesEntry.includes("bootPourSortExample"), true);
+  assert.equal(examplesEntry.includes('"pour-sort"'), true);
+  assert.equal(sceneSource.includes("class PourSortScene"), true);
+  assert.equal(sceneSource.includes("new InputSystem"), true);
+  assert.equal(sceneSource.includes("pickTopEntityAtPoint"), true);
+  assert.equal(sceneSource.includes("createSourceTargetSelectionState"), true);
+  assert.equal(sceneSource.includes("selectSourceTargetSource"), true);
+  assert.equal(sceneSource.includes("selectSourceTargetTarget"), true);
+  assert.equal(sceneSource.includes("getGameplaySnapshot"), true);
+  assert.equal(bootSource.includes("BrowserPointerPositionBridge"), true);
+  assert.equal(bootSource.includes("BrowserPointerButtonBridge"), true);
+  assert.equal(bootSource.includes("getBoundingClientRect"), true);
+  assert.equal(docs.includes("pointer-first puzzle example shell"), true);
+  assert.equal(docs.includes("water-sort rules"), true);
+  assert.equal(docs.includes("visual editor selection handles"), true);
+});
+
 test("dodge-blocks gameplay consumes input action mappings instead of direct physical key queries", async () => {
   const gameplayFiles = [
     "dodge-game-system.ts",
@@ -831,6 +874,8 @@ test("playable examples keep gameplay snapshots example-owned and read-only", as
   const collectScene = await readFile(new URL("collect-stars-scene.ts", collectStarsExampleUrl), "utf8");
   const collectGameSystem = await readFile(new URL("collect-stars-game-system.ts", collectStarsExampleUrl), "utf8");
   const collectBoot = await readFile(new URL("boot.ts", collectStarsExampleUrl), "utf8");
+  const pourSortScene = await readFile(new URL("pour-sort-scene.ts", pourSortExampleUrl), "utf8");
+  const pourSortBoot = await readFile(new URL("boot.ts", pourSortExampleUrl), "utf8");
 
   assert.equal(dodgeGameSystem.includes("export type DodgeGameplaySnapshot"), true);
   assert.equal(dodgeGameSystem.includes("getGameplaySnapshot(): DodgeGameplaySnapshot"), true);
@@ -838,8 +883,12 @@ test("playable examples keep gameplay snapshots example-owned and read-only", as
   assert.equal(collectGameSystem.includes("getGameplaySnapshot(): CollectStarsGameplaySnapshot"), true);
   assert.equal(collectScene.includes("getGameplaySnapshot(): CollectStarsGameplaySnapshot | undefined"), true);
   assert.equal(collectBoot.includes("gameplay: scene.getGameplaySnapshot()"), true);
+  assert.equal(pourSortScene.includes("export type PourSortGameplaySnapshot"), true);
+  assert.equal(pourSortScene.includes("getGameplaySnapshot(): PourSortGameplaySnapshot"), true);
+  assert.equal(pourSortBoot.includes("gameplay: scene.getGameplaySnapshot()"), true);
   assert.equal(collectGameSystem.includes("setGameplaySnapshot"), false);
   assert.equal(collectScene.includes("setGameplaySnapshot"), false);
+  assert.equal(pourSortScene.includes("setGameplaySnapshot"), false);
 });
 
 test("playable examples consume shared actor sprite view attachment helper", async () => {
