@@ -106,6 +106,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.28.1` adds the image-backed Leafer sprite adapter baseline without changing the public render contract. `RenderSpriteAsset.source` now maps to the native Leafer `Image.url`, while fill-only assets keep the existing fill/width/height/cornerRadius placeholder behavior. This is adapter behavior behind the existing `RenderSprite.setAsset(...)` surface; it is not an asset authoring API, visual asset manager, atlas packer, sprite editor, image cropper, bundled asset library, launcher, gallery, marketplace, SDK wrapper, monetization, or publishing workflow.
 
+`v0.28.2` adds the asset loading to render asset handoff baseline. `AssetRegistry.getSpriteRenderAsset(id)` and `AssetRegistry.requireSpriteRenderAsset(id)` return copied `RenderSpriteAsset` data without registry-only metadata, `SpriteAnimationSystem` applies those render assets to sprite-capable view nodes, and `attachActorSpriteView(...)` can resolve a registered sprite through `assets + assetId`. Render nodes still receive stable asset metadata and `source` strings; the browser adapter owns how that source is rendered. This is not a DOM image object pipeline, bundler plugin, CDN policy, asset browser, atlas packer, editor, launcher, gallery, marketplace, SDK wrapper, monetization, or publishing workflow.
+
 ---
 
 ## Package Entrypoints

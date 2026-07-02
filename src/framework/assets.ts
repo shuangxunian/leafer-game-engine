@@ -197,6 +197,22 @@ export class AssetRegistry {
     return asset;
   }
 
+  getSpriteRenderAsset(id: string): RenderSpriteAsset | undefined {
+    const asset = this.getSprite(id);
+    if (!asset) return undefined;
+
+    return copyRenderSpriteAsset(asset);
+  }
+
+  requireSpriteRenderAsset(id: string): RenderSpriteAsset {
+    const asset = this.getSpriteRenderAsset(id);
+    if (!asset) {
+      throw new Error(`Sprite asset "${id}" is not registered.`);
+    }
+
+    return asset;
+  }
+
   getSpriteFrame(id: string): SpriteFrame | undefined {
     const frame = this.spriteFrames.get(id);
     if (!frame) return undefined;
@@ -261,6 +277,20 @@ export class AssetRegistry {
       frameIds: [...clip.frameIds]
     }));
   }
+}
+
+function copyRenderSpriteAsset(asset: RenderSpriteAsset): RenderSpriteAsset {
+  const renderAsset: RenderSpriteAsset = {
+    id: asset.id
+  };
+
+  if (asset.fill !== undefined) renderAsset.fill = asset.fill;
+  if (asset.source !== undefined) renderAsset.source = asset.source;
+  if (asset.width !== undefined) renderAsset.width = asset.width;
+  if (asset.height !== undefined) renderAsset.height = asset.height;
+  if (asset.cornerRadius !== undefined) renderAsset.cornerRadius = asset.cornerRadius;
+
+  return renderAsset;
 }
 
 export function loadAssetManifest(registry: AssetRegistry, manifest: AssetManifest): AssetLoadResult {

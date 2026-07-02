@@ -283,7 +283,7 @@ export class SpriteAnimationSystem extends System {
     }
 
     const frame = this.assets.requireSpriteFrame(component.currentFrameId);
-    const sprite = this.assets.requireSprite(frame.spriteId);
+    const sprite = this.assets.requireSpriteRenderAsset(frame.spriteId);
     node.setAsset(sprite);
 
     if (frame.width !== undefined) node.width = frame.width;

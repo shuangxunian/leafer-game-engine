@@ -1230,3 +1230,7 @@
 第一批先补 Leafer adapter 的 image-backed sprite baseline：
 
 - [v0.28.1](version/v0.28.1.md)
+
+下一步补 asset loading 到 render asset 的明确 handoff：
+
+- [v0.28.2](version/v0.28.2.md)

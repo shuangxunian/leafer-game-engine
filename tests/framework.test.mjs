@@ -2076,6 +2076,43 @@ test("sprite animation system advances components and applies sprite frames to v
   assert.equal(node.height, 40);
 });
 
+test("sprite animation system hands source-backed render assets to view nodes", async () => {
+  const scene = new Scene("AnimationSourceAssetScene");
+  const assets = new AssetRegistry();
+  assets.loadManifest({
+    sprites: [
+      { id: "hero-sprite-1", source: "/assets/hero-1.png", width: 32, height: 32 },
+      { id: "hero-sprite-2", source: "/assets/hero-2.png", width: 32, height: 32 }
+    ],
+    frames: [
+      { id: "hero-run-1", spriteId: "hero-sprite-1", width: 32, height: 40, durationSeconds: 0.25 },
+      { id: "hero-run-2", spriteId: "hero-sprite-2", width: 36, height: 40, durationSeconds: 0.25 }
+    ],
+    clips: [{ id: "hero-run", frameIds: ["hero-run-1", "hero-run-2"] }]
+  });
+  await assets.loadSprite("hero-sprite-2", async () => {});
+  const node = createFakeSpriteNode();
+  const actor = scene.world.createEntity("hero");
+  actor.addComponent(new SpriteAnimationComponent("hero-run"));
+  actor.addComponent(new TransformComponent());
+  actor.addComponent(new ViewComponent(node));
+  scene.addSystem(new SpriteAnimationSystem(scene, assets));
+  scene.start();
+
+  scene.update(0.25);
+  scene.lateUpdate(0.25);
+
+  assert.deepEqual(node.asset, {
+    id: "hero-sprite-2",
+    source: "/assets/hero-2.png",
+    width: 32,
+    height: 32
+  });
+  assert.equal("type" in node.asset, false);
+  assert.equal(node.width, 36);
+  assert.equal(node.height, 40);
+});
+
 test("sprite animation component can pause, resume and stop through the animation system", () => {
   const scene = new Scene("AnimationControlsScene");
   const assets = createAnimationAssets();
@@ -2292,6 +2329,38 @@ test("actor sprite view helper attaches a sprite view to an entity on the world 
   assert.deepEqual(worldChildren, [view.node]);
   assert.equal(view.node.asset.id, "actor");
   assert.equal(actor.getComponent(ViewComponent), view.view);
+});
+
+test("actor sprite view helper can resolve registered source assets for render handoff", () => {
+  const scene = new Scene("ActorSpriteViewAssetRegistryScene");
+  const assets = new AssetRegistry();
+  assets.registerSprite({
+    id: "actor",
+    source: "/assets/actor.png",
+    width: 24,
+    height: 24
+  });
+  const worldChildren = [];
+  const renderAdapter = createFakeTextRenderAdapter();
+  const renderScene = createFakeTileRenderScene(worldChildren);
+  const actor = scene.world.createEntity("Actor");
+  actor.addComponent(new TransformComponent());
+
+  const view = attachActorSpriteView(actor, {
+    renderAdapter,
+    renderScene,
+    assets,
+    assetId: "actor"
+  });
+
+  assert.deepEqual(worldChildren, [view.node]);
+  assert.deepEqual(view.node.asset, {
+    id: "actor",
+    source: "/assets/actor.png",
+    width: 24,
+    height: 24
+  });
+  assert.equal("type" in view.node.asset, false);
 });
 
 test("actor sprite view helper can target a custom layer and reports missing layers", () => {

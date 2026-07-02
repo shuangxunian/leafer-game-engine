@@ -79,6 +79,8 @@ export type InstantiateEntityTemplateOptions = {
 
 export type ActorSpriteViewOptions = {
   asset?: string | RenderSpriteAsset;
+  assetId?: string;
+  assets?: AssetRegistry;
   layer?: RenderSceneLayerName;
   renderAdapter: RenderAdapter;
   renderScene: RenderScene;
@@ -152,13 +154,24 @@ export function attachActorSpriteView(
   }
 
   const node = options.renderAdapter.createSprite();
-  if (options.asset !== undefined) {
-    node.setAsset(options.asset);
+  const asset = resolveActorSpriteViewAsset(options);
+  if (asset !== undefined) {
+    node.setAsset(asset);
   }
 
   renderLayer.addChild(node);
   const view = entity.addComponent(new ViewComponent(node));
   return { node, view };
+}
+
+function resolveActorSpriteViewAsset(options: ActorSpriteViewOptions): string | RenderSpriteAsset | undefined {
+  if (options.asset !== undefined) return options.asset;
+  if (options.assetId === undefined) return undefined;
+  if (!options.assets) {
+    throw new Error(`Actor sprite asset "${options.assetId}" requires an AssetRegistry.`);
+  }
+
+  return options.assets.requireSpriteRenderAsset(options.assetId);
 }
 
 export function defineActorTemplate(definition: ActorTemplateDefinition): EntityTemplate {

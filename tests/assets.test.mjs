@@ -38,10 +38,38 @@ test("asset registry keeps legacy source lookup compatibility", () => {
   assert.equal(assets.requireSprite("hero").source, "/assets/hero.png");
 });
 
+test("asset registry exposes copied render sprite assets for render handoff", () => {
+  const assets = new AssetRegistry();
+  assets.registerSprite({
+    id: "hero",
+    source: "/assets/hero.png",
+    fill: "#ffcf7a",
+    width: 48,
+    height: 56,
+    cornerRadius: 8
+  });
+
+  const renderAsset = assets.requireSpriteRenderAsset("hero");
+
+  assert.deepEqual(renderAsset, {
+    id: "hero",
+    source: "/assets/hero.png",
+    fill: "#ffcf7a",
+    width: 48,
+    height: 56,
+    cornerRadius: 8
+  });
+  assert.equal("type" in renderAsset, false);
+
+  renderAsset.source = "/mutated.png";
+  assert.equal(assets.requireSprite("hero").source, "/assets/hero.png");
+});
+
 test("asset registry fails clearly for missing required sprites", () => {
   const assets = new AssetRegistry();
 
   assert.throws(() => assets.requireSprite("missing"), /Sprite asset "missing" is not registered/);
+  assert.throws(() => assets.requireSpriteRenderAsset("missing"), /Sprite asset "missing" is not registered/);
 });
 
 test("asset registry loads registered sprites with an async loader", async () => {

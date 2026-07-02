@@ -666,10 +666,38 @@ test("image-backed leafer sprite adapter baseline keeps asset authoring out of s
   assert.equal(publicApi.includes("`v0.28.1` adds the image-backed Leafer sprite adapter baseline"), true);
   assert.equal(publicApi.includes("without changing the public render contract"), true);
   assert.equal(publicApi.includes("not an asset authoring API"), true);
-  assert.equal(readme.includes("`v0.28.1` Image-Backed Leafer Sprite Adapter Baseline"), true);
+  assert.equal(readme.includes("在 `v0.28.1` 让 `RenderSpriteAsset.source` 映射到 Leafer `Image.url`"), true);
   assert.equal(readme.includes("映射到 Leafer `Image.url`"), true);
   assert.equal(leaferAdapter.includes("Image as LeaferImage"), true);
   assert.equal(leaferAdapter.includes("this.image.url = asset.source"), true);
+});
+
+test("asset loading to render asset handoff keeps asset tooling out of scope", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.28.2.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const assetsSource = await readFile(new URL("../src/framework/assets.ts", import.meta.url), "utf8");
+  const animationSource = await readFile(new URL("../src/framework/animation.ts", import.meta.url), "utf8");
+  const factorySource = await readFile(new URL("../src/framework/factory.ts", import.meta.url), "utf8");
+
+  assert.equal(roadmap.includes("version/v0.28.2.md"), true);
+  assert.equal(stage.includes("Asset Loading To Render Asset Handoff"), true);
+  assert.equal(stage.includes("getSpriteRenderAsset(id)"), true);
+  assert.equal(stage.includes("requireSpriteRenderAsset(id)"), true);
+  assert.equal(stage.includes("without leaking registry-only state"), true);
+  assert.equal(stage.includes("render nodes do not require a DOM image object"), true);
+  assert.equal(stage.includes("does not add a visual asset manager"), true);
+  assert.equal(stage.includes("bundler plugin"), true);
+  assert.equal(publicApi.includes("`v0.28.2` adds the asset loading to render asset handoff baseline"), true);
+  assert.equal(publicApi.includes("Render nodes still receive stable asset metadata and `source` strings"), true);
+  assert.equal(readme.includes("`v0.28.2` Asset Loading To Render Asset Handoff"), true);
+  assert.equal(readme.includes("AssetRegistry` 输出干净的 render asset 副本"), true);
+  assert.equal(assetsSource.includes("getSpriteRenderAsset"), true);
+  assert.equal(assetsSource.includes("requireSpriteRenderAsset"), true);
+  assert.equal(animationSource.includes("requireSpriteRenderAsset(frame.spriteId)"), true);
+  assert.equal(factorySource.includes("assetId?: string"), true);
+  assert.equal(factorySource.includes("requireSpriteRenderAsset(options.assetId)"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
