@@ -120,6 +120,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.29.1` adds the render scene resize contract. The Node-safe `adapter/render-types` entrypoint now exposes `RenderSceneViewport`, `createRenderSceneViewport(width, height)`, and `getRenderSceneViewport(renderScene)`, and every `RenderScene` now has `resize(width, height)`. The Leafer adapter updates its viewport state and forwards valid sizes to native Leafer `resize(...)` when mounted. This is render/runtime contract work, not a browser resize observer, responsive page builder, layout editor, mobile app shell, SDK wrapper, launcher, gallery, marketplace, monetization, or publishing workflow.
 
+`v0.29.2` adds an opt-in browser resize bridge. The `/runtime` entrypoint now exports `BrowserResizeBridge`, `createBrowserResizeBridge(...)`, and related injected-observer types. `createBrowserRuntime(...)` accepts a `resize` option that can attach this bridge after mount and detach it on `stop()`. The bridge reads `ResizeObserver` entries or target dimensions and calls `RenderScene.resize(...)`; it does not add a responsive page builder, layout system, mobile app shell, SDK wrapper, launcher, gallery, marketplace, monetization, publishing workflow, or device compatibility matrix.
+
 ---
 
 ## Package Entrypoints

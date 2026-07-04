@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { Game, Scene } from "../lib/core/index.js";
 import { createAudioRuntimeState, drainAudioRuntimeOperations } from "../lib/framework/index.js";
 import { BrowserAudioPlaybackAdapter } from "../lib/runtime/browser-audio.js";
+import { createBrowserResizeBridge } from "../lib/runtime/browser-resize.js";
 import { createAnimationFrameLoop } from "../lib/runtime/frame-loop.js";
 import { createRuntimeController } from "../lib/runtime/runtime-controller.js";
 import { startSceneWithLifecycle } from "../lib/runtime/scene-lifecycle.js";
@@ -31,6 +32,31 @@ function createFakeAudioFactory() {
       };
       elements.push(element);
       return element;
+    }
+  };
+}
+
+function createFakeResizeScene(initialWidth = 960, initialHeight = 640) {
+  let width = initialWidth;
+  let height = initialHeight;
+  const resizeCalls = [];
+
+  return {
+    resizeCalls,
+    scene: {
+      get width() {
+        return width;
+      },
+      get height() {
+        return height;
+      },
+      resize(nextWidth, nextHeight) {
+        width = nextWidth;
+        height = nextHeight;
+        const viewport = { width, height };
+        resizeCalls.push(viewport);
+        return { ...viewport };
+      }
     }
   };
 }
@@ -129,6 +155,48 @@ test("runtime controller stop only owns the frame loop, not scene cleanup", () =
   assert.equal(scene.destroyCount, 0);
   assert.equal(game.activeScene, scene);
   assert.deepEqual(calls, ["reset", "start", "stop"]);
+});
+
+test("browser resize bridge observes target size and detaches cleanly", () => {
+  const { scene, resizeCalls } = createFakeResizeScene();
+  const target = { clientWidth: 320, clientHeight: 240 };
+  let callback;
+  const observer = {
+    observed: [],
+    disconnectCount: 0,
+    observe(nextTarget) {
+      this.observed.push(nextTarget);
+    },
+    disconnect() {
+      this.disconnectCount += 1;
+    }
+  };
+  const bridge = createBrowserResizeBridge({
+    renderScene: scene,
+    target,
+    observerFactory(nextCallback) {
+      callback = nextCallback;
+      return observer;
+    }
+  });
+
+  assert.deepEqual(bridge.attach(), { width: 320, height: 240 });
+  assert.deepEqual(bridge.attach(), { width: 320, height: 240 });
+  assert.deepEqual(observer.observed, [target]);
+  assert.deepEqual(resizeCalls, [{ width: 320, height: 240 }]);
+
+  callback([{ contentRect: { width: 375, height: 667 } }]);
+  assert.deepEqual(resizeCalls.at(-1), { width: 375, height: 667 });
+  assert.equal(scene.width, 375);
+  assert.equal(scene.height, 667);
+
+  target.clientWidth = 414;
+  target.clientHeight = 736;
+  assert.deepEqual(bridge.sync(), { width: 414, height: 736 });
+
+  bridge.detach();
+  bridge.detach();
+  assert.equal(observer.disconnectCount, 1);
 });
 
 test("browser audio playback adapter plays and stops fake media elements", async () => {

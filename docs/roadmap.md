@@ -1254,3 +1254,7 @@
 第一批先补 render scene resize contract：
 
 - [v0.29.1](version/v0.29.1.md)
+
+第二批补 opt-in browser resize bridge：
+
+- [v0.29.2](version/v0.29.2.md)

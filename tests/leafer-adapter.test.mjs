@@ -184,3 +184,67 @@ test("leafer render scene resize rejects invalid viewport dimensions", async () 
   assert.equal(scene.width, 960);
   assert.equal(scene.height, 640);
 });
+
+test("browser runtime resize option attaches bridge and tears it down on stop", async () => {
+  const { createBrowserRuntime } = await import("../lib/runtime/browser-runtime.js");
+  const mountedTargets = [];
+  const resizeCalls = [];
+  let width = 960;
+  let height = 640;
+  const renderScene = {
+    root: {},
+    layers: {},
+    get width() {
+      return width;
+    },
+    get height() {
+      return height;
+    },
+    mount(target) {
+      mountedTargets.push(target);
+    },
+    resize(nextWidth, nextHeight) {
+      width = nextWidth;
+      height = nextHeight;
+      const viewport = { width, height };
+      resizeCalls.push(viewport);
+      return { ...viewport };
+    },
+    destroy() {}
+  };
+  const renderAdapter = {
+    createScene() {
+      return renderScene;
+    }
+  };
+  const mount = { clientWidth: 500, clientHeight: 300 };
+  const observer = {
+    observeCount: 0,
+    disconnectCount: 0,
+    observe() {
+      this.observeCount += 1;
+    },
+    disconnect() {
+      this.disconnectCount += 1;
+    }
+  };
+
+  const runtime = createBrowserRuntime({
+    mount,
+    renderAdapter,
+    resize: {
+      observerFactory() {
+        return observer;
+      }
+    }
+  });
+
+  assert.equal(runtime.resizeBridge !== undefined, true);
+  assert.deepEqual(mountedTargets, [mount]);
+  assert.equal(observer.observeCount, 1);
+  assert.deepEqual(resizeCalls, [{ width: 500, height: 300 }]);
+
+  runtime.stop();
+
+  assert.equal(observer.disconnectCount, 1);
+});
