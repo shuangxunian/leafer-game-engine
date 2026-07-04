@@ -3,7 +3,8 @@ import { bootDodgeBlocksExample } from "./boot.js";
 import "./styles.css";
 
 const runtime = createBrowserRuntime({
-  mount: "game-root"
+  mount: "game-root",
+  resize: true
 });
 
 bootDodgeBlocksExample(runtime).catch((error: unknown) => {

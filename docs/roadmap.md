@@ -1262,3 +1262,7 @@
 第三批补 resize 后 pointer local coordinate helper：
 
 - [v0.29.3](version/v0.29.3.md)
+
+第四批补 example responsive verification：
+
+- [v0.29.4](version/v0.29.4.md)

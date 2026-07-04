@@ -136,7 +136,8 @@ import { createBrowserRuntime } from "@shuangxunian/leafer-game-engine";
 import { bootDodgeBlocksExample } from "./boot.js";
 
 const runtime = createBrowserRuntime({
-  mount: "game-root"
+  mount: "game-root",
+  resize: true
 });
 
 bootDodgeBlocksExample(runtime).catch((error) => {
@@ -144,7 +145,7 @@ bootDodgeBlocksExample(runtime).catch((error) => {
 });
 ```
 
-`bootDodgeBlocksExample(...)` 里会创建 scene，通过 scene lifecycle helper 预加载 assets 并启动 runtime、注入可选 browser audio playback adapter、绑定键盘和 pointer button 输入，再把包含 asset state、game flow state、sprite animation state、audio runtime state、collision pair state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。
+`bootDodgeBlocksExample(...)` 里会创建 scene，通过 scene lifecycle helper 预加载 assets 并启动 runtime、注入可选 browser audio playback adapter、绑定键盘和 pointer button 输入，再把包含 asset state、game flow state、sprite animation state、audio runtime state、collision pair state 和 schema metadata 的 tooling snapshot 以分区 panel 的形式显示到浏览器。示例入口启用 `resize: true`，让 browser runtime 的 opt-in resize bridge 读取 `game-root` 容器尺寸并同步 render scene viewport；响应式布局仍由示例 CSS 和 gameplay 代码自己决定。
 
 Runtime Debug panel 会消费 `runtime.game` 和 `runtime.renderScene`，因此可以显示时间步进、viewport、entity counts、system totals、system order 和 system lifecycle。`Audio Runtime` panel 只读取 audio manifest、channel state 和 operation records；实际播放由 `boot.ts` 可选安装的 `AudioPlaybackSystem` 消费，不由 tooling panel 触发，也不提供 playback buttons、volume sliders、mixer controls 或 audio authoring 入口。`Collisions` panel 只读取 `CollisionSystem` 的 current / enter / stay / exit collision pair summary，不提供 collider 编辑、碰撞响应配置、触发器脚本或运行时修改入口。这里的 tooling 仍然只是观察 runtime 状态，不提供系统开关、组件改值、场景编辑、音频编辑或资产管理入口。
 

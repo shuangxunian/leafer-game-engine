@@ -44,7 +44,8 @@ setText("example-hint", route.hint);
 markCurrentExample(selectedExample);
 
 const runtime = createBrowserRuntime({
-  mount: "game-root"
+  mount: "game-root",
+  resize: true
 });
 
 route.boot(runtime).catch((error: unknown) => {

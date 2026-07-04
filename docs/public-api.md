@@ -124,6 +124,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.29.3` adds pointer coordinate consistency after resize. The Node-safe `/framework` entrypoint now exports `createBrowserPointerLocalPositionResolver(target)` and `getBrowserPointerLocalPosition(event, target)`, which convert browser `clientX/clientY` into mount-local coordinates by reading the target bounds on each event. `examples/pour-sort` now consumes the shared resolver for pointer picking. This remains pointer coordinate plumbing, not drag/drop state, gesture recognition, multi-touch gameplay, editor selection handles, responsive layout rules, mobile app shell, SDK wrapper, launcher, gallery, marketplace, monetization, or publishing workflow.
 
+`v0.29.4` adds no new public package API. It enables `resize: true` in the shared browser example route and the standalone `dodge-blocks` example entry so examples consume the opt-in browser resize bridge through package-facing runtime setup. This verifies desktop and mobile-ish mount sizes while keeping layout and gameplay choices example-owned; it is not a responsive page builder, launcher, gallery, design system, mobile app shell, SDK wrapper, marketplace, monetization, or publishing workflow.
+
 ---
 
 ## Package Entrypoints
