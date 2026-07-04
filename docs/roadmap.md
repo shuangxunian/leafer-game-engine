@@ -1266,3 +1266,7 @@
 第四批补 example responsive verification：
 
 - [v0.29.4](version/v0.29.4.md)
+
+收口 `0.29.x` responsive Web runtime 阶段：
+
+- [v0.29.5](version/v0.29.5.md)

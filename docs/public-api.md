@@ -126,6 +126,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.29.4` adds no new public package API. It enables `resize: true` in the shared browser example route and the standalone `dodge-blocks` example entry so examples consume the opt-in browser resize bridge through package-facing runtime setup. This verifies desktop and mobile-ish mount sizes while keeping layout and gameplay choices example-owned; it is not a responsive page builder, launcher, gallery, design system, mobile app shell, SDK wrapper, marketplace, monetization, or publishing workflow.
 
+`v0.29.5` closes the responsive Web runtime stage without adding new public package API. The stage leaves render scene resizing, Node-safe viewport metadata helpers, the opt-in browser resize bridge, runtime resize attachment/teardown, pointer-local coordinate helpers, and responsive example verification in place. DPR / high-density display behavior is documented as CSS-pixel viewport synchronization, with native Leafer rendering owning backing-store details. Drag/drop state, UI/dialogue flow, quick-start presets, visual layout tools, launchers, galleries, SDK wrappers, monetization, and publishing workflows remain outside this stage.
+
 ---
 
 ## Package Entrypoints
