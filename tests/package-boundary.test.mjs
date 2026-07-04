@@ -819,7 +819,6 @@ test("responsive web runtime stage starts without platform wrapper scope", async
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.29.5");
   assert.equal(roadmap.includes("version/v0.29.0.md"), true);
   assert.equal(roadmap.includes("version/v0.29.2.md"), true);
   assert.equal(roadmap.includes("version/v0.29.3.md"), true);
@@ -889,7 +888,7 @@ test("responsive web runtime stage starts without platform wrapper scope", async
   assert.equal(publicApi.includes("examples consume the opt-in browser resize bridge"), true);
   assert.equal(publicApi.includes("without adding new public package API"), true);
   assert.equal(publicApi.includes("pointer coordinate consistency after resize"), true);
-  assert.equal(readme.includes("`v0.29.5` Responsive Web Runtime Stage Closeout"), true);
+  assert.equal(readme.includes("并在 `v0.29.5` 收口该阶段"), true);
   assert.equal(readme.includes("`0.29.x` responsive Web runtime 阶段都已经收口"), true);
   assert.equal(readme.includes("`v0.29.1` 建立 render scene resize contract"), true);
   assert.equal(readme.includes("`v0.29.2` 建立 opt-in browser resize bridge"), true);
@@ -898,7 +897,47 @@ test("responsive web runtime stage starts without platform wrapper scope", async
   assert.equal(readme.includes("并在 `v0.29.5` 收口该阶段"), true);
   assert.equal(readme.includes("drag/drop and selection hardening"), true);
   assert.equal(readme.includes("desktop/mobile-ish 视口验证"), true);
-  assert.equal(readme.includes("不做 responsive page builder、mobile app shell、launcher、gallery、SDK wrapper 或发布平台"), true);
+  assert.equal(readme.includes("不做 gesture system、multi-touch gameplay system、visual editor、launcher、gallery、SDK wrapper 或发布平台"), true);
+});
+
+test("drag drop and selection stage starts without puzzle rules or editor scope", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.30.0.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  assert.equal(packageJson.version, "0.30.0");
+  assert.equal(roadmap.includes("version/v0.30.0.md"), true);
+  assert.equal(roadmap.includes("drag/drop and selection hardening"), true);
+  assert.equal(stage.includes("Drag/Drop And Selection Sprint"), true);
+  assert.equal(stage.includes("does not add public package"), true);
+  assert.equal(stage.includes("0.29.x` closed the responsive Web runtime baseline"), true);
+  assert.equal(stage.includes("pointer position and pointer button runtime state"), true);
+  assert.equal(stage.includes("mount-local pointer coordinate helpers after resize"), true);
+  assert.equal(stage.includes("rectangle hit testing and entity picking helpers"), true);
+  assert.equal(stage.includes("source-target selection state helpers"), true);
+  assert.equal(stage.includes("Selection State Hardening"), true);
+  assert.equal(stage.includes("Drag State Baseline"), true);
+  assert.equal(stage.includes("Source-Target Action Baseline"), true);
+  assert.equal(stage.includes("Pointer Puzzle Example Hardening"), true);
+  assert.equal(stage.includes("keep pour-sort rules in `examples/pour-sort`"), true);
+  assert.equal(stage.includes("does not add a visual editor"), true);
+  assert.equal(stage.includes("recognition system"), true);
+  assert.equal(stage.includes("multi-touch gameplay system"), true);
+  assert.equal(stage.includes("rules engine"), true);
+  assert.equal(stage.includes("launcher, gallery"), true);
+  assert.equal(stage.includes("v0.30.1"), true);
+  assert.equal(stage.includes("v0.30.5"), true);
+  assert.equal(publicApi.includes("`v0.30.0` starts the drag/drop and selection hardening stage"), true);
+  assert.equal(publicApi.includes("without adding new public package API"), true);
+  assert.equal(publicApi.includes("immutable selection snapshots, drag state bookkeeping, source-target action data"), true);
+  assert.equal(publicApi.includes("keeping puzzle rules example-owned"), true);
+  assert.equal(publicApi.includes("not a gesture recognition system, multi-touch gameplay framework"), true);
+  assert.equal(readme.includes("`v0.30.0` Drag/Drop And Selection Sprint"), true);
+  assert.equal(readme.includes("`0.29.x` responsive Web runtime 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.30.x` 开始补 drag/drop and selection hardening"), true);
+  assert.equal(readme.includes("selection snapshot、drag state、source-target action"), true);
+  assert.equal(readme.includes("不做 gesture system、multi-touch gameplay system、visual editor、launcher、gallery、SDK wrapper 或发布平台"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {

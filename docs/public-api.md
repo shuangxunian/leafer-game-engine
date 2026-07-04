@@ -128,6 +128,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.29.5` closes the responsive Web runtime stage without adding new public package API. The stage leaves render scene resizing, Node-safe viewport metadata helpers, the opt-in browser resize bridge, runtime resize attachment/teardown, pointer-local coordinate helpers, and responsive example verification in place. DPR / high-density display behavior is documented as CSS-pixel viewport synchronization, with native Leafer rendering owning backing-store details. Drag/drop state, UI/dialogue flow, quick-start presets, visual layout tools, launchers, galleries, SDK wrappers, monetization, and publishing workflows remain outside this stage.
 
+`v0.30.0` starts the drag/drop and selection hardening stage without adding new public package API. The stage focuses the next work on immutable selection snapshots, drag state bookkeeping, source-target action data, and pointer puzzle example hardening while keeping puzzle rules example-owned. It is not a gesture recognition system, multi-touch gameplay framework, editor selection layer, physics engine, water-sort rules engine, solver, launcher, gallery, marketplace, SDK wrapper, monetization, or publishing workflow.
+
 ---
 
 ## Package Entrypoints

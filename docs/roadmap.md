@@ -1270,3 +1270,7 @@
 收口 `0.29.x` responsive Web runtime 阶段：
 
 - [v0.29.5](version/v0.29.5.md)
+
+完成 responsive Web runtime baseline 后，下一阶段建议补 drag/drop and selection hardening，让选择、拖拽、source-target action 这类 pointer-first puzzle 交互更容易复用：
+
+- [v0.30.0](version/v0.30.0.md)
