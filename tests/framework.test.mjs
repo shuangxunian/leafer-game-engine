@@ -28,6 +28,7 @@ import {
   addRuntimeServices,
   advanceSpriteAnimationPlayback,
   createAudioRuntimeState,
+  createBrowserPointerLocalPositionResolver,
   attachActorSpriteView,
   createRuntimeServices,
   createSourceTargetSelectionState,
@@ -44,6 +45,7 @@ import {
   drainAudioRuntimeOperations,
   getAudioRuntime,
   getAudioPlayback,
+  getBrowserPointerLocalPosition,
   getEntityHitRect,
   getPointerButtonInputId,
   getSpriteAnimationPlaybackFrameId,
@@ -893,6 +895,37 @@ test("browser pointer position bridge writes client position into input system",
 
   target.dispatch("pointermove", {});
   assert.deepEqual(input.getPointerPosition(), { x: 14, y: 24 });
+});
+
+test("browser pointer local resolver maps client coordinates through latest target bounds", () => {
+  const input = new InputSystem();
+  const target = createFakeEventTarget();
+  let bounds = { left: 100, top: 50 };
+  target.getBoundingClientRect = () => bounds;
+  const bridge = new BrowserPointerPositionBridge(
+    input,
+    target,
+    createBrowserPointerLocalPositionResolver(target)
+  );
+
+  bridge.attach();
+  target.dispatch("pointermove", { clientX: 140, clientY: 90 });
+  assert.deepEqual(input.getPointerPosition(), { x: 40, y: 40 });
+
+  bounds = { left: 20, top: 10 };
+  target.dispatch("pointermove", { clientX: 140, clientY: 90 });
+  assert.deepEqual(input.getPointerPosition(), { x: 120, y: 80 });
+});
+
+test("browser pointer local position helper supports x/y bounds fallback", () => {
+  const target = {
+    getBoundingClientRect() {
+      return { x: 8, y: 13 };
+    }
+  };
+
+  assert.deepEqual(getBrowserPointerLocalPosition({ clientX: 28, clientY: 43 }, target), { x: 20, y: 30 });
+  assert.equal(getBrowserPointerLocalPosition({}, target), undefined);
 });
 
 test("browser pointer position bridge clears position on cancel, blur and detach", () => {

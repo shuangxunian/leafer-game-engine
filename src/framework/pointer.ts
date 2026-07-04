@@ -74,6 +74,17 @@ export class BrowserPointerButtonBridge {
 
 export type BrowserPointerPositionResolver = (event: Event) => PointerPosition | undefined;
 
+export type BrowserPointerLocalPositionTarget = {
+  getBoundingClientRect(): BrowserPointerLocalPositionBounds;
+};
+
+export type BrowserPointerLocalPositionBounds = Readonly<{
+  left?: number;
+  top?: number;
+  x?: number;
+  y?: number;
+}>;
+
 export class BrowserPointerPositionBridge {
   private attached = false;
 
@@ -132,6 +143,30 @@ function getBrowserPointerButton(event: Event): PointerButton | undefined {
   return undefined;
 }
 
+export function createBrowserPointerLocalPositionResolver(
+  target: BrowserPointerLocalPositionTarget
+): BrowserPointerPositionResolver {
+  return (event: Event) => getBrowserPointerLocalPosition(event, target);
+}
+
+export function getBrowserPointerLocalPosition(
+  event: Event,
+  target: BrowserPointerLocalPositionTarget
+): PointerPosition | undefined {
+  const position = getBrowserPointerPosition(event);
+  if (!position) return undefined;
+
+  const bounds = target.getBoundingClientRect();
+  const left = getBrowserPointerBoundsOffset(bounds.left, bounds.x);
+  const top = getBrowserPointerBoundsOffset(bounds.top, bounds.y);
+  if (left === undefined || top === undefined) return undefined;
+
+  return {
+    x: position.x - left,
+    y: position.y - top
+  };
+}
+
 function getBrowserPointerPosition(event: Event): PointerPosition | undefined {
   const pointerEvent = event as { clientX?: unknown; clientY?: unknown };
 
@@ -143,4 +178,13 @@ function getBrowserPointerPosition(event: Event): PointerPosition | undefined {
     x: pointerEvent.clientX,
     y: pointerEvent.clientY
   };
+}
+
+function getBrowserPointerBoundsOffset(primary: unknown, fallback: unknown): number | undefined {
+  const value = primary ?? fallback ?? 0;
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return undefined;
+  }
+
+  return value;
 }

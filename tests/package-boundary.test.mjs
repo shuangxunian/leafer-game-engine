@@ -802,14 +802,17 @@ test("responsive web runtime stage starts without platform wrapper scope", async
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.29.0.md", import.meta.url), "utf8");
   const resizeBridgePatch = await readFile(new URL("../docs/version/v0.29.2.md", import.meta.url), "utf8");
+  const pointerResizePatch = await readFile(new URL("../docs/version/v0.29.3.md", import.meta.url), "utf8");
   const runtimeIndex = await readFile(new URL("../src/runtime/index.ts", import.meta.url), "utf8");
   const browserResize = await readFile(new URL("../src/runtime/browser-resize.ts", import.meta.url), "utf8");
   const browserRuntime = await readFile(new URL("../src/runtime/browser-runtime.ts", import.meta.url), "utf8");
+  const pointerSource = await readFile(new URL("../src/framework/pointer.ts", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
   assert.equal(roadmap.includes("version/v0.29.0.md"), true);
   assert.equal(roadmap.includes("version/v0.29.2.md"), true);
+  assert.equal(roadmap.includes("version/v0.29.3.md"), true);
   assert.equal(roadmap.includes("responsive Web runtime"), true);
   assert.equal(stage.includes("Responsive Web Runtime Sprint"), true);
   assert.equal(stage.includes("does not add public package"), true);
@@ -835,14 +838,21 @@ test("responsive web runtime stage starts without platform wrapper scope", async
   assert.equal(browserResize.includes("../adapter/render-types.js"), true);
   assert.equal(browserRuntime.includes("resize?: boolean | BrowserRuntimeResizeOptions"), true);
   assert.equal(browserRuntime.includes("resizeBridge?.detach()"), true);
+  assert.equal(pointerResizePatch.includes("Pointer Coordinates After Resize"), true);
+  assert.equal(pointerResizePatch.includes("mount-local / viewport-local coordinates"), true);
+  assert.equal(pointerResizePatch.includes("does not add drag/drop state"), true);
+  assert.equal(pointerSource.includes("createBrowserPointerLocalPositionResolver"), true);
+  assert.equal(pointerSource.includes("getBoundingClientRect()"), true);
   assert.equal(publicApi.includes("`v0.29.0` starts the responsive Web runtime stage"), true);
   assert.equal(publicApi.includes("`v0.29.2` adds an opt-in browser resize bridge"), true);
+  assert.equal(publicApi.includes("`v0.29.3` adds pointer coordinate consistency after resize"), true);
   assert.equal(publicApi.includes("without adding new public package API"), true);
   assert.equal(publicApi.includes("pointer coordinate consistency after resize"), true);
   assert.equal(readme.includes("`0.29.x` 开始补 1.0 前需要的 responsive Web runtime"), true);
   assert.equal(readme.includes("`v0.29.1` 建立 render scene resize contract"), true);
   assert.equal(readme.includes("`v0.29.2` 建立 opt-in browser resize bridge"), true);
-  assert.equal(readme.includes("resize 后 pointer 坐标一致性和 desktop/mobile-ish 视口验证"), true);
+  assert.equal(readme.includes("`v0.29.3` 建立 resize 后仍读取最新 mount bounds 的 pointer local coordinate helper"), true);
+  assert.equal(readme.includes("desktop/mobile-ish 视口验证"), true);
   assert.equal(readme.includes("不做 responsive page builder、mobile app shell、launcher、gallery、SDK wrapper 或发布平台"), true);
 });
 
@@ -907,6 +917,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "clearSourceTargetSelection",
     "clearSourceTargetTarget",
     "createAudioRuntimeState",
+    "createBrowserPointerLocalPositionResolver",
     "createLevelLayout",
     "createSourceTargetSelectionState",
     "createTileMap",
@@ -931,6 +942,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "getEntityHitRect",
     "getAudioPlayback",
     "getAudioRuntime",
+    "getBrowserPointerLocalPosition",
     "getPointerButtonInputId",
     "getSpriteAnimationPlaybackFrameId",
     "getSpriteAnimationPlaybackFrameIndex",
@@ -977,6 +989,8 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.drainAudioRuntimeOperations, "function");
   assert.equal(typeof framework.getAudioPlayback, "function");
   assert.equal(typeof framework.getAudioRuntime, "function");
+  assert.equal(typeof framework.createBrowserPointerLocalPositionResolver, "function");
+  assert.equal(typeof framework.getBrowserPointerLocalPosition, "function");
   assert.equal(typeof framework.pointInRect, "function");
   assert.equal(typeof framework.pickTopEntityAtPoint, "function");
   assert.equal(typeof framework.createSourceTargetSelectionState, "function");
@@ -1109,7 +1123,7 @@ test("pour-sort example playable loop is routed and package-facing", async () =>
   assert.equal(sceneSource.includes("moves"), true);
   assert.equal(bootSource.includes("BrowserPointerPositionBridge"), true);
   assert.equal(bootSource.includes("BrowserPointerButtonBridge"), true);
-  assert.equal(bootSource.includes("getBoundingClientRect"), true);
+  assert.equal(bootSource.includes("createBrowserPointerLocalPositionResolver"), true);
   assert.equal(docs.includes("pointer-first puzzle example"), true);
   assert.equal(docs.includes("validate simple top-color pours in example-owned code"), true);
   assert.equal(docs.includes("render liquid color segments"), true);

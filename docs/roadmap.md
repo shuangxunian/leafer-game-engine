@@ -1258,3 +1258,7 @@
 第二批补 opt-in browser resize bridge：
 
 - [v0.29.2](version/v0.29.2.md)
+
+第三批补 resize 后 pointer local coordinate helper：
+
+- [v0.29.3](version/v0.29.3.md)

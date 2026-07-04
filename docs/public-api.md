@@ -122,6 +122,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.29.2` adds an opt-in browser resize bridge. The `/runtime` entrypoint now exports `BrowserResizeBridge`, `createBrowserResizeBridge(...)`, and related injected-observer types. `createBrowserRuntime(...)` accepts a `resize` option that can attach this bridge after mount and detach it on `stop()`. The bridge reads `ResizeObserver` entries or target dimensions and calls `RenderScene.resize(...)`; it does not add a responsive page builder, layout system, mobile app shell, SDK wrapper, launcher, gallery, marketplace, monetization, publishing workflow, or device compatibility matrix.
 
+`v0.29.3` adds pointer coordinate consistency after resize. The Node-safe `/framework` entrypoint now exports `createBrowserPointerLocalPositionResolver(target)` and `getBrowserPointerLocalPosition(event, target)`, which convert browser `clientX/clientY` into mount-local coordinates by reading the target bounds on each event. `examples/pour-sort` now consumes the shared resolver for pointer picking. This remains pointer coordinate plumbing, not drag/drop state, gesture recognition, multi-touch gameplay, editor selection handles, responsive layout rules, mobile app shell, SDK wrapper, launcher, gallery, marketplace, monetization, or publishing workflow.
+
 ---
 
 ## Package Entrypoints

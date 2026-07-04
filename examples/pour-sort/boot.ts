@@ -3,7 +3,8 @@ import { startSceneWithLifecycle } from "@shuangxunian/leafer-game-engine/runtim
 import {
   BrowserPointerButtonBridge,
   BrowserPointerPositionBridge,
-  InputSystem
+  InputSystem,
+  createBrowserPointerLocalPositionResolver
 } from "@shuangxunian/leafer-game-engine/framework";
 import { PourSortScene } from "./pour-sort-scene.js";
 
@@ -23,18 +24,11 @@ export async function bootPourSortExample(runtime: BrowserRuntime): Promise<void
   const target = document.getElementById("game-root");
   if (!target) throw new Error("Pour-sort mount target was not found.");
 
-  const pointerPosition = new BrowserPointerPositionBridge(input, target, (event) => {
-    const pointerEvent = event as { clientX?: unknown; clientY?: unknown };
-    if (typeof pointerEvent.clientX !== "number" || typeof pointerEvent.clientY !== "number") {
-      return undefined;
-    }
-
-    const rect = target.getBoundingClientRect();
-    return {
-      x: pointerEvent.clientX - rect.left,
-      y: pointerEvent.clientY - rect.top
-    };
-  });
+  const pointerPosition = new BrowserPointerPositionBridge(
+    input,
+    target,
+    createBrowserPointerLocalPositionResolver(target)
+  );
   const pointerButton = new BrowserPointerButtonBridge(input, target);
   pointerPosition.attach();
   pointerButton.attach();
