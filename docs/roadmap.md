@@ -1250,3 +1250,7 @@
 完成 real sprite / image rendering baseline 后，下一阶段建议补 responsive Web runtime，让容器尺寸变化、viewport 状态和 pointer 坐标转换在桌面和 mobile-ish 视口下保持一致：
 
 - [v0.29.0](version/v0.29.0.md)
+
+第一批先补 render scene resize contract：
+
+- [v0.29.1](version/v0.29.1.md)

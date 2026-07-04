@@ -153,3 +153,34 @@ test("leafer sprite adapter clears stale image source for fill-only assets", asy
   assert.equal(sprite.nativeNode.height, 12);
   assert.equal(sprite.nativeNode.cornerRadius, 6);
 });
+
+test("leafer render scene resize updates viewport state", async () => {
+  const adapter = await createAdapter();
+  const scene = adapter.createScene();
+
+  const viewport = scene.resize(375, 667);
+
+  assert.deepEqual(viewport, { width: 375, height: 667 });
+  assert.equal(scene.width, 375);
+  assert.equal(scene.height, 667);
+
+  viewport.width = 999;
+  assert.equal(scene.width, 375);
+});
+
+test("leafer render scene resize rejects invalid viewport dimensions", async () => {
+  const adapter = await createAdapter();
+  const scene = adapter.createScene();
+
+  assert.throws(
+    () => scene.resize(0, 640),
+    /Render scene viewport width must be a finite number greater than 0/
+  );
+  assert.throws(
+    () => scene.resize(960, Number.NaN),
+    /Render scene viewport height must be a finite number greater than 0/
+  );
+
+  assert.equal(scene.width, 960);
+  assert.equal(scene.height, 640);
+});

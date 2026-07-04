@@ -4,11 +4,13 @@ import type {
   RenderContainer,
   RenderNode,
   RenderScene,
+  RenderSceneViewport,
   RenderSceneLayers,
   RenderSpriteAsset,
   RenderSprite,
   RenderText
 } from "../render-types.js";
+import { createRenderSceneViewport } from "../render-types.js";
 
 type LeaferLikeNode = {
   x?: number;
@@ -20,6 +22,10 @@ type LeaferLikeNode = {
   scaleY?: number;
   visible?: boolean;
   destroy?: () => void;
+};
+
+type LeaferResizable = {
+  resize?: (size: RenderSceneViewport) => void;
 };
 
 class LeaferNodeWrapper implements RenderNode {
@@ -195,8 +201,9 @@ class LeaferSceneWrapper implements RenderScene {
       this.leafer.destroy();
     }
 
-    this.sceneWidth = element.clientWidth || 960;
-    this.sceneHeight = element.clientHeight || 640;
+    const viewport = createRenderSceneViewport(element.clientWidth || 960, element.clientHeight || 640);
+    this.sceneWidth = viewport.width;
+    this.sceneHeight = viewport.height;
 
     const leafer = new Leafer({
       view: element,
@@ -207,6 +214,14 @@ class LeaferSceneWrapper implements RenderScene {
 
     this.leafer = leafer;
     this.root.setContainer(leafer);
+  }
+
+  resize(width: number, height: number): RenderSceneViewport {
+    const viewport = createRenderSceneViewport(width, height);
+    this.sceneWidth = viewport.width;
+    this.sceneHeight = viewport.height;
+    (this.leafer as LeaferResizable | undefined)?.resize?.(viewport);
+    return { ...viewport };
   }
 
   destroy(): void {

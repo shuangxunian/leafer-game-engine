@@ -118,6 +118,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.29.0` starts the responsive Web runtime stage without adding new public package API. The stage focuses the next work on render scene resize behavior, browser resize bridging, pointer coordinate consistency after resize, DPR / high-density display documentation or minimal handling, and example verification across desktop and mobile-ish viewports. This remains runtime/adapter/example verification work, not a responsive page builder, visual layout editor, mobile app shell, WeChat SDK wrapper, launcher, gallery, marketplace, monetization, or publishing workflow.
 
+`v0.29.1` adds the render scene resize contract. The Node-safe `adapter/render-types` entrypoint now exposes `RenderSceneViewport`, `createRenderSceneViewport(width, height)`, and `getRenderSceneViewport(renderScene)`, and every `RenderScene` now has `resize(width, height)`. The Leafer adapter updates its viewport state and forwards valid sizes to native Leafer `resize(...)` when mounted. This is render/runtime contract work, not a browser resize observer, responsive page builder, layout editor, mobile app shell, SDK wrapper, launcher, gallery, marketplace, monetization, or publishing workflow.
+
 ---
 
 ## Package Entrypoints

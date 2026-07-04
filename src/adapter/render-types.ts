@@ -38,8 +38,32 @@ export interface RenderContainer extends RenderNode {
 
 export type RenderSceneLayers = Record<RenderSceneLayerName, RenderContainer>;
 
+export type RenderSceneViewport = {
+  readonly width: number;
+  readonly height: number;
+};
+
 export function getRenderSceneLayerNames(renderScene: Pick<RenderScene, "layers">): RenderSceneLayerName[] {
   return RENDER_SCENE_LAYER_ORDER.filter((layerName) => layerName in renderScene.layers);
+}
+
+export function createRenderSceneViewport(width: number, height: number): RenderSceneViewport {
+  return {
+    width: assertRenderSceneViewportDimension("width", width),
+    height: assertRenderSceneViewportDimension("height", height)
+  };
+}
+
+export function getRenderSceneViewport(renderScene: Pick<RenderScene, "width" | "height">): RenderSceneViewport {
+  return createRenderSceneViewport(renderScene.width, renderScene.height);
+}
+
+function assertRenderSceneViewportDimension(name: "width" | "height", value: number): number {
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new Error(`Render scene viewport ${name} must be a finite number greater than 0.`);
+  }
+
+  return value;
 }
 
 export interface RenderScene {
@@ -47,6 +71,7 @@ export interface RenderScene {
   readonly layers: RenderSceneLayers;
   readonly width: number;
   readonly height: number;
+  resize(width: number, height: number): RenderSceneViewport;
   mount(target: string | HTMLElement): void;
   destroy(): void;
 }

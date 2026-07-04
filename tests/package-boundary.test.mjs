@@ -824,8 +824,9 @@ test("responsive web runtime stage starts without platform wrapper scope", async
   assert.equal(publicApi.includes("`v0.29.0` starts the responsive Web runtime stage"), true);
   assert.equal(publicApi.includes("without adding new public package API"), true);
   assert.equal(publicApi.includes("pointer coordinate consistency after resize"), true);
-  assert.equal(readme.includes("`v0.29.0` Responsive Web Runtime Sprint"), true);
-  assert.equal(readme.includes("容器 resize、viewport 状态更新、resize 后 pointer 坐标一致性"), true);
+  assert.equal(readme.includes("`0.29.x` 开始补 1.0 前需要的 responsive Web runtime"), true);
+  assert.equal(readme.includes("`v0.29.1` 建立 render scene resize contract"), true);
+  assert.equal(readme.includes("browser resize bridge、resize 后 pointer 坐标一致性"), true);
   assert.equal(readme.includes("不做 responsive page builder、mobile app shell、launcher、gallery、SDK wrapper 或发布平台"), true);
 });
 
@@ -838,8 +839,21 @@ test("core package subpath can be imported by package name in Node", async () =>
 test("adapter render-types subpath exposes Node-safe render layer contract helpers", async () => {
   const renderTypes = await import(`${packageJson.name}/adapter/render-types`);
 
-  assertExports(renderTypes, ["RENDER_SCENE_LAYER_ORDER", "getRenderSceneLayerNames"]);
+  assertExports(renderTypes, [
+    "RENDER_SCENE_LAYER_ORDER",
+    "createRenderSceneViewport",
+    "getRenderSceneLayerNames",
+    "getRenderSceneViewport"
+  ]);
   assert.deepEqual(renderTypes.RENDER_SCENE_LAYER_ORDER, ["background", "world", "ui", "overlay"]);
+
+  const viewport = renderTypes.createRenderSceneViewport(320, 240);
+  assert.deepEqual(viewport, { width: 320, height: 240 });
+  assert.deepEqual(renderTypes.getRenderSceneViewport({ width: 800, height: 600 }), { width: 800, height: 600 });
+  assert.throws(
+    () => renderTypes.createRenderSceneViewport(-1, 240),
+    /Render scene viewport width must be a finite number greater than 0/
+  );
 });
 
 test("framework package subpath can be imported by package name in Node", async () => {
