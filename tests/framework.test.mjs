@@ -65,7 +65,11 @@ import {
   normalizePointerButton,
   pauseSpriteAnimationPlayback,
   resumeSpriteAnimationPlayback,
+  getSourceTargetSelectionSnapshot,
   getSourceTargetSelectionPair,
+  isSourceTargetSelectionReady,
+  replaceSourceTargetSelectionSource,
+  replaceSourceTargetSelectionTarget,
   selectSourceTargetSource,
   selectSourceTargetTarget,
   stopSpriteAnimationPlayback,
@@ -1092,6 +1096,13 @@ test("source-target selection tracks source, target and immutable phase changes"
   const empty = createSourceTargetSelectionState();
   assert.deepEqual(empty, { phase: "empty" });
   assert.equal(getSourceTargetSelectionPair(empty), undefined);
+  assert.equal(isSourceTargetSelectionReady(empty), false);
+  assert.deepEqual(getSourceTargetSelectionSnapshot(empty), {
+    phase: "empty",
+    source: undefined,
+    target: undefined,
+    isReady: false
+  });
 
   const sourceSelected = selectSourceTargetSource(empty, bottleA);
   assert.equal(empty.phase, "empty");
@@ -1107,6 +1118,7 @@ test("source-target selection tracks source, target and immutable phase changes"
   assert.equal(targetSelected.phase, "target-selected");
   assert.equal(targetSelected.source?.entity, bottleA);
   assert.equal(targetSelected.target?.entity, bottleB);
+  assert.equal(isSourceTargetSelectionReady(targetSelected), true);
 
   const pair = getSourceTargetSelectionPair(targetSelected);
   assert.equal(pair?.source.entity, bottleA);
@@ -1114,7 +1126,23 @@ test("source-target selection tracks source, target and immutable phase changes"
   assert.notEqual(pair?.source, targetSelected.source);
   assert.notEqual(pair?.target, targetSelected.target);
 
-  const nextSource = selectSourceTargetSource(targetSelected, bottleC);
+  const snapshot = getSourceTargetSelectionSnapshot(targetSelected);
+  assert.deepEqual(snapshot, {
+    phase: "target-selected",
+    source: {
+      entityId: bottleA.id,
+      entityName: "bottle-a"
+    },
+    target: {
+      entityId: bottleB.id,
+      entityName: "bottle-b"
+    },
+    isReady: true
+  });
+  assert.equal("entity" in snapshot.source, false);
+  assert.equal("entity" in snapshot.target, false);
+
+  const nextSource = replaceSourceTargetSelectionSource(targetSelected, bottleC);
   assert.equal(nextSource.phase, "source-selected");
   assert.equal(nextSource.source?.entity, bottleC);
   assert.equal(nextSource.target, undefined);
@@ -1143,6 +1171,12 @@ test("source-target selection reports invalid target transitions clearly", () =>
   assert.equal(sameEntitySelection.target?.entity, source);
 
   const targetSelected = selectSourceTargetTarget(sourceSelected, target);
+  const replacementTarget = replaceSourceTargetSelectionTarget(targetSelected, source, { allowSameEntity: true });
+  assert.equal(replacementTarget.phase, "target-selected");
+  assert.equal(replacementTarget.source?.entity, source);
+  assert.equal(replacementTarget.target?.entity, source);
+  assert.equal(targetSelected.target?.entity, target);
+
   const targetCleared = clearSourceTargetTarget(targetSelected);
   assert.deepEqual(targetCleared, {
     phase: "source-selected",

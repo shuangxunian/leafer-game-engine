@@ -130,6 +130,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.30.0` starts the drag/drop and selection hardening stage without adding new public package API. The stage focuses the next work on immutable selection snapshots, drag state bookkeeping, source-target action data, and pointer puzzle example hardening while keeping puzzle rules example-owned. It is not a gesture recognition system, multi-touch gameplay framework, editor selection layer, physics engine, water-sort rules engine, solver, launcher, gallery, marketplace, SDK wrapper, monetization, or publishing workflow.
 
+`v0.30.1` hardens the source-target selection helpers. The `/framework` entrypoint now exports `EntitySelectionSnapshotRef`, `SourceTargetSelectionSnapshot`, `getSourceTargetSelectionSnapshot(state)`, `isSourceTargetSelectionReady(state)`, `replaceSourceTargetSelectionSource(state, entity)`, and `replaceSourceTargetSelectionTarget(state, entity, options)`. These helpers provide copied selection snapshots, generic readiness checks, and explicit immutable replacement operations for pointer-first games. They do not add drag state, drop target resolution, puzzle rules, solver logic, gesture recognition, multi-touch gameplay, editor selection handles, launcher, gallery, SDK wrapper, monetization, or publishing workflow.
+
 ---
 
 ## Package Entrypoints

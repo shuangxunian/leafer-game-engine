@@ -6,6 +6,11 @@ export type EntitySelectionRef = Readonly<{
   entityName: string;
 }>;
 
+export type EntitySelectionSnapshotRef = Readonly<{
+  entityId: number;
+  entityName: string;
+}>;
+
 export type SourceTargetSelectionPhase = "empty" | "source-selected" | "target-selected";
 
 export type SourceTargetSelectionState = Readonly<{
@@ -17,6 +22,13 @@ export type SourceTargetSelectionState = Readonly<{
 export type SourceTargetSelectionPair = Readonly<{
   source: EntitySelectionRef;
   target: EntitySelectionRef;
+}>;
+
+export type SourceTargetSelectionSnapshot = Readonly<{
+  phase: SourceTargetSelectionPhase;
+  source?: EntitySelectionSnapshotRef;
+  target?: EntitySelectionSnapshotRef;
+  isReady: boolean;
 }>;
 
 export type SelectSourceTargetTargetOptions = Readonly<{
@@ -39,6 +51,13 @@ export function selectSourceTargetSource(
   };
 }
 
+export function replaceSourceTargetSelectionSource(
+  state: SourceTargetSelectionState,
+  entity: Entity
+): SourceTargetSelectionState {
+  return selectSourceTargetSource(state, entity);
+}
+
 export function selectSourceTargetTarget(
   state: SourceTargetSelectionState,
   entity: Entity,
@@ -57,6 +76,14 @@ export function selectSourceTargetTarget(
     source: copyEntitySelectionRef(state.source),
     target: createEntitySelectionRef(entity)
   };
+}
+
+export function replaceSourceTargetSelectionTarget(
+  state: SourceTargetSelectionState,
+  entity: Entity,
+  options: SelectSourceTargetTargetOptions = {}
+): SourceTargetSelectionState {
+  return selectSourceTargetTarget(state, entity, options);
 }
 
 export function clearSourceTargetTarget(state: SourceTargetSelectionState): SourceTargetSelectionState {
@@ -83,6 +110,21 @@ export function getSourceTargetSelectionPair(
   };
 }
 
+export function isSourceTargetSelectionReady(state: SourceTargetSelectionState): boolean {
+  return state.source !== undefined && state.target !== undefined;
+}
+
+export function getSourceTargetSelectionSnapshot(
+  state: SourceTargetSelectionState
+): SourceTargetSelectionSnapshot {
+  return {
+    phase: state.phase,
+    source: state.source ? createEntitySelectionSnapshotRef(state.source) : undefined,
+    target: state.target ? createEntitySelectionSnapshotRef(state.target) : undefined,
+    isReady: isSourceTargetSelectionReady(state)
+  };
+}
+
 export function createEntitySelectionRef(entity: Entity): EntitySelectionRef {
   return {
     entity,
@@ -94,6 +136,13 @@ export function createEntitySelectionRef(entity: Entity): EntitySelectionRef {
 function copyEntitySelectionRef(ref: EntitySelectionRef): EntitySelectionRef {
   return {
     entity: ref.entity,
+    entityId: ref.entityId,
+    entityName: ref.entityName
+  };
+}
+
+function createEntitySelectionSnapshotRef(ref: EntitySelectionRef): EntitySelectionSnapshotRef {
+  return {
     entityId: ref.entityId,
     entityName: ref.entityName
   };

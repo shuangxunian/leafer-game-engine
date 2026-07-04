@@ -1274,3 +1274,7 @@
 完成 responsive Web runtime baseline 后，下一阶段建议补 drag/drop and selection hardening，让选择、拖拽、source-target action 这类 pointer-first puzzle 交互更容易复用：
 
 - [v0.30.0](version/v0.30.0.md)
+
+第一批先补 selection state helper hardening：
+
+- [v0.30.1](version/v0.30.1.md)

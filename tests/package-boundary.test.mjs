@@ -906,7 +906,6 @@ test("drag drop and selection stage starts without puzzle rules or editor scope"
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.30.0");
   assert.equal(roadmap.includes("version/v0.30.0.md"), true);
   assert.equal(roadmap.includes("drag/drop and selection hardening"), true);
   assert.equal(stage.includes("Drag/Drop And Selection Sprint"), true);
@@ -933,11 +932,51 @@ test("drag drop and selection stage starts without puzzle rules or editor scope"
   assert.equal(publicApi.includes("immutable selection snapshots, drag state bookkeeping, source-target action data"), true);
   assert.equal(publicApi.includes("keeping puzzle rules example-owned"), true);
   assert.equal(publicApi.includes("not a gesture recognition system, multi-touch gameplay framework"), true);
-  assert.equal(readme.includes("`v0.30.0` Drag/Drop And Selection Sprint"), true);
+  assert.equal(readme.includes("`0.30.x` 开始补 drag/drop and selection hardening"), true);
   assert.equal(readme.includes("`0.29.x` responsive Web runtime 阶段都已经收口"), true);
   assert.equal(readme.includes("`0.30.x` 开始补 drag/drop and selection hardening"), true);
-  assert.equal(readme.includes("selection snapshot、drag state、source-target action"), true);
+  assert.equal(readme.includes("copied selection snapshot"), true);
+  assert.equal(readme.includes("后续继续补 drag state、source-target action"), true);
   assert.equal(readme.includes("不做 gesture system、multi-touch gameplay system、visual editor、launcher、gallery、SDK wrapper 或发布平台"), true);
+});
+
+test("selection state helper hardening stays generic and package-facing", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.30.0.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.30.1.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const selectionSource = await readFile(new URL("../src/framework/selection.ts", import.meta.url), "utf8");
+
+  assert.equal(packageJson.version, "0.30.1");
+  assert.equal(roadmap.includes("version/v0.30.1.md"), true);
+  assert.equal(roadmap.includes("selection state helper hardening"), true);
+  assert.equal(stage.includes("v0.30.1"), true);
+  assert.equal(patch.includes("Selection State Helper Hardening"), true);
+  assert.equal(patch.includes("EntitySelectionSnapshotRef"), true);
+  assert.equal(patch.includes("SourceTargetSelectionSnapshot"), true);
+  assert.equal(patch.includes("getSourceTargetSelectionSnapshot(state)"), true);
+  assert.equal(patch.includes("isSourceTargetSelectionReady(state)"), true);
+  assert.equal(patch.includes("replaceSourceTargetSelectionSource(state, entity)"), true);
+  assert.equal(patch.includes("replaceSourceTargetSelectionTarget(state, entity, options)"), true);
+  assert.equal(patch.includes("without exposing live entity objects"), true);
+  assert.equal(patch.includes("does not add drag state"), true);
+  assert.equal(patch.includes("water-sort rules"), true);
+  assert.equal(patch.includes("editor selection handles"), true);
+  assert.equal(selectionSource.includes("export type EntitySelectionSnapshotRef"), true);
+  assert.equal(selectionSource.includes("export type SourceTargetSelectionSnapshot"), true);
+  assert.equal(selectionSource.includes("export function getSourceTargetSelectionSnapshot"), true);
+  assert.equal(selectionSource.includes("export function isSourceTargetSelectionReady"), true);
+  assert.equal(selectionSource.includes("export function replaceSourceTargetSelectionSource"), true);
+  assert.equal(selectionSource.includes("export function replaceSourceTargetSelectionTarget"), true);
+  assert.equal(selectionSource.includes("pourTopColor"), false);
+  assert.equal(selectionSource.includes("isPourSortSolved"), false);
+  assert.equal(publicApi.includes("`v0.30.1` hardens the source-target selection helpers"), true);
+  assert.equal(publicApi.includes("copied selection snapshots, generic readiness checks"), true);
+  assert.equal(publicApi.includes("do not add drag state, drop target resolution, puzzle rules"), true);
+  assert.equal(readme.includes("`v0.30.1` Selection State Helper Hardening"), true);
+  assert.equal(readme.includes("copied selection snapshot、source-target readiness check"), true);
+  assert.equal(readme.includes("selection snapshot / readiness helper"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -1080,6 +1119,10 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.createSourceTargetSelectionState, "function");
   assert.equal(typeof framework.selectSourceTargetSource, "function");
   assert.equal(typeof framework.selectSourceTargetTarget, "function");
+  assert.equal(typeof framework.getSourceTargetSelectionSnapshot, "function");
+  assert.equal(typeof framework.isSourceTargetSelectionReady, "function");
+  assert.equal(typeof framework.replaceSourceTargetSelectionSource, "function");
+  assert.equal(typeof framework.replaceSourceTargetSelectionTarget, "function");
 });
 
 test("tooling package subpath can be imported by package name in Node", async () => {
