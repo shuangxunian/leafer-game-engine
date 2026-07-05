@@ -936,7 +936,8 @@ test("drag drop and selection stage starts without puzzle rules or editor scope"
   assert.equal(readme.includes("`0.29.x` responsive Web runtime 阶段都已经收口"), true);
   assert.equal(readme.includes("`0.30.x` 开始补 drag/drop and selection hardening"), true);
   assert.equal(readme.includes("copied selection snapshot"), true);
-  assert.equal(readme.includes("后续继续补 drag state、source-target action"), true);
+  assert.equal(readme.includes("active entity drag identity"), true);
+  assert.equal(readme.includes("后续继续补 source-target action"), true);
   assert.equal(readme.includes("不做 gesture system、multi-touch gameplay system、visual editor、launcher、gallery、SDK wrapper 或发布平台"), true);
 });
 
@@ -948,7 +949,6 @@ test("selection state helper hardening stays generic and package-facing", async 
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const selectionSource = await readFile(new URL("../src/framework/selection.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.30.1");
   assert.equal(roadmap.includes("version/v0.30.1.md"), true);
   assert.equal(roadmap.includes("selection state helper hardening"), true);
   assert.equal(stage.includes("v0.30.1"), true);
@@ -974,9 +974,56 @@ test("selection state helper hardening stays generic and package-facing", async 
   assert.equal(publicApi.includes("`v0.30.1` hardens the source-target selection helpers"), true);
   assert.equal(publicApi.includes("copied selection snapshots, generic readiness checks"), true);
   assert.equal(publicApi.includes("do not add drag state, drop target resolution, puzzle rules"), true);
-  assert.equal(readme.includes("`v0.30.1` Selection State Helper Hardening"), true);
+  assert.equal(readme.includes("在 `v0.30.1` 补齐 copied selection snapshot"), true);
   assert.equal(readme.includes("copied selection snapshot、source-target readiness check"), true);
   assert.equal(readme.includes("selection snapshot / readiness helper"), true);
+});
+
+test("entity drag state baseline stays generic and package-facing", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.30.0.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.30.2.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const dragSource = await readFile(new URL("../src/framework/drag.ts", import.meta.url), "utf8");
+
+  assert.equal(packageJson.version, "0.30.2");
+  assert.equal(roadmap.includes("version/v0.30.2.md"), true);
+  assert.equal(roadmap.includes("entity drag state baseline"), true);
+  assert.equal(stage.includes("v0.30.2"), true);
+  assert.equal(patch.includes("Entity Drag State Baseline"), true);
+  assert.equal(patch.includes("EntityDragPointerPosition"), true);
+  assert.equal(patch.includes("EntityDragSnapshot"), true);
+  assert.equal(patch.includes("EntityDragTransition"), true);
+  assert.equal(patch.includes("createEntityDragState()"), true);
+  assert.equal(patch.includes("startEntityDrag(state, entity, pointerPosition)"), true);
+  assert.equal(patch.includes("moveEntityDrag(state, pointerPosition)"), true);
+  assert.equal(patch.includes("completeEntityDrag(state, pointerPosition?)"), true);
+  assert.equal(patch.includes("cancelEntityDrag(state, pointerPosition?)"), true);
+  assert.equal(patch.includes("without exposing live entity"), true);
+  assert.equal(patch.includes("does not add drop target resolution"), true);
+  assert.equal(patch.includes("gesture recognition"), true);
+  assert.equal(patch.includes("physics simulation"), true);
+  assert.equal(patch.includes("water-sort rules"), true);
+  assert.equal(dragSource.includes("export type EntityDragPointerPosition"), true);
+  assert.equal(dragSource.includes("export type EntityDragSnapshot"), true);
+  assert.equal(dragSource.includes("export type EntityDragTransition"), true);
+  assert.equal(dragSource.includes("export function createEntityDragState"), true);
+  assert.equal(dragSource.includes("export function startEntityDrag"), true);
+  assert.equal(dragSource.includes("export function moveEntityDrag"), true);
+  assert.equal(dragSource.includes("export function completeEntityDrag"), true);
+  assert.equal(dragSource.includes("export function cancelEntityDrag"), true);
+  assert.equal(dragSource.includes("export function getEntityDragDelta"), true);
+  assert.equal(dragSource.includes("export function getEntityDragSnapshot"), true);
+  assert.equal(dragSource.includes("dropTarget"), false);
+  assert.equal(dragSource.includes("isPourSortSolved"), false);
+  assert.equal(publicApi.includes("`v0.30.2` adds the entity drag state baseline"), true);
+  assert.equal(publicApi.includes("generic active entity drag identity"), true);
+  assert.equal(publicApi.includes("deterministic completed/cancelled snapshots"), true);
+  assert.equal(publicApi.includes("do not add drop target resolution, source-target action validation"), true);
+  assert.equal(readme.includes("`v0.30.2` Entity Drag State Baseline"), true);
+  assert.equal(readme.includes("active entity drag identity、start/current pointer position"), true);
+  assert.equal(readme.includes("entity drag state baseline"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -1039,8 +1086,10 @@ test("framework package subpath can be imported by package name in Node", async 
     "bootstrapSceneFromConfig",
     "clearSourceTargetSelection",
     "clearSourceTargetTarget",
+    "completeEntityDrag",
     "createAudioRuntimeState",
     "createBrowserPointerLocalPositionResolver",
+    "createEntityDragState",
     "createLevelLayout",
     "createSourceTargetSelectionState",
     "createTileMap",
@@ -1062,6 +1111,9 @@ test("framework package subpath can be imported by package name in Node", async 
     "defineSpriteFrame",
     "dispatchAudioRuntimeOperation",
     "drainAudioRuntimeOperations",
+    "cancelEntityDrag",
+    "getEntityDragDelta",
+    "getEntityDragSnapshot",
     "getEntityHitRect",
     "getAudioPlayback",
     "getAudioRuntime",
@@ -1072,17 +1124,20 @@ test("framework package subpath can be imported by package name in Node", async 
     "getRuntimeServices",
     "getSourceTargetSelectionPair",
     "hitTestEntitiesAtPoint",
+    "isEntityDragActive",
     "isSpriteCapableRenderNode",
     "clampPositionToBounds",
     "limitMovementVector",
     "loadAssetManifestAsync",
     "normalizeKeyboardKey",
     "normalizePointerButton",
+    "moveEntityDrag",
     "pickTopEntityAtPoint",
     "pointInRect",
     "randomPositionInBounds",
     "selectSourceTargetSource",
     "selectSourceTargetTarget",
+    "startEntityDrag",
     "validateSceneConfig"
   ]);
   assert.equal(typeof framework.CollisionSystem.prototype.getCollisionPairs, "function");
@@ -1123,6 +1178,14 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.isSourceTargetSelectionReady, "function");
   assert.equal(typeof framework.replaceSourceTargetSelectionSource, "function");
   assert.equal(typeof framework.replaceSourceTargetSelectionTarget, "function");
+  assert.equal(typeof framework.createEntityDragState, "function");
+  assert.equal(typeof framework.startEntityDrag, "function");
+  assert.equal(typeof framework.moveEntityDrag, "function");
+  assert.equal(typeof framework.completeEntityDrag, "function");
+  assert.equal(typeof framework.cancelEntityDrag, "function");
+  assert.equal(typeof framework.isEntityDragActive, "function");
+  assert.equal(typeof framework.getEntityDragDelta, "function");
+  assert.equal(typeof framework.getEntityDragSnapshot, "function");
 });
 
 test("tooling package subpath can be imported by package name in Node", async () => {

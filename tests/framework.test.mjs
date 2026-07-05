@@ -27,8 +27,10 @@ import {
   addAudioPlayback,
   addRuntimeServices,
   advanceSpriteAnimationPlayback,
+  cancelEntityDrag,
   createAudioRuntimeState,
   createBrowserPointerLocalPositionResolver,
+  createEntityDragState,
   attachActorSpriteView,
   createRuntimeServices,
   createSourceTargetSelectionState,
@@ -46,6 +48,8 @@ import {
   getAudioRuntime,
   getAudioPlayback,
   getBrowserPointerLocalPosition,
+  getEntityDragDelta,
+  getEntityDragSnapshot,
   getEntityHitRect,
   getPointerButtonInputId,
   getSpriteAnimationPlaybackFrameId,
@@ -60,9 +64,12 @@ import {
   randomPositionInBounds,
   clearSourceTargetSelection,
   clearSourceTargetTarget,
+  completeEntityDrag,
   createHudText,
+  isEntityDragActive,
   normalizeKeyboardKey,
   normalizePointerButton,
+  moveEntityDrag,
   pauseSpriteAnimationPlayback,
   resumeSpriteAnimationPlayback,
   getSourceTargetSelectionSnapshot,
@@ -72,6 +79,7 @@ import {
   replaceSourceTargetSelectionTarget,
   selectSourceTargetSource,
   selectSourceTargetTarget,
+  startEntityDrag,
   stopSpriteAnimationPlayback,
   createLevelLayout,
   createTileMapLayerView,
@@ -1189,6 +1197,110 @@ test("source-target selection reports invalid target transitions clearly", () =>
   assert.notEqual(targetCleared.source, sourceSelected.source);
   assert.deepEqual(clearSourceTargetSelection(), { phase: "empty" });
   assert.deepEqual(clearSourceTargetTarget(createSourceTargetSelectionState()), { phase: "empty" });
+});
+
+test("entity drag state tracks active entity positions and copied snapshots", () => {
+  const scene = new Scene("EntityDragScene");
+  const card = scene.world.createEntity("card");
+
+  const idle = createEntityDragState();
+  assert.deepEqual(idle, { phase: "idle" });
+  assert.equal(isEntityDragActive(idle), false);
+  assert.deepEqual(getEntityDragDelta(idle), { x: 0, y: 0 });
+  assert.deepEqual(getEntityDragSnapshot(idle), {
+    phase: "idle",
+    subject: undefined,
+    startPosition: undefined,
+    currentPosition: undefined,
+    delta: { x: 0, y: 0 },
+    isActive: false
+  });
+
+  const started = startEntityDrag(idle, card, { x: 10, y: 20 });
+  assert.deepEqual(idle, { phase: "idle" });
+  assert.equal(started.phase, "dragging");
+  assert.equal(started.subject?.entity, card);
+  assert.equal(started.subject?.entityId, card.id);
+  assert.equal(started.subject?.entityName, "card");
+  assert.deepEqual(started.startPosition, { x: 10, y: 20 });
+  assert.deepEqual(started.currentPosition, { x: 10, y: 20 });
+  assert.equal(isEntityDragActive(started), true);
+
+  const moved = moveEntityDrag(started, { x: 18, y: 26 });
+  assert.notEqual(moved, started);
+  assert.notEqual(moved.subject, started.subject);
+  assert.notEqual(moved.startPosition, started.startPosition);
+  assert.equal(started.currentPosition?.x, 10);
+  assert.deepEqual(getEntityDragDelta(moved), { x: 8, y: 6 });
+
+  const activeSnapshot = getEntityDragSnapshot(moved);
+  assert.deepEqual(activeSnapshot, {
+    phase: "dragging",
+    subject: {
+      entityId: card.id,
+      entityName: "card"
+    },
+    startPosition: { x: 10, y: 20 },
+    currentPosition: { x: 18, y: 26 },
+    delta: { x: 8, y: 6 },
+    isActive: true
+  });
+  assert.equal("entity" in activeSnapshot.subject, false);
+});
+
+test("entity drag completion and cancellation return clean snapshots and reset state", () => {
+  const scene = new Scene("EntityDragFinishScene");
+  const token = scene.world.createEntity("token");
+  const started = startEntityDrag(createEntityDragState(), token, { x: 4, y: 5 });
+  const moved = moveEntityDrag(started, { x: 7, y: 9 });
+
+  const completed = completeEntityDrag(moved, { x: 10, y: 12 });
+  assert.deepEqual(completed.state, { phase: "idle" });
+  assert.deepEqual(completed.snapshot, {
+    phase: "completed",
+    subject: {
+      entityId: token.id,
+      entityName: "token"
+    },
+    startPosition: { x: 4, y: 5 },
+    currentPosition: { x: 10, y: 12 },
+    delta: { x: 6, y: 7 },
+    isActive: false
+  });
+  assert.equal(moved.phase, "dragging");
+  assert.deepEqual(moved.currentPosition, { x: 7, y: 9 });
+
+  const cancelled = cancelEntityDrag(moved);
+  assert.deepEqual(cancelled.state, { phase: "idle" });
+  assert.deepEqual(cancelled.snapshot, {
+    phase: "cancelled",
+    subject: {
+      entityId: token.id,
+      entityName: "token"
+    },
+    startPosition: { x: 4, y: 5 },
+    currentPosition: { x: 7, y: 9 },
+    delta: { x: 3, y: 4 },
+    isActive: false
+  });
+});
+
+test("entity drag state reports invalid transitions and coordinates clearly", () => {
+  const scene = new Scene("InvalidEntityDragScene");
+  const piece = scene.world.createEntity("piece");
+  const idle = createEntityDragState();
+
+  assert.throws(() => moveEntityDrag(idle, { x: 1, y: 1 }), /Cannot move an entity drag before it starts/);
+  assert.throws(() => completeEntityDrag(idle), /Cannot complete an entity drag before it starts/);
+  assert.throws(() => cancelEntityDrag(idle), /Cannot cancel an entity drag before it starts/);
+  assert.throws(
+    () => startEntityDrag(idle, piece, { x: Number.NaN, y: 0 }),
+    /Entity drag start position x must be a finite number/
+  );
+  assert.throws(
+    () => moveEntityDrag(startEntityDrag(idle, piece, { x: 0, y: 0 }), { x: 1, y: Infinity }),
+    /Entity drag current position y must be a finite number/
+  );
 });
 
 test("tile map data contract copies layers and supports tile lookup", () => {

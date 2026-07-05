@@ -3,6 +3,7 @@ export * from "./audio.js";
 export * from "./assets.js";
 export * from "./camera.js";
 export * from "./collision.js";
+export * from "./drag.js";
 export * from "./events.js";
 export * from "./factory.js";
 export * from "./game-flow.js";

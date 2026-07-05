@@ -1278,3 +1278,7 @@
 第一批先补 selection state helper hardening：
 
 - [v0.30.1](version/v0.30.1.md)
+
+第二批补 entity drag state baseline：
+
+- [v0.30.2](version/v0.30.2.md)
