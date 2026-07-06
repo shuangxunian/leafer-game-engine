@@ -140,6 +140,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.30.5` closes the drag/drop and selection hardening stage without adding new public package API. The stage leaves copied selection snapshots/readiness, immutable selection replacement helpers, entity drag state snapshots/deltas, source-target action envelopes, copied action snapshots, explicit allowed/blocked action results, and `pour-sort` example consumption in place. Drop target resolution, puzzle rules, solvers, undo/hint systems, gesture recognition, multi-touch gameplay, physics simulation, editor drag handles, editor selection handles, visual layout tools, launcher, gallery, marketplace, SDK wrapper, accounts, ads, monetization, mobile app shells, and publishing workflows remain outside the engine package.
 
+`v0.31.0` starts the UI / dialogue / scene flow stage without adding new public package API. The stage focuses the next work on dialogue text and choice data contracts, choice state helpers, screen-space prompt rendering, scene-flow transitions, and a narrative example while keeping story content and UI layout example-owned. It is not a visual novel scripting language, branching story editor, dialogue timeline editor, visual UI builder, scene graph editor, launcher, gallery, marketplace, SDK wrapper, account system, ads, monetization, analytics service, mobile app shell, or publishing workflow.
+
 ---
 
 ## Package Entrypoints

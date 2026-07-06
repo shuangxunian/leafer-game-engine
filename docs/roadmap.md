@@ -1294,3 +1294,7 @@
 收口 `0.30.x` drag/drop and selection hardening 阶段：
 
 - [v0.30.5](version/v0.30.5.md)
+
+完成 drag/drop and selection baseline 后，下一阶段建议补 UI / dialogue / scene flow，让 galgame / 互动叙事原型也有轻量 package-facing 基础：
+
+- [v0.31.0](version/v0.31.0.md)

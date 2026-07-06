@@ -897,7 +897,7 @@ test("responsive web runtime stage starts without platform wrapper scope", async
   assert.equal(readme.includes("并在 `v0.29.5` 收口该阶段"), true);
   assert.equal(readme.includes("drag/drop and selection hardening"), true);
   assert.equal(readme.includes("desktop/mobile-ish 视口验证"), true);
-  assert.equal(readme.includes("不做 gesture system、multi-touch gameplay system、visual editor、launcher、gallery、SDK wrapper 或发布平台"), true);
+  assert.equal(readme.includes("仍然不做 visual novel scripting language、branching story editor、visual editor、launcher、gallery、SDK wrapper 或发布平台"), true);
 });
 
 test("drag drop and selection stage starts without puzzle rules or editor scope", async () => {
@@ -939,7 +939,7 @@ test("drag drop and selection stage starts without puzzle rules or editor scope"
   assert.equal(readme.includes("active entity drag identity"), true);
   assert.equal(readme.includes("source-target action envelope"), true);
   assert.equal(readme.includes("在 `v0.30.4` 让 `pour-sort` 消费 selection snapshot 与 source-target action helper"), true);
-  assert.equal(readme.includes("不做 gesture system、multi-touch gameplay system、visual editor、launcher、gallery、SDK wrapper 或发布平台"), true);
+  assert.equal(readme.includes("仍然不做 visual novel scripting language、branching story editor、visual editor、launcher、gallery、SDK wrapper 或发布平台"), true);
 });
 
 test("selection state helper hardening stays generic and package-facing", async () => {
@@ -1126,7 +1126,6 @@ test("drag drop and selection stage closes without adding scope", async () => {
   const selectionSource = await readFile(new URL("../src/framework/selection.ts", import.meta.url), "utf8");
   const dragSource = await readFile(new URL("../src/framework/drag.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.30.5");
   assert.equal(roadmap.includes("version/v0.30.5.md"), true);
   assert.equal(roadmap.includes("收口 `0.30.x` drag/drop and selection hardening 阶段"), true);
   assert.equal(stage.includes("The `0.30.x` stage is complete through `v0.30.5`"), true);
@@ -1150,7 +1149,6 @@ test("drag drop and selection stage closes without adding scope", async () => {
   assert.equal(publicApi.includes("entity drag state snapshots/deltas"), true);
   assert.equal(publicApi.includes("source-target action envelopes"), true);
   assert.equal(publicApi.includes("explicit allowed/blocked action results"), true);
-  assert.equal(readme.includes("当前项目已经推进到 `v0.30.5` Drag/Drop And Selection Stage Closeout"), true);
   assert.equal(readme.includes("`0.30.x` drag/drop and selection hardening 阶段都已经收口"), true);
   assert.equal(readme.includes("并在 `v0.30.5` 收口该阶段"), true);
   assert.equal(readme.includes("drag/drop and selection stage closeout"), true);
@@ -1160,6 +1158,47 @@ test("drag drop and selection stage closes without adding scope", async () => {
   assert.equal(selectionSource.includes("isPourSortSolved"), false);
   assert.equal(dragSource.includes("pourTopColor"), false);
   assert.equal(dragSource.includes("isPourSortSolved"), false);
+});
+
+test("ui dialogue scene flow stage starts without editor or scripting scope", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.31.0.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  assert.equal(packageJson.version, "0.31.0");
+  assert.equal(roadmap.includes("version/v0.31.0.md"), true);
+  assert.equal(roadmap.includes("UI / dialogue / scene flow"), true);
+  assert.equal(roadmap.includes("galgame / 互动叙事原型"), true);
+  assert.equal(stage.includes("UI / Dialogue / Scene Flow Sprint"), true);
+  assert.equal(stage.includes("does not add public package"), true);
+  assert.equal(stage.includes("0.30.x` closed the drag/drop and selection hardening baseline"), true);
+  assert.equal(stage.includes("dialogue text, choices, and scene/flow"), true);
+  assert.equal(stage.includes("screen-space HUD text through `createHudText(...)`"), true);
+  assert.equal(stage.includes("`GameFlow` for ready/running/paused/ended-style state"), true);
+  assert.equal(stage.includes("Dialogue And Choice Data Contract"), true);
+  assert.equal(stage.includes("Choice State And Selection Helpers"), true);
+  assert.equal(stage.includes("Screen-Space Prompt Rendering"), true);
+  assert.equal(stage.includes("Scene Flow And Narrative Example"), true);
+  assert.equal(stage.includes("visual novel scripting language"), true);
+  assert.equal(stage.includes("branching story editor"), true);
+  assert.equal(stage.includes("visual UI builder"), true);
+  assert.equal(stage.includes("launcher, gallery, marketplace"), true);
+  assert.equal(stage.includes("v0.31.1"), true);
+  assert.equal(stage.includes("v0.31.6"), true);
+  assert.equal(publicApi.includes("`v0.31.0` starts the UI / dialogue / scene flow stage"), true);
+  assert.equal(publicApi.includes("without adding new public package API"), true);
+  assert.equal(publicApi.includes("dialogue text and choice data contracts"), true);
+  assert.equal(publicApi.includes("screen-space prompt rendering"), true);
+  assert.equal(publicApi.includes("keeping story content and UI layout example-owned"), true);
+  assert.equal(publicApi.includes("not a visual novel scripting language"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.31.0` UI / Dialogue / Scene Flow Sprint"), true);
+  assert.equal(readme.includes("`0.31.x` 开始补 UI / dialogue / scene flow"), true);
+  assert.equal(readme.includes("dialogue text / choice data contract"), true);
+  assert.equal(readme.includes("choice state helper"), true);
+  assert.equal(readme.includes("screen-space prompt rendering"), true);
+  assert.equal(readme.includes("narrative example"), true);
+  assert.equal(readme.includes("visual novel scripting language、branching story editor"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
