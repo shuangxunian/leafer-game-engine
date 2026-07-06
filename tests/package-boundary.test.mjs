@@ -1194,7 +1194,7 @@ test("ui dialogue scene flow stage starts without editor or scripting scope", as
   assert.equal(readme.includes("`0.31.x` 开始补 UI / dialogue / scene flow"), true);
   assert.equal(readme.includes("dialogue text / choice data contract"), true);
   assert.equal(readme.includes("choice state helper"), true);
-  assert.equal(readme.includes("screen-space prompt rendering"), true);
+  assert.equal(readme.includes("screen-space prompt view"), true);
   assert.equal(readme.includes("narrative example"), true);
   assert.equal(readme.includes("visual novel scripting language、branching story editor"), true);
 });
@@ -1248,7 +1248,6 @@ test("dialogue choice state helper baseline stays package-facing", async () => {
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.31.2");
   assert.equal(roadmap.includes("version/v0.31.2.md"), true);
   assert.equal(roadmap.includes("choice state helper baseline"), true);
   assert.equal(patch.includes("Choice State Helper Baseline"), true);
@@ -1271,7 +1270,6 @@ test("dialogue choice state helper baseline stays package-facing", async () => {
   assert.equal(publicApi.includes("selectDialogueChoice(state, choiceId)"), true);
   assert.equal(publicApi.includes("prompt-owned choice validation"), true);
   assert.equal(publicApi.includes("do not add scene transitions, story graph traversal"), true);
-  assert.equal(readme.includes("当前项目已经推进到 `v0.31.2` Choice State Helper Baseline"), true);
   assert.equal(readme.includes("在 `v0.31.2` 补齐 choice state helper baseline"), true);
   assert.equal(readme.includes("dialogue choice state helper"), true);
   assert.equal(dialogueSource.includes("export type DialogueChoiceStatePhase"), true);
@@ -1285,6 +1283,41 @@ test("dialogue choice state helper baseline stays package-facing", async () => {
   assert.equal(dialogueSource.includes("export function getResolvedDialogueChoice"), true);
   assert.equal(dialogueSource.includes("export function getDialogueChoiceStateSnapshot"), true);
   assert.equal(dialogueSource.includes("script"), false);
+  assert.equal(dialogueSource.includes("editor"), false);
+  assert.equal(dialogueSource.includes("story graph"), false);
+});
+
+test("dialogue prompt view baseline stays package-facing", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.31.3.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
+
+  assert.equal(packageJson.version, "0.31.3");
+  assert.equal(roadmap.includes("version/v0.31.3.md"), true);
+  assert.equal(roadmap.includes("screen-space prompt view baseline"), true);
+  assert.equal(patch.includes("Screen-Space Prompt View Baseline"), true);
+  assert.equal(patch.includes("DialoguePromptViewOptions"), true);
+  assert.equal(patch.includes("DialoguePromptView"), true);
+  assert.equal(patch.includes("createDialoguePromptView(renderAdapter, renderScene, options)"), true);
+  assert.equal(patch.includes("existing HUD text helper"), true);
+  assert.equal(patch.includes("This is a screen-space prompt view baseline only"), true);
+  assert.equal(patch.includes("does not add a visual UI"), true);
+  assert.equal(patch.includes("visual novel scripting"), true);
+  assert.equal(patch.includes("branching story editor"), true);
+  assert.equal(publicApi.includes("`v0.31.3` adds the screen-space prompt view baseline"), true);
+  assert.equal(publicApi.includes("DialoguePromptViewOptions"), true);
+  assert.equal(publicApi.includes("createDialoguePromptView(renderAdapter, renderScene, options)"), true);
+  assert.equal(publicApi.includes("builds on `createHudText(...)`"), true);
+  assert.equal(publicApi.includes("does not add a visual UI builder, layout engine"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.31.3` Screen-Space Prompt View Baseline"), true);
+  assert.equal(readme.includes("在 `v0.31.3` 补齐 screen-space prompt view baseline"), true);
+  assert.equal(readme.includes("dialogue prompt screen-space view helper"), true);
+  assert.equal(dialogueSource.includes("export type DialoguePromptViewOptions"), true);
+  assert.equal(dialogueSource.includes("export type DialoguePromptView"), true);
+  assert.equal(dialogueSource.includes("export function createDialoguePromptView"), true);
+  assert.equal(dialogueSource.includes("visual novel"), false);
   assert.equal(dialogueSource.includes("editor"), false);
   assert.equal(dialogueSource.includes("story graph"), false);
 });
@@ -1356,6 +1389,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "createAudioRuntimeState",
     "createBrowserPointerLocalPositionResolver",
     "createDialogueChoiceState",
+    "createDialoguePromptView",
     "defineDialogueChoice",
     "defineDialogueLine",
     "defineDialoguePrompt",
@@ -1479,6 +1513,7 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.defineDialoguePrompt, "function");
   assert.equal(typeof framework.getDialoguePromptSnapshot, "function");
   assert.equal(typeof framework.createDialogueChoiceState, "function");
+  assert.equal(typeof framework.createDialoguePromptView, "function");
   assert.equal(typeof framework.selectDialogueChoice, "function");
   assert.equal(typeof framework.clearDialogueChoiceSelection, "function");
   assert.equal(typeof framework.resolveDialogueChoiceSelection, "function");

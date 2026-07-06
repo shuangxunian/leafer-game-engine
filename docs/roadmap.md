@@ -1306,3 +1306,7 @@
 第二批补 choice state helper baseline：
 
 - [v0.31.2](version/v0.31.2.md)
+
+第三批补 screen-space prompt view baseline：
+
+- [v0.31.3](version/v0.31.3.md)

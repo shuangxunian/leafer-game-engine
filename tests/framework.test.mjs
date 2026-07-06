@@ -36,6 +36,7 @@ import {
   defineDialogueChoice,
   defineDialogueLine,
   defineDialoguePrompt,
+  createDialoguePromptView,
   createDialogueChoiceState,
   createEntityDragState,
   attachActorSpriteView,
@@ -3121,6 +3122,123 @@ test("hud text helper can target the overlay layer and initial visibility", () =
   assert.equal(node.visible, false);
   assert.deepEqual(uiChildren, []);
   assert.deepEqual(overlayChildren, [node]);
+});
+
+test("dialogue prompt view creates screen-space line and choice text nodes", () => {
+  const uiChildren = [];
+  const overlayChildren = [];
+  const renderAdapter = createFakeTextRenderAdapter();
+  const renderScene = createFakeLayeredRenderScene(uiChildren, overlayChildren);
+  const prompt = defineDialoguePrompt({
+    line: {
+      id: "start",
+      speaker: "Guide",
+      text: "Choose a route."
+    },
+    choices: [
+      {
+        id: "forest",
+        label: "Forest"
+      },
+      {
+        id: "town",
+        label: "Town"
+      }
+    ]
+  });
+
+  const view = createDialoguePromptView(renderAdapter, renderScene, {
+    prompt,
+    x: 24,
+    y: 40,
+    choiceStartY: 96,
+    choiceGap: 30,
+    lineFontSize: 20,
+    choiceFontSize: 16,
+    layer: "overlay"
+  });
+
+  assert.equal(view.line.text, "Guide: Choose a route.");
+  assert.equal(view.line.x, 24);
+  assert.equal(view.line.y, 40);
+  assert.equal(view.line.fontSize, 20);
+  assert.equal(view.choices.length, 2);
+  assert.equal(view.choices[0].text, "Forest");
+  assert.equal(view.choices[0].x, 24);
+  assert.equal(view.choices[0].y, 96);
+  assert.equal(view.choices[0].fontSize, 16);
+  assert.equal(view.choices[1].text, "Town");
+  assert.equal(view.choices[1].y, 126);
+  assert.deepEqual(uiChildren, []);
+  assert.deepEqual(overlayChildren, [view.line, ...view.choices]);
+
+  const snapshot = view.getPromptSnapshot();
+  assert.deepEqual(snapshot, prompt);
+  assert.notEqual(snapshot, prompt);
+  assert.notEqual(snapshot.choices, prompt.choices);
+});
+
+test("dialogue prompt view updates prompt text and visibility deterministically", () => {
+  const uiChildren = [];
+  const overlayChildren = [];
+  const renderAdapter = createFakeTextRenderAdapter();
+  const renderScene = createFakeLayeredRenderScene(uiChildren, overlayChildren);
+  const view = createDialoguePromptView(renderAdapter, renderScene, {
+    prompt: defineDialoguePrompt({
+      line: {
+        id: "start",
+        text: "Choose a route."
+      },
+      choices: [
+        {
+          id: "forest",
+          label: "Forest"
+        }
+      ]
+    }),
+    x: 10,
+    y: 20,
+    choiceStartY: 50
+  });
+
+  view.setPrompt(
+    defineDialoguePrompt({
+      line: {
+        id: "next",
+        speaker: "Guide",
+        text: "Pick again."
+      },
+      choices: [
+        {
+          id: "left",
+          label: "Left"
+        },
+        {
+          id: "right",
+          label: "Right"
+        }
+      ]
+    })
+  );
+
+  assert.equal(view.line.text, "Guide: Pick again.");
+  assert.equal(view.choices.length, 2);
+  assert.equal(view.choices[0].text, "Left");
+  assert.equal(view.choices[0].y, 50);
+  assert.equal(view.choices[1].text, "Right");
+  assert.equal(view.choices[1].y, 78);
+  assert.deepEqual(uiChildren, [view.line, ...view.choices]);
+  assert.deepEqual(overlayChildren, []);
+
+  view.setVisible(false);
+  assert.equal(view.line.visible, false);
+  assert.equal(view.choices[0].visible, false);
+  assert.equal(view.choices[1].visible, false);
+
+  view.setVisible(true);
+  assert.equal(view.line.visible, true);
+  assert.equal(view.choices[0].visible, true);
+  assert.equal(view.choices[1].visible, true);
 });
 
 test("camera system maps world layer from position and zoom", () => {
