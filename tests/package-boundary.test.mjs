@@ -1207,7 +1207,6 @@ test("dialogue choice data contract baseline stays package-facing", async () => 
   const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
   const frameworkIndex = await readFile(new URL("../src/framework/index.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.31.1");
   assert.equal(roadmap.includes("version/v0.31.1.md"), true);
   assert.equal(roadmap.includes("dialogue text / choice data contract baseline"), true);
   assert.equal(patch.includes("Dialogue Text / Choice Data Contract Baseline"), true);
@@ -1227,7 +1226,6 @@ test("dialogue choice data contract baseline stays package-facing", async () => 
   assert.equal(publicApi.includes("defineDialoguePrompt(input)"), true);
   assert.equal(publicApi.includes("duplicate choice id validation"), true);
   assert.equal(publicApi.includes("do not add choice selection state, scene transitions"), true);
-  assert.equal(readme.includes("当前项目已经推进到 `v0.31.1` Dialogue Text / Choice Data Contract Baseline"), true);
   assert.equal(readme.includes("在 `v0.31.1` 补齐 dialogue text / choice data contract baseline"), true);
   assert.equal(readme.includes("dialogue line / choice / prompt data contract"), true);
   assert.equal(frameworkIndex.includes('export * from "./dialogue.js"'), true);
@@ -1238,6 +1236,54 @@ test("dialogue choice data contract baseline stays package-facing", async () => 
   assert.equal(dialogueSource.includes("export function defineDialogueChoice"), true);
   assert.equal(dialogueSource.includes("export function defineDialoguePrompt"), true);
   assert.equal(dialogueSource.includes("export function getDialoguePromptSnapshot"), true);
+  assert.equal(dialogueSource.includes("script"), false);
+  assert.equal(dialogueSource.includes("editor"), false);
+  assert.equal(dialogueSource.includes("story graph"), false);
+});
+
+test("dialogue choice state helper baseline stays package-facing", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.31.2.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
+
+  assert.equal(packageJson.version, "0.31.2");
+  assert.equal(roadmap.includes("version/v0.31.2.md"), true);
+  assert.equal(roadmap.includes("choice state helper baseline"), true);
+  assert.equal(patch.includes("Choice State Helper Baseline"), true);
+  assert.equal(patch.includes("DialogueChoiceStatePhase"), true);
+  assert.equal(patch.includes("DialogueChoiceState"), true);
+  assert.equal(patch.includes("DialogueChoiceStateSnapshot"), true);
+  assert.equal(patch.includes("createDialogueChoiceState(prompt)"), true);
+  assert.equal(patch.includes("selectDialogueChoice(state, choiceId)"), true);
+  assert.equal(patch.includes("clearDialogueChoiceSelection(state)"), true);
+  assert.equal(patch.includes("resolveDialogueChoiceSelection(state)"), true);
+  assert.equal(patch.includes("getSelectedDialogueChoice(state)"), true);
+  assert.equal(patch.includes("getResolvedDialogueChoice(state)"), true);
+  assert.equal(patch.includes("getDialogueChoiceStateSnapshot(state)"), true);
+  assert.equal(patch.includes("This is a choice state helper baseline only"), true);
+  assert.equal(patch.includes("does not add scene transitions"), true);
+  assert.equal(patch.includes("visual novel scripting"), true);
+  assert.equal(patch.includes("branching story"), true);
+  assert.equal(publicApi.includes("`v0.31.2` adds the choice state helper baseline"), true);
+  assert.equal(publicApi.includes("DialogueChoiceStateSnapshot"), true);
+  assert.equal(publicApi.includes("selectDialogueChoice(state, choiceId)"), true);
+  assert.equal(publicApi.includes("prompt-owned choice validation"), true);
+  assert.equal(publicApi.includes("do not add scene transitions, story graph traversal"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.31.2` Choice State Helper Baseline"), true);
+  assert.equal(readme.includes("在 `v0.31.2` 补齐 choice state helper baseline"), true);
+  assert.equal(readme.includes("dialogue choice state helper"), true);
+  assert.equal(dialogueSource.includes("export type DialogueChoiceStatePhase"), true);
+  assert.equal(dialogueSource.includes("export type DialogueChoiceState"), true);
+  assert.equal(dialogueSource.includes("export type DialogueChoiceStateSnapshot"), true);
+  assert.equal(dialogueSource.includes("export function createDialogueChoiceState"), true);
+  assert.equal(dialogueSource.includes("export function selectDialogueChoice"), true);
+  assert.equal(dialogueSource.includes("export function clearDialogueChoiceSelection"), true);
+  assert.equal(dialogueSource.includes("export function resolveDialogueChoiceSelection"), true);
+  assert.equal(dialogueSource.includes("export function getSelectedDialogueChoice"), true);
+  assert.equal(dialogueSource.includes("export function getResolvedDialogueChoice"), true);
+  assert.equal(dialogueSource.includes("export function getDialogueChoiceStateSnapshot"), true);
   assert.equal(dialogueSource.includes("script"), false);
   assert.equal(dialogueSource.includes("editor"), false);
   assert.equal(dialogueSource.includes("story graph"), false);
@@ -1303,11 +1349,13 @@ test("framework package subpath can be imported by package name in Node", async 
     "addRuntimeServices",
     "attachActorSpriteView",
     "bootstrapSceneFromConfig",
+    "clearDialogueChoiceSelection",
     "clearSourceTargetSelection",
     "clearSourceTargetTarget",
     "completeEntityDrag",
     "createAudioRuntimeState",
     "createBrowserPointerLocalPositionResolver",
+    "createDialogueChoiceState",
     "defineDialogueChoice",
     "defineDialogueLine",
     "defineDialoguePrompt",
@@ -1342,14 +1390,19 @@ test("framework package subpath can be imported by package name in Node", async 
     "getAudioPlayback",
     "getAudioRuntime",
     "getBrowserPointerLocalPosition",
+    "getDialogueChoiceStateSnapshot",
     "getDialoguePromptSnapshot",
     "getPointerButtonInputId",
+    "getResolvedDialogueChoice",
     "getSpriteAnimationPlaybackFrameId",
     "getSpriteAnimationPlaybackFrameIndex",
     "getRuntimeServices",
+    "getSelectedDialogueChoice",
     "getSourceTargetActionSnapshot",
     "getSourceTargetSelectionPair",
     "hitTestEntitiesAtPoint",
+    "isDialogueChoiceResolved",
+    "isDialogueChoiceSelected",
     "isEntityDragActive",
     "isSpriteCapableRenderNode",
     "isSourceTargetActionAllowed",
@@ -1362,6 +1415,8 @@ test("framework package subpath can be imported by package name in Node", async 
     "pickTopEntityAtPoint",
     "pointInRect",
     "randomPositionInBounds",
+    "resolveDialogueChoiceSelection",
+    "selectDialogueChoice",
     "selectSourceTargetSource",
     "selectSourceTargetTarget",
     "startEntityDrag",
@@ -1423,6 +1478,15 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.defineDialogueChoice, "function");
   assert.equal(typeof framework.defineDialoguePrompt, "function");
   assert.equal(typeof framework.getDialoguePromptSnapshot, "function");
+  assert.equal(typeof framework.createDialogueChoiceState, "function");
+  assert.equal(typeof framework.selectDialogueChoice, "function");
+  assert.equal(typeof framework.clearDialogueChoiceSelection, "function");
+  assert.equal(typeof framework.resolveDialogueChoiceSelection, "function");
+  assert.equal(typeof framework.getSelectedDialogueChoice, "function");
+  assert.equal(typeof framework.getResolvedDialogueChoice, "function");
+  assert.equal(typeof framework.isDialogueChoiceSelected, "function");
+  assert.equal(typeof framework.isDialogueChoiceResolved, "function");
+  assert.equal(typeof framework.getDialogueChoiceStateSnapshot, "function");
 });
 
 test("tooling package subpath can be imported by package name in Node", async () => {

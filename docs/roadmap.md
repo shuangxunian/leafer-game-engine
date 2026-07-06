@@ -1302,3 +1302,7 @@
 第一批先补 dialogue text / choice data contract baseline：
 
 - [v0.31.1](version/v0.31.1.md)
+
+第二批补 choice state helper baseline：
+
+- [v0.31.2](version/v0.31.2.md)

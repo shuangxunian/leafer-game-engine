@@ -32,9 +32,11 @@ import {
   cancelEntityDrag,
   createAudioRuntimeState,
   createBrowserPointerLocalPositionResolver,
+  clearDialogueChoiceSelection,
   defineDialogueChoice,
   defineDialogueLine,
   defineDialoguePrompt,
+  createDialogueChoiceState,
   createEntityDragState,
   attachActorSpriteView,
   createRuntimeServices,
@@ -53,7 +55,10 @@ import {
   getAudioRuntime,
   getAudioPlayback,
   getBrowserPointerLocalPosition,
+  getDialogueChoiceStateSnapshot,
   getDialoguePromptSnapshot,
+  getResolvedDialogueChoice,
+  getSelectedDialogueChoice,
   getEntityDragDelta,
   getEntityDragSnapshot,
   getEntityHitRect,
@@ -84,9 +89,13 @@ import {
   getSourceTargetActionSnapshot,
   getSourceTargetSelectionSnapshot,
   getSourceTargetSelectionPair,
+  isDialogueChoiceResolved,
+  isDialogueChoiceSelected,
   isSourceTargetSelectionReady,
   replaceSourceTargetSelectionSource,
   replaceSourceTargetSelectionTarget,
+  resolveDialogueChoiceSelection,
+  selectDialogueChoice,
   selectSourceTargetSource,
   selectSourceTargetTarget,
   startEntityDrag,
@@ -1392,6 +1401,172 @@ test("dialogue prompt data contract reports invalid fields clearly", () => {
       ]
     }),
     /Dialogue prompt choice id "repeat" must be unique/
+  );
+});
+
+test("dialogue choice state tracks selected choice id with copied prompt snapshots", () => {
+  const prompt = defineDialoguePrompt({
+    line: {
+      id: "start",
+      text: "Choose a route."
+    },
+    choices: [
+      {
+        id: " forest ",
+        label: "Forest",
+        nextId: "forest-entry"
+      },
+      {
+        id: "town",
+        label: "Town"
+      }
+    ]
+  });
+
+  const empty = createDialogueChoiceState(prompt);
+  assert.deepEqual(empty, {
+    phase: "empty",
+    prompt
+  });
+  assert.equal(isDialogueChoiceSelected(empty), false);
+  assert.equal(isDialogueChoiceResolved(empty), false);
+  assert.equal(getSelectedDialogueChoice(empty), undefined);
+  assert.equal(getResolvedDialogueChoice(empty), undefined);
+
+  const emptySnapshot = getDialogueChoiceStateSnapshot(empty);
+  assert.deepEqual(emptySnapshot, {
+    phase: "empty",
+    prompt,
+    selectedChoiceId: undefined,
+    resolvedChoice: undefined,
+    isSelected: false,
+    isResolved: false
+  });
+  assert.notEqual(emptySnapshot.prompt, prompt);
+  assert.notEqual(emptySnapshot.prompt.line, prompt.line);
+  assert.notEqual(emptySnapshot.prompt.choices, prompt.choices);
+
+  const selected = selectDialogueChoice(empty, " forest ");
+  assert.equal(empty.phase, "empty");
+  assert.deepEqual(selected, {
+    phase: "choice-selected",
+    prompt,
+    selectedChoiceId: "forest"
+  });
+  assert.equal(isDialogueChoiceSelected(selected), true);
+  assert.equal(isDialogueChoiceResolved(selected), false);
+  assert.deepEqual(getSelectedDialogueChoice(selected), {
+    id: "forest",
+    label: "Forest",
+    nextId: "forest-entry"
+  });
+
+  const selectedChoice = getSelectedDialogueChoice(selected);
+  assert.notEqual(selectedChoice, selected.prompt.choices[0]);
+
+  const selectedSnapshot = getDialogueChoiceStateSnapshot(selected);
+  assert.deepEqual(selectedSnapshot, {
+    phase: "choice-selected",
+    prompt,
+    selectedChoiceId: "forest",
+    resolvedChoice: undefined,
+    isSelected: true,
+    isResolved: false
+  });
+});
+
+test("dialogue choice state clears and resolves selected choices deterministically", () => {
+  const prompt = defineDialoguePrompt({
+    line: {
+      id: "start",
+      text: "Choose a route."
+    },
+    choices: [
+      {
+        id: "forest",
+        label: "Forest",
+        nextId: "forest-entry"
+      },
+      {
+        id: "town",
+        label: "Town"
+      }
+    ]
+  });
+
+  const empty = createDialogueChoiceState(prompt);
+  const selected = selectDialogueChoice(empty, "town");
+  const cleared = clearDialogueChoiceSelection(selected);
+
+  assert.deepEqual(cleared, {
+    phase: "empty",
+    prompt
+  });
+  assert.notEqual(cleared.prompt, selected.prompt);
+  assert.equal(getSelectedDialogueChoice(cleared), undefined);
+
+  const resolved = resolveDialogueChoiceSelection(selected);
+  assert.deepEqual(resolved, {
+    phase: "choice-resolved",
+    prompt,
+    selectedChoiceId: "town",
+    resolvedChoice: {
+      id: "town",
+      label: "Town"
+    }
+  });
+  assert.equal(isDialogueChoiceSelected(resolved), true);
+  assert.equal(isDialogueChoiceResolved(resolved), true);
+  assert.deepEqual(getResolvedDialogueChoice(resolved), {
+    id: "town",
+    label: "Town"
+  });
+
+  const resolvedChoice = getResolvedDialogueChoice(resolved);
+  assert.notEqual(resolvedChoice, resolved.resolvedChoice);
+
+  const resolvedSnapshot = getDialogueChoiceStateSnapshot(resolved);
+  assert.deepEqual(resolvedSnapshot, {
+    phase: "choice-resolved",
+    prompt,
+    selectedChoiceId: "town",
+    resolvedChoice: {
+      id: "town",
+      label: "Town"
+    },
+    isSelected: true,
+    isResolved: true
+  });
+  assert.notEqual(resolvedSnapshot.resolvedChoice, resolved.resolvedChoice);
+});
+
+test("dialogue choice state reports invalid transitions clearly", () => {
+  const prompt = defineDialoguePrompt({
+    line: {
+      id: "start",
+      text: "Choose a route."
+    },
+    choices: [
+      {
+        id: "forest",
+        label: "Forest"
+      }
+    ]
+  });
+
+  const empty = createDialogueChoiceState(prompt);
+
+  assert.throws(
+    () => selectDialogueChoice(empty, " "),
+    /Dialogue choice selection id must be a non-empty string/
+  );
+  assert.throws(
+    () => selectDialogueChoice(empty, "missing"),
+    /Dialogue choice id "missing" must belong to the current prompt/
+  );
+  assert.throws(
+    () => resolveDialogueChoiceSelection(empty),
+    /Cannot resolve a dialogue choice before selecting a choice/
   );
 });
 
