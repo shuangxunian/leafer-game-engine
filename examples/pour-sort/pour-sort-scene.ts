@@ -4,18 +4,27 @@ import type { RenderAdapter, RenderScene, RenderSprite, RenderText } from "@shua
 import {
   InputSystem,
   attachActorSpriteView,
+  allowSourceTargetAction,
+  blockSourceTargetAction,
   clearSourceTargetSelection,
   createHudText,
+  createSourceTargetActionFromSelection,
   createSourceTargetSelectionState,
   defineActorTemplate,
   getPointerButtonInputId,
+  getSourceTargetActionSnapshot,
   getSourceTargetSelectionPair,
+  getSourceTargetSelectionSnapshot,
   instantiateEntityTemplate,
   pickTopEntityAtPoint,
   selectSourceTargetSource,
   selectSourceTargetTarget
 } from "@shuangxunian/leafer-game-engine/framework";
-import type { SourceTargetSelectionState } from "@shuangxunian/leafer-game-engine/framework";
+import type {
+  SourceTargetActionSnapshot,
+  SourceTargetActionValidationResult,
+  SourceTargetSelectionState
+} from "@shuangxunian/leafer-game-engine/framework";
 
 const BOTTLE_WIDTH = 74;
 const BOTTLE_HEIGHT = 168;
@@ -59,12 +68,16 @@ export type PourSortGameplaySnapshot = Readonly<{
   selectionPhase: SourceTargetSelectionState["phase"];
   sourceName?: string;
   targetName?: string;
+  lastAction?: SourceTargetActionSnapshot;
+  lastActionStatus?: SourceTargetActionValidationResult["status"];
+  lastActionReason?: string;
 }>;
 
 export class PourSortScene extends Scene {
   private readonly bottles: BottleRuntime[] = [];
   private readonly liquidNodes: RenderSprite[] = [];
   private selection = createSourceTargetSelectionState();
+  private lastActionResult?: SourceTargetActionValidationResult;
   private moves = 0;
   private puzzlePhase: PuzzlePhase = "playing";
   private statusNode?: RenderText;
@@ -79,6 +92,11 @@ export class PourSortScene extends Scene {
   }
 
   getGameplaySnapshot(): PourSortGameplaySnapshot {
+    const selection = getSourceTargetSelectionSnapshot(this.selection);
+    const blockedReason = this.lastActionResult && !this.lastActionResult.allowed
+      ? this.lastActionResult.reason
+      : undefined;
+
     return {
       bottles: this.bottles.map((bottle) => ({
         colors: [...bottle.colors],
@@ -86,9 +104,14 @@ export class PourSortScene extends Scene {
       })),
       moves: this.moves,
       puzzlePhase: this.puzzlePhase,
-      selectionPhase: this.selection.phase,
-      sourceName: this.selection.source?.entityName,
-      targetName: this.selection.target?.entityName
+      selectionPhase: selection.phase,
+      sourceName: selection.source?.entityName,
+      targetName: selection.target?.entityName,
+      lastAction: this.lastActionResult
+        ? getSourceTargetActionSnapshot(this.lastActionResult.action)
+        : undefined,
+      lastActionStatus: this.lastActionResult?.status,
+      lastActionReason: blockedReason
     };
   }
 
@@ -199,7 +222,9 @@ export class PourSortScene extends Scene {
 
     const source = this.findBottle(pair.source.entityId);
     const target = this.findBottle(pair.target.entityId);
+    const action = createSourceTargetActionFromSelection("pour", selection);
     if (!source || !target) {
+      this.lastActionResult = blockSourceTargetAction(action, "Selected bottle disappeared.");
       this.selection = clearSourceTargetSelection();
       this.syncHud("Selected bottle disappeared.");
       return;
@@ -209,10 +234,12 @@ export class PourSortScene extends Scene {
     this.selection = clearSourceTargetSelection();
 
     if (!result.ok) {
+      this.lastActionResult = blockSourceTargetAction(action, result.reason);
       this.syncHud(result.reason);
       return;
     }
 
+    this.lastActionResult = allowSourceTargetAction(action);
     source.colors = result.source;
     target.colors = result.target;
     this.moves += 1;

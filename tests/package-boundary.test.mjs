@@ -938,7 +938,7 @@ test("drag drop and selection stage starts without puzzle rules or editor scope"
   assert.equal(readme.includes("copied selection snapshot"), true);
   assert.equal(readme.includes("active entity drag identity"), true);
   assert.equal(readme.includes("source-target action envelope"), true);
-  assert.equal(readme.includes("后续继续补 pointer puzzle example hardening"), true);
+  assert.equal(readme.includes("在 `v0.30.4` 让 `pour-sort` 消费 selection snapshot 与 source-target action helper"), true);
   assert.equal(readme.includes("不做 gesture system、multi-touch gameplay system、visual editor、launcher、gallery、SDK wrapper 或发布平台"), true);
 });
 
@@ -1034,7 +1034,6 @@ test("source-target action baseline stays generic and package-facing", async () 
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const actionSource = await readFile(new URL("../src/framework/source-target-action.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.30.3");
   assert.equal(roadmap.includes("version/v0.30.3.md"), true);
   assert.equal(roadmap.includes("source-target action baseline"), true);
   assert.equal(stage.includes("v0.30.3"), true);
@@ -1065,9 +1064,58 @@ test("source-target action baseline stays generic and package-facing", async () 
   assert.equal(publicApi.includes("generic source id / target id action data"), true);
   assert.equal(publicApi.includes("explicit allowed/blocked result envelopes"), true);
   assert.equal(publicApi.includes("do not add drop target resolution, water-sort validation"), true);
-  assert.equal(readme.includes("`v0.30.3` Source-Target Action Baseline"), true);
+  assert.equal(readme.includes("在 `v0.30.3` 补齐 source-target action envelope"), true);
   assert.equal(readme.includes("source-target action envelope、copied action snapshot"), true);
   assert.equal(readme.includes("source-target action envelope / validation result"), true);
+});
+
+test("pour sort consumes generic source-target actions while keeping rules example-owned", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.30.4.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const exampleDocs = await readFile(new URL("README.md", pourSortExampleUrl), "utf8");
+  const pourSortScene = await readFile(new URL("pour-sort-scene.ts", pourSortExampleUrl), "utf8");
+  const actionSource = await readFile(new URL("../src/framework/source-target-action.ts", import.meta.url), "utf8");
+  const selectionSource = await readFile(new URL("../src/framework/selection.ts", import.meta.url), "utf8");
+  const dragSource = await readFile(new URL("../src/framework/drag.ts", import.meta.url), "utf8");
+
+  assert.equal(packageJson.version, "0.30.4");
+  assert.equal(roadmap.includes("version/v0.30.4.md"), true);
+  assert.equal(roadmap.includes("pointer puzzle example hardening"), true);
+  assert.equal(patch.includes("Pointer Puzzle Example Hardening"), true);
+  assert.equal(patch.includes("does not add new public package API"), true);
+  assert.equal(patch.includes('createSourceTargetActionFromSelection("pour", state)'), true);
+  assert.equal(patch.includes("getSourceTargetActionSnapshot(action)"), true);
+  assert.equal(patch.includes("getSourceTargetSelectionSnapshot(state)"), true);
+  assert.equal(patch.includes("keeps `pourTopColor(...)`, `isPourSortSolved(...)`"), true);
+  assert.equal(publicApi.includes("`v0.30.4` adds no new public package API"), true);
+  assert.equal(publicApi.includes("hardens `examples/pour-sort`"), true);
+  assert.equal(publicApi.includes("getSourceTargetSelectionSnapshot(state)"), true);
+  assert.equal(publicApi.includes("createSourceTargetActionFromSelection(type, state)"), true);
+  assert.equal(publicApi.includes("allowSourceTargetAction(action)"), true);
+  assert.equal(publicApi.includes("blockSourceTargetAction(action, reason)"), true);
+  assert.equal(publicApi.includes("getSourceTargetActionSnapshot(action)"), true);
+  assert.equal(publicApi.includes("while keeping pour-sort rules example-owned"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.30.4` Pointer Puzzle Example Hardening"), true);
+  assert.equal(readme.includes("在 `v0.30.4` 让 `pour-sort` 消费 selection snapshot 与 source-target action helper"), true);
+  assert.equal(exampleDocs.includes("generic source-target action"), true);
+  assert.equal(exampleDocs.includes("allowed/blocked source-target action results"), true);
+  assert.equal(pourSortScene.includes("getSourceTargetSelectionSnapshot"), true);
+  assert.equal(pourSortScene.includes("createSourceTargetActionFromSelection"), true);
+  assert.equal(pourSortScene.includes("allowSourceTargetAction"), true);
+  assert.equal(pourSortScene.includes("blockSourceTargetAction"), true);
+  assert.equal(pourSortScene.includes("getSourceTargetActionSnapshot"), true);
+  assert.equal(pourSortScene.includes("lastActionStatus"), true);
+  assert.equal(pourSortScene.includes("lastActionReason"), true);
+  assert.equal(pourSortScene.includes("pourTopColor"), true);
+  assert.equal(pourSortScene.includes("isPourSortSolved"), true);
+  assert.equal(actionSource.includes("pourTopColor"), false);
+  assert.equal(actionSource.includes("isPourSortSolved"), false);
+  assert.equal(selectionSource.includes("pourTopColor"), false);
+  assert.equal(selectionSource.includes("isPourSortSolved"), false);
+  assert.equal(dragSource.includes("pourTopColor"), false);
+  assert.equal(dragSource.includes("isPourSortSolved"), false);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {

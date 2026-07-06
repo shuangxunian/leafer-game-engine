@@ -2,7 +2,7 @@
 
 `pour-sort` is the first pointer-first puzzle example for `leaferGame`.
 
-It validates the route, browser boot path, local pointer coordinates, rectangle/entity picking, source-target selection state, and a tiny example-owned bottle-pouring loop needed by pouring, sorting, grouping, matching, and click-first puzzle games.
+It validates the route, browser boot path, local pointer coordinates, rectangle/entity picking, source-target selection state, generic source-target action snapshots, and a tiny example-owned bottle-pouring loop needed by pouring, sorting, grouping, matching, and click-first puzzle games.
 
 Current scope:
 
@@ -11,6 +11,8 @@ Current scope:
 - map pointer events to local game coordinates
 - pick bottle entities through framework hit testing
 - store source-target selection through framework selection helpers
+- turn ready selection into generic source-target action data
+- record allowed/blocked source-target action results in the gameplay snapshot
 - validate simple top-color pours in example-owned code
 - render liquid color segments
 - update HUD text with selection, move count, invalid move feedback, and solved state

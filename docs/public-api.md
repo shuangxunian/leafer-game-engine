@@ -136,6 +136,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.30.3` adds the source-target action baseline. The `/framework` entrypoint now exports `SourceTargetActionRef`, `SourceTargetAction`, `SourceTargetActionSnapshot`, `SourceTargetActionValidationResult`, `createSourceTargetAction(type, source, target)`, `createSourceTargetActionFromSelection(type, state)`, `getSourceTargetActionSnapshot(action)`, `allowSourceTargetAction(action)`, `blockSourceTargetAction(action, reason)`, and `isSourceTargetActionAllowed(result)`. These helpers provide generic source id / target id action data, copied deterministic action snapshots, and explicit allowed/blocked result envelopes. They do not add drop target resolution, water-sort validation, match-3 validation, merge rules, inventory rules, scoring, solvers, gesture recognition, multi-touch gameplay, physics simulation, editor drag handles, launcher, gallery, SDK wrapper, monetization, or publishing workflow.
 
+`v0.30.4` adds no new public package API. It hardens `examples/pour-sort` so the pointer puzzle example consumes `getSourceTargetSelectionSnapshot(state)`, `createSourceTargetActionFromSelection(type, state)`, `allowSourceTargetAction(action)`, `blockSourceTargetAction(action, reason)`, and `getSourceTargetActionSnapshot(action)` while keeping pour-sort rules example-owned. Water-sort validation, match-3 validation, merge rules, inventory rules, solvers, scoring, undo/hint systems, gesture recognition, multi-touch gameplay, physics simulation, editor drag handles, launcher, gallery, SDK wrapper, monetization, and publishing workflow remain outside the engine package.
+
 ---
 
 ## Package Entrypoints

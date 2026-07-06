@@ -1286,3 +1286,7 @@
 第三批补 source-target action baseline：
 
 - [v0.30.3](version/v0.30.3.md)
+
+第四批补 pointer puzzle example hardening：
+
+- [v0.30.4](version/v0.30.4.md)
