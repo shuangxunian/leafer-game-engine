@@ -1314,3 +1314,7 @@
 第四批补 narrative example shell and route baseline：
 
 - [v0.31.4](version/v0.31.4.md)
+
+第五批补 narrative example playable flow：
+
+- [v0.31.5](version/v0.31.5.md)

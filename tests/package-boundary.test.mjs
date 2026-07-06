@@ -1295,7 +1295,7 @@ test("dialogue prompt view baseline stays package-facing", async () => {
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.31.4");
+  assert.equal(packageJson.version, "0.31.5");
   assert.equal(roadmap.includes("version/v0.31.3.md"), true);
   assert.equal(roadmap.includes("screen-space prompt view baseline"), true);
   assert.equal(patch.includes("Screen-Space Prompt View Baseline"), true);
@@ -1334,7 +1334,7 @@ test("dialogue choice example shell stays routed and package-facing", async () =
   const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
   const inputActions = await readFile(new URL("input-actions.ts", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.31.4");
+  assert.equal(packageJson.version, "0.31.5");
   assert.equal(roadmap.includes("version/v0.31.4.md"), true);
   assert.equal(roadmap.includes("narrative example shell and route baseline"), true);
   assert.equal(patch.includes("Narrative Example Shell And Route Baseline"), true);
@@ -1351,7 +1351,6 @@ test("dialogue choice example shell stays routed and package-facing", async () =
   assert.equal(publicApi.includes("`v0.31.4` adds no new public package API"), true);
   assert.equal(publicApi.includes("adds `examples/dialogue-choice` as a routed narrative example shell"), true);
   assert.equal(publicApi.includes("keeping prompt content, choice effects, scene transitions, and layout example-owned"), true);
-  assert.equal(readme.includes("当前项目已经推进到 `v0.31.4` Narrative Example Shell And Route Baseline"), true);
   assert.equal(readme.includes("在 `v0.31.4` 补齐 narrative example shell and route baseline"), true);
   assert.equal(readme.includes("examples/dialogue-choice"), true);
   assert.equal(exampleMain.includes("bootDialogueChoiceExample"), true);
@@ -1370,6 +1369,48 @@ test("dialogue choice example shell stays routed and package-facing", async () =
   assert.equal(scene.includes("getGameplaySnapshot"), true);
   assert.equal(inputActions.includes("InputActionMap"), true);
   assert.equal(inputActions.includes("defineKeyboardBinding"), true);
+  assert.equal(scene.includes("visual novel"), false);
+  assert.equal(scene.includes("editor"), false);
+  assert.equal(scene.includes("marketplace"), false);
+});
+
+test("dialogue choice example provides an example-owned playable flow", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.31.5.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const exampleReadme = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
+  const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
+
+  assert.equal(packageJson.version, "0.31.5");
+  assert.equal(roadmap.includes("version/v0.31.5.md"), true);
+  assert.equal(roadmap.includes("narrative example playable flow"), true);
+  assert.equal(patch.includes("Narrative Example Playable Flow"), true);
+  assert.equal(patch.includes("still adds no new public package API"), true);
+  assert.equal(patch.includes("routes to the next example-owned prompt"), true);
+  assert.equal(patch.includes("DialoguePromptView.setPrompt(prompt)"), true);
+  assert.equal(patch.includes("visited prompt ids"), true);
+  assert.equal(patch.includes("last resolved choice"), true);
+  assert.equal(patch.includes("story graph traversal engine"), true);
+  assert.equal(publicApi.includes("`v0.31.5` adds no new public package API"), true);
+  assert.equal(publicApi.includes("tiny playable dialogue flow"), true);
+  assert.equal(publicApi.includes("example-owned prompt route table"), true);
+  assert.equal(publicApi.includes("visited prompt tracking"), true);
+  assert.equal(publicApi.includes("while keeping prompt routing, choice effects, story content, ending conditions, and layout in the downstream example"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.31.5` Narrative Example Playable Flow"), true);
+  assert.equal(readme.includes("在 `v0.31.5` 补齐 narrative example playable flow"), true);
+  assert.equal(readme.includes("dialogue choice playable flow"), true);
+  assert.equal(exampleReadme.includes("example-owned prompt routing"), true);
+  assert.equal(exampleReadme.includes("route resolved choices to the next example-owned prompt"), true);
+  assert.equal(scene.includes("DIALOGUE_PROMPTS"), true);
+  assert.equal(scene.includes("DialoguePromptId"), true);
+  assert.equal(scene.includes("visitedPromptIds"), true);
+  assert.equal(scene.includes("lastResolvedChoiceId"), true);
+  assert.equal(scene.includes("lastResolvedNextId"), true);
+  assert.equal(scene.includes("isComplete"), true);
+  assert.equal(scene.includes("setCurrentPrompt"), true);
+  assert.equal(scene.includes("this.promptView?.setPrompt(this.currentPrompt)"), true);
+  assert.equal(scene.includes("getDialoguePromptId"), true);
   assert.equal(scene.includes("visual novel"), false);
   assert.equal(scene.includes("editor"), false);
   assert.equal(scene.includes("marketplace"), false);

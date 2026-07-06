@@ -2,7 +2,7 @@
 
 `dialogue-choice` is the first narrative/UI example shell for `leaferGame`.
 
-It validates that a downstream browser game can consume dialogue data, choice state, prompt rendering, keyboard input actions, and a read-only gameplay snapshot without adding new public package API.
+It validates that a downstream browser game can consume dialogue data, choice state, prompt rendering, keyboard input actions, example-owned prompt routing, and a read-only gameplay snapshot without adding new public package API.
 
 Current scope:
 
@@ -11,6 +11,8 @@ Current scope:
 - use `defineDialoguePrompt(...)` for example-owned prompt data
 - use `createDialogueChoiceState(...)`, `selectDialogueChoice(...)`, `resolveDialogueChoiceSelection(...)`, and `getDialogueChoiceStateSnapshot(...)` for deterministic choice state
 - use `createDialoguePromptView(...)` for screen-space dialogue text and choice text
+- route resolved choices to the next example-owned prompt through local `nextId` values
+- record visited prompt ids, last resolved choice, and completion state in the gameplay snapshot
 - map keyboard input through `InputActionMap` and `BrowserKeyboardBridge`
 - expose a read-only gameplay snapshot
 
