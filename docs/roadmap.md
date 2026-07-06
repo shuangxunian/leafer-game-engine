@@ -1310,3 +1310,7 @@
 第三批补 screen-space prompt view baseline：
 
 - [v0.31.3](version/v0.31.3.md)
+
+第四批补 narrative example shell and route baseline：
+
+- [v0.31.4](version/v0.31.4.md)

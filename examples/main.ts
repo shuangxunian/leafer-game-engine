@@ -1,11 +1,12 @@
 import { createBrowserRuntime } from "@shuangxunian/leafer-game-engine";
 import type { BrowserRuntime } from "@shuangxunian/leafer-game-engine/runtime";
 import { bootCollectStarsExample } from "./collect-stars/boot.js";
+import { bootDialogueChoiceExample } from "./dialogue-choice/boot.js";
 import { bootDodgeBlocksExample } from "./dodge-blocks/boot.js";
 import { bootPourSortExample } from "./pour-sort/boot.js";
 import "./styles.css";
 
-type ExampleId = "dodge-blocks" | "collect-stars" | "pour-sort";
+type ExampleId = "dodge-blocks" | "collect-stars" | "pour-sort" | "dialogue-choice";
 
 type ExampleRoute = {
   id: ExampleId;
@@ -32,6 +33,12 @@ const EXAMPLES: Record<ExampleId, ExampleRoute> = {
     title: "Pour Sort Shell",
     hint: "Pointer-first puzzle shell that validates local pointer coordinates, entity picking, and source-target selection.",
     boot: bootPourSortExample
+  },
+  "dialogue-choice": {
+    id: "dialogue-choice",
+    title: "Dialogue Choice Shell",
+    hint: "Narrative UI shell that validates dialogue prompt data, choice state, prompt rendering, and keyboard action consumption.",
+    boot: bootDialogueChoiceExample
   }
 };
 
@@ -53,7 +60,7 @@ route.boot(runtime).catch((error: unknown) => {
 });
 
 function resolveExampleId(value: string | null): ExampleId {
-  if (value === "collect-stars" || value === "pour-sort") return value;
+  if (value === "collect-stars" || value === "pour-sort" || value === "dialogue-choice") return value;
   return "dodge-blocks";
 }
 

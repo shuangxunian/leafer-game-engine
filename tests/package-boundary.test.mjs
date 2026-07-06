@@ -9,6 +9,7 @@ const examplesRootUrl = new URL("../examples/", import.meta.url);
 const dodgeBlocksExampleUrl = new URL("../examples/dodge-blocks/", import.meta.url);
 const collectStarsExampleUrl = new URL("../examples/collect-stars/", import.meta.url);
 const pourSortExampleUrl = new URL("../examples/pour-sort/", import.meta.url);
+const dialogueChoiceExampleUrl = new URL("../examples/dialogue-choice/", import.meta.url);
 
 function assertExports(moduleExports, names) {
   for (const name of names) {
@@ -1294,7 +1295,7 @@ test("dialogue prompt view baseline stays package-facing", async () => {
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.31.3");
+  assert.equal(packageJson.version, "0.31.4");
   assert.equal(roadmap.includes("version/v0.31.3.md"), true);
   assert.equal(roadmap.includes("screen-space prompt view baseline"), true);
   assert.equal(patch.includes("Screen-Space Prompt View Baseline"), true);
@@ -1311,7 +1312,6 @@ test("dialogue prompt view baseline stays package-facing", async () => {
   assert.equal(publicApi.includes("createDialoguePromptView(renderAdapter, renderScene, options)"), true);
   assert.equal(publicApi.includes("builds on `createHudText(...)`"), true);
   assert.equal(publicApi.includes("does not add a visual UI builder, layout engine"), true);
-  assert.equal(readme.includes("当前项目已经推进到 `v0.31.3` Screen-Space Prompt View Baseline"), true);
   assert.equal(readme.includes("在 `v0.31.3` 补齐 screen-space prompt view baseline"), true);
   assert.equal(readme.includes("dialogue prompt screen-space view helper"), true);
   assert.equal(dialogueSource.includes("export type DialoguePromptViewOptions"), true);
@@ -1320,6 +1320,59 @@ test("dialogue prompt view baseline stays package-facing", async () => {
   assert.equal(dialogueSource.includes("visual novel"), false);
   assert.equal(dialogueSource.includes("editor"), false);
   assert.equal(dialogueSource.includes("story graph"), false);
+});
+
+test("dialogue choice example shell stays routed and package-facing", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.31.4.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const exampleMain = await readFile(new URL("../examples/main.ts", import.meta.url), "utf8");
+  const indexHtml = await readFile(new URL("../index.html", import.meta.url), "utf8");
+  const exampleReadme = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
+  const boot = await readFile(new URL("boot.ts", dialogueChoiceExampleUrl), "utf8");
+  const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
+  const inputActions = await readFile(new URL("input-actions.ts", dialogueChoiceExampleUrl), "utf8");
+
+  assert.equal(packageJson.version, "0.31.4");
+  assert.equal(roadmap.includes("version/v0.31.4.md"), true);
+  assert.equal(roadmap.includes("narrative example shell and route baseline"), true);
+  assert.equal(patch.includes("Narrative Example Shell And Route Baseline"), true);
+  assert.equal(patch.includes("examples/dialogue-choice"), true);
+  assert.equal(patch.includes("does not add new public package API"), true);
+  assert.equal(patch.includes("defineDialoguePrompt(...)"), true);
+  assert.equal(patch.includes("createDialogueChoiceState(prompt)"), true);
+  assert.equal(patch.includes("createDialoguePromptView(renderAdapter, renderScene, options)"), true);
+  assert.equal(patch.includes("InputActionMap"), true);
+  assert.equal(patch.includes("BrowserKeyboardBridge"), true);
+  assert.equal(patch.includes("getGameplaySnapshot()"), true);
+  assert.equal(patch.includes("visual novel scripting language"), true);
+  assert.equal(patch.includes("branching story editor"), true);
+  assert.equal(publicApi.includes("`v0.31.4` adds no new public package API"), true);
+  assert.equal(publicApi.includes("adds `examples/dialogue-choice` as a routed narrative example shell"), true);
+  assert.equal(publicApi.includes("keeping prompt content, choice effects, scene transitions, and layout example-owned"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.31.4` Narrative Example Shell And Route Baseline"), true);
+  assert.equal(readme.includes("在 `v0.31.4` 补齐 narrative example shell and route baseline"), true);
+  assert.equal(readme.includes("examples/dialogue-choice"), true);
+  assert.equal(exampleMain.includes("bootDialogueChoiceExample"), true);
+  assert.equal(exampleMain.includes('"dialogue-choice"'), true);
+  assert.equal(indexHtml.includes("?example=dialogue-choice"), true);
+  assert.equal(exampleReadme.includes("boot through `?example=dialogue-choice`"), true);
+  assert.equal(exampleReadme.includes("does not become a galgame authoring product"), true);
+  assert.equal(boot.includes("BrowserKeyboardBridge"), true);
+  assert.equal(boot.includes("startSceneWithLifecycle"), true);
+  assert.equal(scene.includes("defineDialoguePrompt"), true);
+  assert.equal(scene.includes("createDialogueChoiceState"), true);
+  assert.equal(scene.includes("selectDialogueChoice"), true);
+  assert.equal(scene.includes("resolveDialogueChoiceSelection"), true);
+  assert.equal(scene.includes("getDialogueChoiceStateSnapshot"), true);
+  assert.equal(scene.includes("createDialoguePromptView"), true);
+  assert.equal(scene.includes("getGameplaySnapshot"), true);
+  assert.equal(inputActions.includes("InputActionMap"), true);
+  assert.equal(inputActions.includes("defineKeyboardBinding"), true);
+  assert.equal(scene.includes("visual novel"), false);
+  assert.equal(scene.includes("editor"), false);
+  assert.equal(scene.includes("marketplace"), false);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
