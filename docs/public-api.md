@@ -142,6 +142,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.31.0` starts the UI / dialogue / scene flow stage without adding new public package API. The stage focuses the next work on dialogue text and choice data contracts, choice state helpers, screen-space prompt rendering, scene-flow transitions, and a narrative example while keeping story content and UI layout example-owned. It is not a visual novel scripting language, branching story editor, dialogue timeline editor, visual UI builder, scene graph editor, launcher, gallery, marketplace, SDK wrapper, account system, ads, monetization, analytics service, mobile app shell, or publishing workflow.
 
+`v0.31.1` adds the dialogue text / choice data contract baseline. The `/framework` entrypoint now exports `DialogueLine`, `DialogueChoice`, `DialoguePrompt`, `DialoguePromptSnapshot`, `DialogueLineInput`, `DialogueChoiceInput`, `DialoguePromptInput`, `defineDialogueLine(input)`, `defineDialogueChoice(input)`, `defineDialoguePrompt(input)`, and `getDialoguePromptSnapshot(prompt)`. These helpers provide normalized dialogue line data, normalized choice data, copied prompt snapshots, and duplicate choice id validation. They do not add choice selection state, scene transitions, prompt rendering, a visual novel scripting language, branching story editor, dialogue timeline editor, localization management, save/load framework, story graph mutation UI, visual UI builder, launcher, gallery, marketplace, SDK wrapper, monetization, analytics, mobile app shell, or publishing workflow.
+
 ---
 
 ## Package Entrypoints

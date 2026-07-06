@@ -1166,7 +1166,6 @@ test("ui dialogue scene flow stage starts without editor or scripting scope", as
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.31.0");
   assert.equal(roadmap.includes("version/v0.31.0.md"), true);
   assert.equal(roadmap.includes("UI / dialogue / scene flow"), true);
   assert.equal(roadmap.includes("galgame / 互动叙事原型"), true);
@@ -1192,13 +1191,56 @@ test("ui dialogue scene flow stage starts without editor or scripting scope", as
   assert.equal(publicApi.includes("screen-space prompt rendering"), true);
   assert.equal(publicApi.includes("keeping story content and UI layout example-owned"), true);
   assert.equal(publicApi.includes("not a visual novel scripting language"), true);
-  assert.equal(readme.includes("当前项目已经推进到 `v0.31.0` UI / Dialogue / Scene Flow Sprint"), true);
   assert.equal(readme.includes("`0.31.x` 开始补 UI / dialogue / scene flow"), true);
   assert.equal(readme.includes("dialogue text / choice data contract"), true);
   assert.equal(readme.includes("choice state helper"), true);
   assert.equal(readme.includes("screen-space prompt rendering"), true);
   assert.equal(readme.includes("narrative example"), true);
   assert.equal(readme.includes("visual novel scripting language、branching story editor"), true);
+});
+
+test("dialogue choice data contract baseline stays package-facing", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.31.1.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
+  const frameworkIndex = await readFile(new URL("../src/framework/index.ts", import.meta.url), "utf8");
+
+  assert.equal(packageJson.version, "0.31.1");
+  assert.equal(roadmap.includes("version/v0.31.1.md"), true);
+  assert.equal(roadmap.includes("dialogue text / choice data contract baseline"), true);
+  assert.equal(patch.includes("Dialogue Text / Choice Data Contract Baseline"), true);
+  assert.equal(patch.includes("DialogueLine"), true);
+  assert.equal(patch.includes("DialogueChoice"), true);
+  assert.equal(patch.includes("DialoguePrompt"), true);
+  assert.equal(patch.includes("defineDialogueLine(input)"), true);
+  assert.equal(patch.includes("defineDialogueChoice(input)"), true);
+  assert.equal(patch.includes("defineDialoguePrompt(input)"), true);
+  assert.equal(patch.includes("getDialoguePromptSnapshot(prompt)"), true);
+  assert.equal(patch.includes("This is a data contract baseline only"), true);
+  assert.equal(patch.includes("does not add choice selection state"), true);
+  assert.equal(patch.includes("visual novel scripting language"), true);
+  assert.equal(patch.includes("branching story editor"), true);
+  assert.equal(publicApi.includes("`v0.31.1` adds the dialogue text / choice data contract baseline"), true);
+  assert.equal(publicApi.includes("DialoguePromptSnapshot"), true);
+  assert.equal(publicApi.includes("defineDialoguePrompt(input)"), true);
+  assert.equal(publicApi.includes("duplicate choice id validation"), true);
+  assert.equal(publicApi.includes("do not add choice selection state, scene transitions"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.31.1` Dialogue Text / Choice Data Contract Baseline"), true);
+  assert.equal(readme.includes("在 `v0.31.1` 补齐 dialogue text / choice data contract baseline"), true);
+  assert.equal(readme.includes("dialogue line / choice / prompt data contract"), true);
+  assert.equal(frameworkIndex.includes('export * from "./dialogue.js"'), true);
+  assert.equal(dialogueSource.includes("export type DialogueLine"), true);
+  assert.equal(dialogueSource.includes("export type DialogueChoice"), true);
+  assert.equal(dialogueSource.includes("export type DialoguePrompt"), true);
+  assert.equal(dialogueSource.includes("export function defineDialogueLine"), true);
+  assert.equal(dialogueSource.includes("export function defineDialogueChoice"), true);
+  assert.equal(dialogueSource.includes("export function defineDialoguePrompt"), true);
+  assert.equal(dialogueSource.includes("export function getDialoguePromptSnapshot"), true);
+  assert.equal(dialogueSource.includes("script"), false);
+  assert.equal(dialogueSource.includes("editor"), false);
+  assert.equal(dialogueSource.includes("story graph"), false);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -1266,6 +1308,9 @@ test("framework package subpath can be imported by package name in Node", async 
     "completeEntityDrag",
     "createAudioRuntimeState",
     "createBrowserPointerLocalPositionResolver",
+    "defineDialogueChoice",
+    "defineDialogueLine",
+    "defineDialoguePrompt",
     "createEntityDragState",
     "createLevelLayout",
     "createSourceTargetAction",
@@ -1297,6 +1342,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "getAudioPlayback",
     "getAudioRuntime",
     "getBrowserPointerLocalPosition",
+    "getDialoguePromptSnapshot",
     "getPointerButtonInputId",
     "getSpriteAnimationPlaybackFrameId",
     "getSpriteAnimationPlaybackFrameIndex",
@@ -1373,6 +1419,10 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.allowSourceTargetAction, "function");
   assert.equal(typeof framework.blockSourceTargetAction, "function");
   assert.equal(typeof framework.isSourceTargetActionAllowed, "function");
+  assert.equal(typeof framework.defineDialogueLine, "function");
+  assert.equal(typeof framework.defineDialogueChoice, "function");
+  assert.equal(typeof framework.defineDialoguePrompt, "function");
+  assert.equal(typeof framework.getDialoguePromptSnapshot, "function");
 });
 
 test("tooling package subpath can be imported by package name in Node", async () => {

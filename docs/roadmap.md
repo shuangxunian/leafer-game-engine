@@ -1298,3 +1298,7 @@
 完成 drag/drop and selection baseline 后，下一阶段建议补 UI / dialogue / scene flow，让 galgame / 互动叙事原型也有轻量 package-facing 基础：
 
 - [v0.31.0](version/v0.31.0.md)
+
+第一批先补 dialogue text / choice data contract baseline：
+
+- [v0.31.1](version/v0.31.1.md)

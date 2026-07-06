@@ -32,6 +32,9 @@ import {
   cancelEntityDrag,
   createAudioRuntimeState,
   createBrowserPointerLocalPositionResolver,
+  defineDialogueChoice,
+  defineDialogueLine,
+  defineDialoguePrompt,
   createEntityDragState,
   attachActorSpriteView,
   createRuntimeServices,
@@ -50,6 +53,7 @@ import {
   getAudioRuntime,
   getAudioPlayback,
   getBrowserPointerLocalPosition,
+  getDialoguePromptSnapshot,
   getEntityDragDelta,
   getEntityDragSnapshot,
   getEntityHitRect,
@@ -1292,6 +1296,103 @@ test("source-target action validation results are deterministic and copied", () 
 
   assert.throws(() => createSourceTargetAction(" ", source, target), /action type must be a non-empty string/);
   assert.throws(() => blockSourceTargetAction(action, " "), /blocked reason must be a non-empty string/);
+});
+
+test("dialogue prompt data contract normalizes line and choice data", () => {
+  const prompt = defineDialoguePrompt({
+    line: {
+      id: " intro ",
+      speaker: " Guide ",
+      text: " Welcome in. "
+    },
+    choices: [
+      {
+        id: " look ",
+        label: " Look around ",
+        nextId: " inspect-room "
+      },
+      {
+        id: " leave ",
+        label: " Leave "
+      }
+    ]
+  });
+
+  assert.deepEqual(prompt, {
+    line: {
+      id: "intro",
+      speaker: "Guide",
+      text: "Welcome in."
+    },
+    choices: [
+      {
+        id: "look",
+        label: "Look around",
+        nextId: "inspect-room"
+      },
+      {
+        id: "leave",
+        label: "Leave"
+      }
+    ]
+  });
+});
+
+test("dialogue prompt snapshots are copied and deterministic", () => {
+  const prompt = defineDialoguePrompt({
+    line: defineDialogueLine({
+      id: "start",
+      text: "Choose a path."
+    }),
+    choices: [
+      defineDialogueChoice({
+        id: "forest",
+        label: "Forest",
+        nextId: "forest-entrance"
+      })
+    ]
+  });
+
+  const snapshot = getDialoguePromptSnapshot(prompt);
+
+  assert.deepEqual(snapshot, prompt);
+  assert.notEqual(snapshot, prompt);
+  assert.notEqual(snapshot.line, prompt.line);
+  assert.notEqual(snapshot.choices, prompt.choices);
+  assert.notEqual(snapshot.choices[0], prompt.choices[0]);
+});
+
+test("dialogue prompt data contract reports invalid fields clearly", () => {
+  assert.throws(
+    () => defineDialogueLine({ id: " ", text: "hello" }),
+    /Dialogue line id must be a non-empty string/
+  );
+  assert.throws(
+    () => defineDialogueLine({ id: "line", text: "" }),
+    /Dialogue line text must be a non-empty string/
+  );
+  assert.throws(
+    () => defineDialogueLine({ id: "line", speaker: " ", text: "hello" }),
+    /Dialogue line speaker must be a non-empty string/
+  );
+  assert.throws(
+    () => defineDialogueChoice({ id: "choice", label: " " }),
+    /Dialogue choice label must be a non-empty string/
+  );
+  assert.throws(
+    () => defineDialogueChoice({ id: "choice", label: "Continue", nextId: " " }),
+    /Dialogue choice nextId must be a non-empty string/
+  );
+  assert.throws(
+    () => defineDialoguePrompt({
+      line: { id: "line", text: "hello" },
+      choices: [
+        { id: "repeat", label: "One" },
+        { id: " repeat ", label: "Two" }
+      ]
+    }),
+    /Dialogue prompt choice id "repeat" must be unique/
+  );
 });
 
 test("entity drag state tracks active entity positions and copied snapshots", () => {
