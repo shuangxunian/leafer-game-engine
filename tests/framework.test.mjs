@@ -7,6 +7,8 @@ import {
   AudioRuntimeSystem,
   AudioPlaybackSystem,
   AssetRegistry,
+  allowSourceTargetAction,
+  blockSourceTargetAction,
   BrowserPointerButtonBridge,
   BrowserPointerPositionBridge,
   CameraSystem,
@@ -65,13 +67,17 @@ import {
   clearSourceTargetSelection,
   clearSourceTargetTarget,
   completeEntityDrag,
+  createSourceTargetAction,
+  createSourceTargetActionFromSelection,
   createHudText,
   isEntityDragActive,
+  isSourceTargetActionAllowed,
   normalizeKeyboardKey,
   normalizePointerButton,
   moveEntityDrag,
   pauseSpriteAnimationPlayback,
   resumeSpriteAnimationPlayback,
+  getSourceTargetActionSnapshot,
   getSourceTargetSelectionSnapshot,
   getSourceTargetSelectionPair,
   isSourceTargetSelectionReady,
@@ -1197,6 +1203,95 @@ test("source-target selection reports invalid target transitions clearly", () =>
   assert.notEqual(targetCleared.source, sourceSelected.source);
   assert.deepEqual(clearSourceTargetSelection(), { phase: "empty" });
   assert.deepEqual(clearSourceTargetTarget(createSourceTargetSelectionState()), { phase: "empty" });
+});
+
+test("source-target actions expose generic action data and copied snapshots", () => {
+  const scene = new Scene("SourceTargetActionScene");
+  const source = scene.world.createEntity("source");
+  const target = scene.world.createEntity("target");
+
+  const action = createSourceTargetAction(" pour ", source, target);
+  assert.deepEqual(action, {
+    type: "pour",
+    source: {
+      entityId: source.id,
+      entityName: "source"
+    },
+    target: {
+      entityId: target.id,
+      entityName: "target"
+    }
+  });
+
+  const snapshot = getSourceTargetActionSnapshot(action);
+  assert.deepEqual(snapshot, action);
+  assert.notEqual(snapshot, action);
+  assert.notEqual(snapshot.source, action.source);
+  assert.notEqual(snapshot.target, action.target);
+  assert.equal("entity" in snapshot.source, false);
+  assert.equal("entity" in snapshot.target, false);
+});
+
+test("source-target actions can be created from ready selection state", () => {
+  const scene = new Scene("SourceTargetActionSelectionScene");
+  const source = scene.world.createEntity("source");
+  const target = scene.world.createEntity("target");
+  const empty = createSourceTargetSelectionState();
+  const sourceSelected = selectSourceTargetSource(empty, source);
+  const targetSelected = selectSourceTargetTarget(sourceSelected, target);
+
+  assert.throws(
+    () => createSourceTargetActionFromSelection("pour", empty),
+    /Cannot create a source-target action before selection is ready/
+  );
+  assert.throws(
+    () => createSourceTargetActionFromSelection("pour", sourceSelected),
+    /Cannot create a source-target action before selection is ready/
+  );
+
+  const action = createSourceTargetActionFromSelection("pour", targetSelected);
+  assert.deepEqual(action, {
+    type: "pour",
+    source: {
+      entityId: source.id,
+      entityName: "source"
+    },
+    target: {
+      entityId: target.id,
+      entityName: "target"
+    }
+  });
+  assert.equal(targetSelected.source?.entity, source);
+  assert.equal(targetSelected.target?.entity, target);
+});
+
+test("source-target action validation results are deterministic and copied", () => {
+  const scene = new Scene("SourceTargetActionValidationScene");
+  const source = scene.world.createEntity("source");
+  const target = scene.world.createEntity("target");
+  const action = createSourceTargetAction("merge", source, target);
+
+  const allowed = allowSourceTargetAction(action);
+  assert.deepEqual(allowed, {
+    allowed: true,
+    status: "allowed",
+    action
+  });
+  assert.equal(isSourceTargetActionAllowed(allowed), true);
+  assert.notEqual(allowed.action, action);
+
+  const blocked = blockSourceTargetAction(action, " target is full ");
+  assert.deepEqual(blocked, {
+    allowed: false,
+    status: "blocked",
+    action,
+    reason: "target is full"
+  });
+  assert.equal(isSourceTargetActionAllowed(blocked), false);
+  assert.notEqual(blocked.action.source, action.source);
+
+  assert.throws(() => createSourceTargetAction(" ", source, target), /action type must be a non-empty string/);
+  assert.throws(() => blockSourceTargetAction(action, " "), /blocked reason must be a non-empty string/);
 });
 
 test("entity drag state tracks active entity positions and copied snapshots", () => {

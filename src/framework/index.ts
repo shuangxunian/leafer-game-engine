@@ -20,6 +20,7 @@ export * from "./scheduler.js";
 export * from "./schema.js";
 export * from "./selection.js";
 export * from "./size.js";
+export * from "./source-target-action.js";
 export * from "./state.js";
 export * from "./tile-map.js";
 export * from "./transform.js";

@@ -937,7 +937,8 @@ test("drag drop and selection stage starts without puzzle rules or editor scope"
   assert.equal(readme.includes("`0.30.x` 开始补 drag/drop and selection hardening"), true);
   assert.equal(readme.includes("copied selection snapshot"), true);
   assert.equal(readme.includes("active entity drag identity"), true);
-  assert.equal(readme.includes("后续继续补 source-target action"), true);
+  assert.equal(readme.includes("source-target action envelope"), true);
+  assert.equal(readme.includes("后续继续补 pointer puzzle example hardening"), true);
   assert.equal(readme.includes("不做 gesture system、multi-touch gameplay system、visual editor、launcher、gallery、SDK wrapper 或发布平台"), true);
 });
 
@@ -987,7 +988,6 @@ test("entity drag state baseline stays generic and package-facing", async () => 
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const dragSource = await readFile(new URL("../src/framework/drag.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.30.2");
   assert.equal(roadmap.includes("version/v0.30.2.md"), true);
   assert.equal(roadmap.includes("entity drag state baseline"), true);
   assert.equal(stage.includes("v0.30.2"), true);
@@ -1021,9 +1021,53 @@ test("entity drag state baseline stays generic and package-facing", async () => 
   assert.equal(publicApi.includes("generic active entity drag identity"), true);
   assert.equal(publicApi.includes("deterministic completed/cancelled snapshots"), true);
   assert.equal(publicApi.includes("do not add drop target resolution, source-target action validation"), true);
-  assert.equal(readme.includes("`v0.30.2` Entity Drag State Baseline"), true);
+  assert.equal(readme.includes("在 `v0.30.2` 补齐 active entity drag identity"), true);
   assert.equal(readme.includes("active entity drag identity、start/current pointer position"), true);
   assert.equal(readme.includes("entity drag state baseline"), true);
+});
+
+test("source-target action baseline stays generic and package-facing", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.30.0.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.30.3.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const actionSource = await readFile(new URL("../src/framework/source-target-action.ts", import.meta.url), "utf8");
+
+  assert.equal(packageJson.version, "0.30.3");
+  assert.equal(roadmap.includes("version/v0.30.3.md"), true);
+  assert.equal(roadmap.includes("source-target action baseline"), true);
+  assert.equal(stage.includes("v0.30.3"), true);
+  assert.equal(patch.includes("Source-Target Action Baseline"), true);
+  assert.equal(patch.includes("SourceTargetActionRef"), true);
+  assert.equal(patch.includes("SourceTargetActionValidationResult"), true);
+  assert.equal(patch.includes("createSourceTargetAction(type, source, target)"), true);
+  assert.equal(patch.includes("createSourceTargetActionFromSelection(type, state)"), true);
+  assert.equal(patch.includes("getSourceTargetActionSnapshot(action)"), true);
+  assert.equal(patch.includes("allowSourceTargetAction(action)"), true);
+  assert.equal(patch.includes("blockSourceTargetAction(action, reason)"), true);
+  assert.equal(patch.includes("does not add drop target resolution"), true);
+  assert.equal(patch.includes("water-sort validation"), true);
+  assert.equal(patch.includes("match-3"), true);
+  assert.equal(patch.includes("inventory rules"), true);
+  assert.equal(actionSource.includes("export type SourceTargetActionRef"), true);
+  assert.equal(actionSource.includes("export type SourceTargetActionValidationResult"), true);
+  assert.equal(actionSource.includes("export function createSourceTargetAction"), true);
+  assert.equal(actionSource.includes("export function createSourceTargetActionFromSelection"), true);
+  assert.equal(actionSource.includes("export function getSourceTargetActionSnapshot"), true);
+  assert.equal(actionSource.includes("export function allowSourceTargetAction"), true);
+  assert.equal(actionSource.includes("export function blockSourceTargetAction"), true);
+  assert.equal(actionSource.includes("export function isSourceTargetActionAllowed"), true);
+  assert.equal(actionSource.includes("pourTopColor"), false);
+  assert.equal(actionSource.includes("isPourSortSolved"), false);
+  assert.equal(actionSource.includes("dropTarget"), false);
+  assert.equal(publicApi.includes("`v0.30.3` adds the source-target action baseline"), true);
+  assert.equal(publicApi.includes("generic source id / target id action data"), true);
+  assert.equal(publicApi.includes("explicit allowed/blocked result envelopes"), true);
+  assert.equal(publicApi.includes("do not add drop target resolution, water-sort validation"), true);
+  assert.equal(readme.includes("`v0.30.3` Source-Target Action Baseline"), true);
+  assert.equal(readme.includes("source-target action envelope、copied action snapshot"), true);
+  assert.equal(readme.includes("source-target action envelope / validation result"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -1060,6 +1104,8 @@ test("framework package subpath can be imported by package name in Node", async 
     "AudioRuntimeSystem",
     "AudioPlaybackSystem",
     "AssetRegistry",
+    "allowSourceTargetAction",
+    "blockSourceTargetAction",
     "BrowserPointerButtonBridge",
     "BrowserPointerPositionBridge",
     "CameraSystem",
@@ -1091,6 +1137,8 @@ test("framework package subpath can be imported by package name in Node", async 
     "createBrowserPointerLocalPositionResolver",
     "createEntityDragState",
     "createLevelLayout",
+    "createSourceTargetAction",
+    "createSourceTargetActionFromSelection",
     "createSourceTargetSelectionState",
     "createTileMap",
     "createSpriteAnimationPlayback",
@@ -1122,10 +1170,12 @@ test("framework package subpath can be imported by package name in Node", async 
     "getSpriteAnimationPlaybackFrameId",
     "getSpriteAnimationPlaybackFrameIndex",
     "getRuntimeServices",
+    "getSourceTargetActionSnapshot",
     "getSourceTargetSelectionPair",
     "hitTestEntitiesAtPoint",
     "isEntityDragActive",
     "isSpriteCapableRenderNode",
+    "isSourceTargetActionAllowed",
     "clampPositionToBounds",
     "limitMovementVector",
     "loadAssetManifestAsync",
@@ -1186,6 +1236,12 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.isEntityDragActive, "function");
   assert.equal(typeof framework.getEntityDragDelta, "function");
   assert.equal(typeof framework.getEntityDragSnapshot, "function");
+  assert.equal(typeof framework.createSourceTargetAction, "function");
+  assert.equal(typeof framework.createSourceTargetActionFromSelection, "function");
+  assert.equal(typeof framework.getSourceTargetActionSnapshot, "function");
+  assert.equal(typeof framework.allowSourceTargetAction, "function");
+  assert.equal(typeof framework.blockSourceTargetAction, "function");
+  assert.equal(typeof framework.isSourceTargetActionAllowed, "function");
 });
 
 test("tooling package subpath can be imported by package name in Node", async () => {

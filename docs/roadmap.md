@@ -1282,3 +1282,7 @@
 第二批补 entity drag state baseline：
 
 - [v0.30.2](version/v0.30.2.md)
+
+第三批补 source-target action baseline：
+
+- [v0.30.3](version/v0.30.3.md)
