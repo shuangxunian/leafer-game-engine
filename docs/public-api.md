@@ -138,6 +138,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.30.4` adds no new public package API. It hardens `examples/pour-sort` so the pointer puzzle example consumes `getSourceTargetSelectionSnapshot(state)`, `createSourceTargetActionFromSelection(type, state)`, `allowSourceTargetAction(action)`, `blockSourceTargetAction(action, reason)`, and `getSourceTargetActionSnapshot(action)` while keeping pour-sort rules example-owned. Water-sort validation, match-3 validation, merge rules, inventory rules, solvers, scoring, undo/hint systems, gesture recognition, multi-touch gameplay, physics simulation, editor drag handles, launcher, gallery, SDK wrapper, monetization, and publishing workflow remain outside the engine package.
 
+`v0.30.5` closes the drag/drop and selection hardening stage without adding new public package API. The stage leaves copied selection snapshots/readiness, immutable selection replacement helpers, entity drag state snapshots/deltas, source-target action envelopes, copied action snapshots, explicit allowed/blocked action results, and `pour-sort` example consumption in place. Drop target resolution, puzzle rules, solvers, undo/hint systems, gesture recognition, multi-touch gameplay, physics simulation, editor drag handles, editor selection handles, visual layout tools, launcher, gallery, marketplace, SDK wrapper, accounts, ads, monetization, mobile app shells, and publishing workflows remain outside the engine package.
+
 ---
 
 ## Package Entrypoints

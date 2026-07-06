@@ -587,7 +587,7 @@ test("framework extraction planning docs start from two examples without editor 
   assert.equal(readme.includes("`v0.26.5` Framework Extraction Closeout From Two Playable Examples"), true);
   assert.equal(readme.includes("`0.26.x` framework extraction from two playable examples 阶段"), true);
   assert.equal(readme.includes("`0.27.x` pointer-first puzzle interaction 阶段"), true);
-  assert.equal(readme.includes("`0.28.x` real sprite / image rendering 阶段和 `0.29.x` responsive Web runtime 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.28.x` real sprite / image rendering 阶段、`0.29.x` responsive Web runtime 阶段和 `0.30.x`"), true);
   assert.equal(readme.includes("抽出了 `clampPositionToBounds(...)`、`attachActorSpriteView(...)` 和 `randomPositionInBounds(...)`"), true);
   assert.equal(readme.includes("gameplay snapshot 固定为 example-owned read-only 约定"), true);
   assert.equal(readme.includes("framework extraction closeout"), true);
@@ -620,7 +620,7 @@ test("pointer-first puzzle stage closes without swallowing puzzle rules", async 
   assert.equal(publicApi.includes("Water-sort rules, drag/drop state, undo, hints"), true);
   assert.equal(readme.includes("`v0.27.6` Pointer-First Puzzle Interaction Stage Closeout"), true);
   assert.equal(readme.includes("`0.27.x` pointer-first puzzle interaction 阶段"), true);
-  assert.equal(readme.includes("`0.28.x` real sprite / image rendering 阶段和 `0.29.x` responsive Web runtime 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.28.x` real sprite / image rendering 阶段、`0.29.x` responsive Web runtime 阶段和 `0.30.x`"), true);
   assert.equal(readme.includes("GitHub 仓库已创建；当前不使用 GitHub CI"), true);
   assert.equal(frameworkSource.includes("pourTopColor"), false);
   assert.equal(frameworkSource.includes("isPourSortSolved"), false);
@@ -795,7 +795,7 @@ test("real sprite image rendering stage closes at package boundary", async () =>
   assert.equal(publicApi.includes("without adding new public package API"), true);
   assert.equal(publicApi.includes("Responsive runtime behavior, drag/drop state"), true);
   assert.equal(readme.includes("并在 `v0.28.5` 收口该阶段"), true);
-  assert.equal(readme.includes("`0.28.x` real sprite / image rendering 阶段和 `0.29.x` responsive Web runtime 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.28.x` real sprite / image rendering 阶段、`0.29.x` responsive Web runtime 阶段和 `0.30.x`"), true);
   assert.equal(readme.includes("`0.29.x` 已补齐 1.0 前需要的 responsive Web runtime"), true);
   assert.equal(frameworkSource.includes("HTMLImageElement"), false);
   assert.equal(frameworkSource.includes("new Image("), false);
@@ -889,7 +889,7 @@ test("responsive web runtime stage starts without platform wrapper scope", async
   assert.equal(publicApi.includes("without adding new public package API"), true);
   assert.equal(publicApi.includes("pointer coordinate consistency after resize"), true);
   assert.equal(readme.includes("并在 `v0.29.5` 收口该阶段"), true);
-  assert.equal(readme.includes("`0.29.x` responsive Web runtime 阶段都已经收口"), true);
+  assert.equal(readme.includes("`0.29.x` responsive Web runtime 阶段和 `0.30.x`"), true);
   assert.equal(readme.includes("`v0.29.1` 建立 render scene resize contract"), true);
   assert.equal(readme.includes("`v0.29.2` 建立 opt-in browser resize bridge"), true);
   assert.equal(readme.includes("`v0.29.3` 建立 resize 后仍读取最新 mount bounds 的 pointer local coordinate helper"), true);
@@ -932,9 +932,9 @@ test("drag drop and selection stage starts without puzzle rules or editor scope"
   assert.equal(publicApi.includes("immutable selection snapshots, drag state bookkeeping, source-target action data"), true);
   assert.equal(publicApi.includes("keeping puzzle rules example-owned"), true);
   assert.equal(publicApi.includes("not a gesture recognition system, multi-touch gameplay framework"), true);
-  assert.equal(readme.includes("`0.30.x` 开始补 drag/drop and selection hardening"), true);
-  assert.equal(readme.includes("`0.29.x` responsive Web runtime 阶段都已经收口"), true);
-  assert.equal(readme.includes("`0.30.x` 开始补 drag/drop and selection hardening"), true);
+  assert.equal(readme.includes("`0.30.x` drag/drop and selection hardening 阶段已"), true);
+  assert.equal(readme.includes("`0.29.x` responsive Web runtime 阶段和 `0.30.x`"), true);
+  assert.equal(readme.includes("`0.30.x` drag/drop and selection hardening 阶段已"), true);
   assert.equal(readme.includes("copied selection snapshot"), true);
   assert.equal(readme.includes("active entity drag identity"), true);
   assert.equal(readme.includes("source-target action envelope"), true);
@@ -1080,7 +1080,6 @@ test("pour sort consumes generic source-target actions while keeping rules examp
   const selectionSource = await readFile(new URL("../src/framework/selection.ts", import.meta.url), "utf8");
   const dragSource = await readFile(new URL("../src/framework/drag.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.30.4");
   assert.equal(roadmap.includes("version/v0.30.4.md"), true);
   assert.equal(roadmap.includes("pointer puzzle example hardening"), true);
   assert.equal(patch.includes("Pointer Puzzle Example Hardening"), true);
@@ -1097,7 +1096,6 @@ test("pour sort consumes generic source-target actions while keeping rules examp
   assert.equal(publicApi.includes("blockSourceTargetAction(action, reason)"), true);
   assert.equal(publicApi.includes("getSourceTargetActionSnapshot(action)"), true);
   assert.equal(publicApi.includes("while keeping pour-sort rules example-owned"), true);
-  assert.equal(readme.includes("当前项目已经推进到 `v0.30.4` Pointer Puzzle Example Hardening"), true);
   assert.equal(readme.includes("在 `v0.30.4` 让 `pour-sort` 消费 selection snapshot 与 source-target action helper"), true);
   assert.equal(exampleDocs.includes("generic source-target action"), true);
   assert.equal(exampleDocs.includes("allowed/blocked source-target action results"), true);
@@ -1110,6 +1108,52 @@ test("pour sort consumes generic source-target actions while keeping rules examp
   assert.equal(pourSortScene.includes("lastActionReason"), true);
   assert.equal(pourSortScene.includes("pourTopColor"), true);
   assert.equal(pourSortScene.includes("isPourSortSolved"), true);
+  assert.equal(actionSource.includes("pourTopColor"), false);
+  assert.equal(actionSource.includes("isPourSortSolved"), false);
+  assert.equal(selectionSource.includes("pourTopColor"), false);
+  assert.equal(selectionSource.includes("isPourSortSolved"), false);
+  assert.equal(dragSource.includes("pourTopColor"), false);
+  assert.equal(dragSource.includes("isPourSortSolved"), false);
+});
+
+test("drag drop and selection stage closes without adding scope", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.30.0.md", import.meta.url), "utf8");
+  const closeoutPatch = await readFile(new URL("../docs/version/v0.30.5.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const actionSource = await readFile(new URL("../src/framework/source-target-action.ts", import.meta.url), "utf8");
+  const selectionSource = await readFile(new URL("../src/framework/selection.ts", import.meta.url), "utf8");
+  const dragSource = await readFile(new URL("../src/framework/drag.ts", import.meta.url), "utf8");
+
+  assert.equal(packageJson.version, "0.30.5");
+  assert.equal(roadmap.includes("version/v0.30.5.md"), true);
+  assert.equal(roadmap.includes("收口 `0.30.x` drag/drop and selection hardening 阶段"), true);
+  assert.equal(stage.includes("The `0.30.x` stage is complete through `v0.30.5`"), true);
+  assert.equal(stage.includes("selection snapshots/readiness"), true);
+  assert.equal(stage.includes("entity drag state snapshots"), true);
+  assert.equal(stage.includes("source-target action envelopes"), true);
+  assert.equal(stage.includes("Puzzle rules remain example-owned"), true);
+  assert.equal(closeoutPatch.includes("Drag/Drop And Selection Stage Closeout"), true);
+  assert.equal(closeoutPatch.includes("adds no new public package API"), true);
+  assert.equal(closeoutPatch.includes("copied source-target selection snapshots"), true);
+  assert.equal(closeoutPatch.includes("generic entity drag state"), true);
+  assert.equal(closeoutPatch.includes("generic source-target action envelopes"), true);
+  assert.equal(closeoutPatch.includes("`examples/pour-sort` consuming selection snapshots"), true);
+  assert.equal(closeoutPatch.includes("did not add drop target resolution"), true);
+  assert.equal(closeoutPatch.includes("visual layout tools"), true);
+  assert.equal(closeoutPatch.includes("SDK wrappers"), true);
+  assert.equal(closeoutPatch.includes("Game-specific rules still belong in `examples/`"), true);
+  assert.equal(publicApi.includes("`v0.30.5` closes the drag/drop and selection hardening stage"), true);
+  assert.equal(publicApi.includes("without adding new public package API"), true);
+  assert.equal(publicApi.includes("copied selection snapshots/readiness"), true);
+  assert.equal(publicApi.includes("entity drag state snapshots/deltas"), true);
+  assert.equal(publicApi.includes("source-target action envelopes"), true);
+  assert.equal(publicApi.includes("explicit allowed/blocked action results"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.30.5` Drag/Drop And Selection Stage Closeout"), true);
+  assert.equal(readme.includes("`0.30.x` drag/drop and selection hardening 阶段都已经收口"), true);
+  assert.equal(readme.includes("并在 `v0.30.5` 收口该阶段"), true);
+  assert.equal(readme.includes("drag/drop and selection stage closeout"), true);
   assert.equal(actionSource.includes("pourTopColor"), false);
   assert.equal(actionSource.includes("isPourSortSolved"), false);
   assert.equal(selectionSource.includes("pourTopColor"), false);

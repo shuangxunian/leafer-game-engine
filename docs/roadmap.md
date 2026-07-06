@@ -1290,3 +1290,7 @@
 第四批补 pointer puzzle example hardening：
 
 - [v0.30.4](version/v0.30.4.md)
+
+收口 `0.30.x` drag/drop and selection hardening 阶段：
+
+- [v0.30.5](version/v0.30.5.md)
