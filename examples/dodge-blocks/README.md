@@ -77,6 +77,7 @@ npm run dev
 - `boot.ts`
   - 启动 `DodgeBlocksScene`
   - 通过 `startSceneWithLifecycle(...)` 在 runtime start 前预加载 asset manifest
+  - 通过 `createSceneRuntimePreset(...)` 安装 input 和 collisions
   - 通过 `addAudioPlayback(...)` 注入 `BrowserAudioPlaybackAdapter`，把 audio runtime intent 可选交给浏览器 media element 消费
   - 在启动日志里输出 tooling snapshot 和 `DodgeGameSystem.getGameplaySnapshot()` 的只读 gameplay state
   - 通过 `createSceneInputBridgeBundle(...)` 挂载 keyboard bridge 和 pointer button bridge

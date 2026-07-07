@@ -1295,7 +1295,7 @@ test("dialogue prompt view baseline stays package-facing", async () => {
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.32.0");
+  assert.equal(packageJson.version, "0.32.1");
   assert.equal(roadmap.includes("version/v0.31.3.md"), true);
   assert.equal(roadmap.includes("screen-space prompt view baseline"), true);
   assert.equal(patch.includes("Screen-Space Prompt View Baseline"), true);
@@ -1334,7 +1334,7 @@ test("dialogue choice example shell stays routed and package-facing", async () =
   const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
   const inputActions = await readFile(new URL("input-actions.ts", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.0");
+  assert.equal(packageJson.version, "0.32.1");
   assert.equal(roadmap.includes("version/v0.31.4.md"), true);
   assert.equal(roadmap.includes("narrative example shell and route baseline"), true);
   assert.equal(patch.includes("Narrative Example Shell And Route Baseline"), true);
@@ -1382,7 +1382,7 @@ test("dialogue choice example provides an example-owned playable flow", async ()
   const exampleReadme = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
   const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.0");
+  assert.equal(packageJson.version, "0.32.1");
   assert.equal(roadmap.includes("version/v0.31.5.md"), true);
   assert.equal(roadmap.includes("narrative example playable flow"), true);
   assert.equal(patch.includes("Narrative Example Playable Flow"), true);
@@ -1422,7 +1422,7 @@ test("ui dialogue scene flow stage closes without adding authoring scope", async
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.32.0");
+  assert.equal(packageJson.version, "0.32.1");
   assert.equal(roadmap.includes("version/v0.31.6.md"), true);
   assert.equal(roadmap.includes("UI / dialogue / scene flow 阶段"), true);
   assert.equal(stage.includes("The `0.31.x` stage is complete through `v0.31.6`"), true);
@@ -1457,7 +1457,7 @@ test("quick-start game kit stage starts with scene input bridge bundle", async (
   const pourBoot = await readFile(new URL("boot.ts", pourSortExampleUrl), "utf8");
   const dodgeBoot = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.0");
+  assert.equal(packageJson.version, "0.32.1");
   assert.equal(roadmap.includes("version/v0.32.0.md"), true);
   assert.equal(roadmap.includes("Quick-Start Game Kit 阶段"), true);
   assert.equal(roadmap.includes("scene input bridge bundle baseline"), true);
@@ -1469,7 +1469,7 @@ test("quick-start game kit stage starts with scene input bridge bundle", async (
   assert.equal(publicApi.includes("createSceneInputBridgeBundle(scene, options)"), true);
   assert.equal(publicApi.includes("BrowserKeyboardBridge` now also supports an optional injected event target"), true);
   assert.equal(publicApi.includes("does not add a project generator, CLI scaffold, visual editor"), true);
-  assert.equal(readme.includes("当前项目已经推进到 `v0.32.0` Quick-Start Game Kit Sprint"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.32.1` Quick-Start Game Kit Sprint"), true);
   assert.equal(readme.includes("scene input bridge bundle baseline"), true);
   assert.equal(readme.includes("createSceneInputBridgeBundle(scene, options)"), true);
   assert.equal(quickStartSource.includes("export function createSceneInputBridgeBundle"), true);
@@ -1487,6 +1487,54 @@ test("quick-start game kit stage starts with scene input bridge bundle", async (
   assert.equal(dodgeBoot.includes("createSceneInputBridgeBundle"), true);
   assert.equal(dodgeBoot.includes("pointerButtons: true"), true);
   assert.equal(dodgeBoot.includes("inputBridges.detach()"), true);
+});
+
+test("quick-start game kit stage adds scene runtime preset baseline", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.32.1.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const quickStartSource = await readFile(new URL("../src/framework/quick-start.ts", import.meta.url), "utf8");
+  const collectScene = await readFile(new URL("collect-stars-scene.ts", collectStarsExampleUrl), "utf8");
+  const dodgeScene = await readFile(new URL("dodge-blocks-scene.ts", dodgeBlocksExampleUrl), "utf8");
+  const pourScene = await readFile(new URL("pour-sort-scene.ts", pourSortExampleUrl), "utf8");
+  const dialogueScene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
+  const collectDocs = await readFile(new URL("README.md", collectStarsExampleUrl), "utf8");
+  const dodgeDocs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
+  const pourDocs = await readFile(new URL("README.md", pourSortExampleUrl), "utf8");
+  const dialogueDocs = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
+
+  assert.equal(packageJson.version, "0.32.1");
+  assert.equal(roadmap.includes("version/v0.32.1.md"), true);
+  assert.equal(roadmap.includes("scene runtime preset baseline"), true);
+  assert.equal(patch.includes("Scene Runtime Preset Baseline"), true);
+  assert.equal(patch.includes("createSceneRuntimePreset(scene, options?)"), true);
+  assert.equal(patch.includes("does not add a project generator"), true);
+  assert.equal(publicApi.includes("`v0.32.1` adds the scene runtime preset baseline"), true);
+  assert.equal(publicApi.includes("createSceneRuntimePreset(scene, options?)"), true);
+  assert.equal(publicApi.includes("reuses existing systems instead of adding duplicates"), true);
+  assert.equal(readme.includes("在 `v0.32.1` 补齐 scene runtime preset baseline"), true);
+  assert.equal(readme.includes("createSceneRuntimePreset(scene, options?)"), true);
+  assert.equal(quickStartSource.includes("export function createSceneRuntimePreset"), true);
+  assert.equal(quickStartSource.includes("SceneRuntimePresetOptions"), true);
+  assert.equal(quickStartSource.includes("getOrAddInputSystem"), true);
+  assert.equal(quickStartSource.includes("getOrAddCollisionSystem"), true);
+  assert.equal(quickStartSource.includes("getOrAddRuntimeServicesSystem"), true);
+  assert.equal(collectScene.includes("createSceneRuntimePreset(this"), true);
+  assert.equal(collectScene.includes("runtimeServices: true"), true);
+  assert.equal(collectScene.includes("collisions: true"), true);
+  assert.equal(dodgeScene.includes("createSceneRuntimePreset(this"), true);
+  assert.equal(dodgeScene.includes("collisions: true"), true);
+  assert.equal(pourScene.includes("createSceneRuntimePreset(this, { input: true })"), true);
+  assert.equal(dialogueScene.includes("createSceneRuntimePreset(this, { input: true })"), true);
+  assert.equal(collectScene.includes("this.addSystem(new InputSystem"), false);
+  assert.equal(collectScene.includes("this.addSystem(new CollisionSystem"), false);
+  assert.equal(dodgeScene.includes("this.addSystem(new InputSystem"), false);
+  assert.equal(dodgeScene.includes("this.addSystem(new CollisionSystem"), false);
+  assert.equal(collectDocs.includes("createSceneRuntimePreset(...)"), true);
+  assert.equal(dodgeDocs.includes("createSceneRuntimePreset(...)"), true);
+  assert.equal(pourDocs.includes("createSceneRuntimePreset(...)"), true);
+  assert.equal(dialogueDocs.includes("createSceneRuntimePreset(...)"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -1572,6 +1620,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "createHudText",
     "createRuntimeServices",
     "createSceneInputBridgeBundle",
+    "createSceneRuntimePreset",
     "createTileMapLayerView",
     "defineAudioAsset",
     "defineAudioChannel",
@@ -1656,6 +1705,7 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.getBrowserPointerLocalPosition, "function");
   assert.equal(typeof framework.BrowserKeyboardBridge, "function");
   assert.equal(typeof framework.createSceneInputBridgeBundle, "function");
+  assert.equal(typeof framework.createSceneRuntimePreset, "function");
   assert.equal(typeof framework.pointInRect, "function");
   assert.equal(typeof framework.pickTopEntityAtPoint, "function");
   assert.equal(typeof framework.createSourceTargetSelectionState, "function");
@@ -1750,8 +1800,8 @@ test("collect-stars example gameplay loop is routed and package-facing", async (
   assert.equal(examplesEntry.includes('"collect-stars"'), true);
   assert.equal(sceneSource.includes("class CollectStarsScene"), true);
   assert.equal(sceneSource.includes("new GameFlow"), true);
-  assert.equal(sceneSource.includes("new InputSystem"), true);
-  assert.equal(sceneSource.includes("new CollisionSystem"), true);
+  assert.equal(sceneSource.includes("createSceneRuntimePreset"), true);
+  assert.equal(sceneSource.includes("collisions: true"), true);
   assert.equal(sceneSource.includes("instantiateEntityTemplate"), true);
   assert.equal(actionsSource.includes("new InputActionMap"), true);
   assert.equal(actionsSource.includes("defineKeyboardBinding"), true);
@@ -1807,7 +1857,7 @@ test("pour-sort example playable loop is routed and package-facing", async () =>
   assert.equal(examplesEntry.includes("bootPourSortExample"), true);
   assert.equal(examplesEntry.includes('"pour-sort"'), true);
   assert.equal(sceneSource.includes("class PourSortScene"), true);
-  assert.equal(sceneSource.includes("new InputSystem"), true);
+  assert.equal(sceneSource.includes("createSceneRuntimePreset"), true);
   assert.equal(sceneSource.includes("pickTopEntityAtPoint"), true);
   assert.equal(sceneSource.includes("createSourceTargetSelectionState"), true);
   assert.equal(sceneSource.includes("selectSourceTargetSource"), true);

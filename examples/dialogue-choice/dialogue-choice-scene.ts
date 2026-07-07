@@ -14,6 +14,7 @@ import {
   createDialogueChoiceState,
   createDialoguePromptView,
   createHudText,
+  createSceneRuntimePreset,
   defineDialoguePrompt,
   getDialogueChoiceStateSnapshot,
   resolveDialogueChoiceSelection,
@@ -181,7 +182,7 @@ export class DialogueChoiceScene extends Scene {
   }
 
   protected onStart(): void {
-    this.addSystem(new InputSystem(this));
+    createSceneRuntimePreset(this, { input: true });
     this.flow.start();
     this.createStage();
     this.createPromptView();

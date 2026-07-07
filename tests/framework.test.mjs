@@ -13,6 +13,7 @@ import {
   BrowserPointerButtonBridge,
   BrowserPointerPositionBridge,
   CameraSystem,
+  CollisionSystem,
   ColliderComponent,
   EventBus,
   GameFlow,
@@ -41,6 +42,7 @@ import {
   createDialogueChoiceState,
   createEntityDragState,
   createSceneInputBridgeBundle,
+  createSceneRuntimePreset,
   attachActorSpriteView,
   createRuntimeServices,
   createSourceTargetSelectionState,
@@ -1087,6 +1089,61 @@ test("quick-start scene input bridge bundle reports missing input system clearly
     () => createSceneInputBridgeBundle(new Scene("MissingInputScene"), { keyboard: false }),
     /must install InputSystem/
   );
+});
+
+test("quick-start scene runtime preset installs default input and runtime services", () => {
+  const scene = new Scene("QuickStartRuntimePresetScene");
+
+  const preset = createSceneRuntimePreset(scene);
+
+  assert.equal(preset.input, scene.getSystem(InputSystem));
+  assert.equal(preset.runtimeServices, scene.getSystem(RuntimeServicesSystem));
+  assert.equal(preset.services, preset.runtimeServices.services);
+  assert.equal(preset.collisions, undefined);
+  assert.equal(scene.systems.length, 2);
+});
+
+test("quick-start scene runtime preset installs requested systems and reuses existing systems", () => {
+  const scene = new Scene("QuickStartRuntimePresetReuseScene");
+  const existingInput = scene.addSystem(new InputSystem(scene));
+  const existingServices = scene.addSystem(new RuntimeServicesSystem(scene, { priority: -111 }));
+
+  const preset = createSceneRuntimePreset(scene, {
+    input: true,
+    collisions: true,
+    runtimeServices: { priority: -222 }
+  });
+  const secondPreset = createSceneRuntimePreset(scene, {
+    input: true,
+    collisions: true,
+    runtimeServices: true
+  });
+
+  assert.equal(preset.input, existingInput);
+  assert.equal(preset.runtimeServices, existingServices);
+  assert.equal(preset.runtimeServices.priority, -111);
+  assert.equal(preset.collisions, scene.getSystem(CollisionSystem));
+  assert.equal(secondPreset.input, preset.input);
+  assert.equal(secondPreset.collisions, preset.collisions);
+  assert.equal(secondPreset.runtimeServices, preset.runtimeServices);
+  assert.equal(scene.systems.filter((system) => system instanceof InputSystem).length, 1);
+  assert.equal(scene.systems.filter((system) => system instanceof CollisionSystem).length, 1);
+  assert.equal(scene.systems.filter((system) => system instanceof RuntimeServicesSystem).length, 1);
+});
+
+test("quick-start scene runtime preset respects explicit opt-in options", () => {
+  const scene = new Scene("QuickStartRuntimePresetOptionsScene");
+
+  const emptyPreset = createSceneRuntimePreset(scene, {});
+  const collisionPreset = createSceneRuntimePreset(scene, { collisions: true });
+
+  assert.equal(emptyPreset.input, undefined);
+  assert.equal(emptyPreset.runtimeServices, undefined);
+  assert.equal(emptyPreset.collisions, undefined);
+  assert.equal(collisionPreset.input, undefined);
+  assert.equal(collisionPreset.runtimeServices, undefined);
+  assert.equal(collisionPreset.collisions, scene.getSystem(CollisionSystem));
+  assert.equal(scene.systems.length, 1);
 });
 
 test("point hit testing includes rect edges and reports invalid inputs", () => {

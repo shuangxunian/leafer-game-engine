@@ -13,6 +13,7 @@ Current scope:
 - use `createDialoguePromptView(...)` for screen-space dialogue text and choice text
 - route resolved choices to the next example-owned prompt through local `nextId` values
 - record visited prompt ids, last resolved choice, and completion state in the gameplay snapshot
+- install scene input through `createSceneRuntimePreset(...)`
 - map keyboard input through `InputActionMap` and `createSceneInputBridgeBundle(...)`
 - expose a read-only gameplay snapshot
 

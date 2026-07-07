@@ -12,8 +12,6 @@ import type {
 } from "@shuangxunian/leafer-game-engine/framework";
 import {
   AssetRegistry,
-  CollisionSystem,
-  InputSystem,
   SpriteAnimationComponent,
   SpriteAnimationSystem,
   addAudioRuntime,
@@ -21,6 +19,7 @@ import {
   bootstrapSceneFromConfig,
   createBrowserImageSpriteLoader,
   createHudText,
+  createSceneRuntimePreset,
   createTileMapLayerView,
   defineActorTemplate
 } from "@shuangxunian/leafer-game-engine/framework";
@@ -228,12 +227,14 @@ export class DodgeBlocksScene extends Scene {
     }
     const levelRuntime = createDodgeLevelRuntime(bootstrapResult.level);
 
-    this.addSystem(new InputSystem(this));
+    createSceneRuntimePreset(this, {
+      input: true,
+      collisions: true
+    });
     addAudioRuntime(this, {
       manifest: DODGE_BLOCKS_AUDIO_MANIFEST
     });
     this.addSystem(new SpriteAnimationSystem(this, this.assets));
-    this.addSystem(new CollisionSystem(this));
 
     createTileMapLayerView({
       tileMap: levelRuntime.tileMap,

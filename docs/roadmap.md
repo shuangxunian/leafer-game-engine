@@ -1340,3 +1340,7 @@
 第一批补 scene input bridge bundle baseline：
 
 - [v0.32.0](version/v0.32.0.md)
+
+第二批补 scene runtime preset baseline：
+
+- [v0.32.1](version/v0.32.1.md)

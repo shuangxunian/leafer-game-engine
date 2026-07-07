@@ -2,11 +2,10 @@ import { Scene } from "@shuangxunian/leafer-game-engine/core";
 import type { Entity } from "@shuangxunian/leafer-game-engine/core";
 import type { RenderAdapter, RenderScene } from "@shuangxunian/leafer-game-engine/adapter";
 import {
-  CollisionSystem,
   GameFlow,
-  InputSystem,
   attachActorSpriteView,
   createHudText,
+  createSceneRuntimePreset,
   createTileMap,
   createTileMapLayerView,
   instantiateEntityTemplate
@@ -46,8 +45,11 @@ export class CollectStarsScene extends Scene {
   }
 
   protected onStart(): void {
-    this.addSystem(new InputSystem(this));
-    this.addSystem(new CollisionSystem(this));
+    createSceneRuntimePreset(this, {
+      input: true,
+      collisions: true,
+      runtimeServices: true
+    });
     this.createPlayfieldLayer();
     const playfield = this.getPlayfieldBounds();
     const player = this.createPlayer(playfield);

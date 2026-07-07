@@ -8,6 +8,7 @@ Current scope:
 
 - boot through `?example=pour-sort`
 - create a small row of selectable bottle entities
+- install scene input through `createSceneRuntimePreset(...)`
 - map pointer events to local game coordinates
 - pick bottle entities through framework hit testing
 - store source-target selection through framework selection helpers

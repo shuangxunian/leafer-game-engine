@@ -9,7 +9,7 @@
 - 通过 `examples/main.ts?example=collect-stars` 启动
 - 使用 `@shuangxunian/leafer-game-engine` package-style imports
 - 创建 `CollectStarsScene`
-- 安装 `InputSystem` 和 `CollisionSystem`
+- 通过 `createSceneRuntimePreset(...)` 安装 `InputSystem`、`CollisionSystem` 和 runtime services
 - 从 boot path 通过 `createSceneInputBridgeBundle(...)` 挂载 keyboard bridge
 - 使用 `InputActionMap` 读取 movement / confirm 语义动作
 - 使用 `limitMovementVector(...)` 保持斜向移动速度一致

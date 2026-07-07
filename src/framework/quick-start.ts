@@ -1,4 +1,5 @@
 import type { Scene } from "../core/index.js";
+import { CollisionSystem } from "./collision.js";
 import { InputSystem } from "./input.js";
 import { BrowserKeyboardBridge, type BrowserKeyboardBridgeTarget } from "./keyboard.js";
 import {
@@ -9,6 +10,25 @@ import {
   type BrowserPointerLocalPositionTarget,
   type BrowserPointerPositionResolver
 } from "./pointer.js";
+import {
+  RuntimeServicesSystem,
+  addRuntimeServices,
+  type RuntimeServices,
+  type RuntimeServicesSystemOptions
+} from "./runtime-services.js";
+
+export type SceneRuntimePresetOptions<TEvents extends object = Record<string, unknown>> = Readonly<{
+  input?: boolean;
+  collisions?: boolean;
+  runtimeServices?: boolean | RuntimeServicesSystemOptions<TEvents>;
+}>;
+
+export type SceneRuntimePreset<TEvents extends object = Record<string, unknown>> = Readonly<{
+  input?: InputSystem;
+  collisions?: CollisionSystem;
+  runtimeServices?: RuntimeServicesSystem<TEvents>;
+  services?: RuntimeServices<TEvents>;
+}>;
 
 export type SceneInputBridgeKind = "keyboard" | "pointer-button" | "pointer-position";
 
@@ -133,6 +153,29 @@ export function createSceneInputBridgeBundle(
   return bundle;
 }
 
+export function createSceneRuntimePreset<TEvents extends object = Record<string, unknown>>(
+  scene: Scene,
+  options?: SceneRuntimePresetOptions<TEvents>
+): SceneRuntimePreset<TEvents> {
+  const resolvedOptions = options ?? {
+    input: true,
+    runtimeServices: true
+  };
+
+  const input = resolvedOptions.input ? getOrAddInputSystem(scene) : undefined;
+  const collisions = resolvedOptions.collisions ? getOrAddCollisionSystem(scene) : undefined;
+  const runtimeServices = resolvedOptions.runtimeServices
+    ? getOrAddRuntimeServicesSystem<TEvents>(scene, resolvedOptions.runtimeServices)
+    : undefined;
+
+  return Object.freeze({
+    input,
+    collisions,
+    runtimeServices,
+    services: runtimeServices?.services
+  });
+}
+
 function createBridgeHandle(
   kind: SceneInputBridgeKind,
   bridge: Pick<SceneInputBridgeHandle, "attach" | "detach">
@@ -162,4 +205,25 @@ function getBridgeOptions<TOptions extends object>(option: boolean | TOptions | 
   }
 
   return {} as TOptions;
+}
+
+function getOrAddInputSystem(scene: Scene): InputSystem {
+  return scene.getSystem(InputSystem) ?? scene.addSystem(new InputSystem(scene));
+}
+
+function getOrAddCollisionSystem(scene: Scene): CollisionSystem {
+  return scene.getSystem(CollisionSystem) ?? scene.addSystem(new CollisionSystem(scene));
+}
+
+function getOrAddRuntimeServicesSystem<TEvents extends object>(
+  scene: Scene,
+  option: true | RuntimeServicesSystemOptions<TEvents>
+): RuntimeServicesSystem<TEvents> {
+  const existing = scene.getSystem(RuntimeServicesSystem) as RuntimeServicesSystem<TEvents> | undefined;
+  if (existing) return existing;
+
+  return addRuntimeServices<TEvents>(
+    scene,
+    typeof option === "object" && option !== null ? option : {}
+  );
 }

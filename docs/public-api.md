@@ -156,6 +156,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.32.0` starts the quick-start game kit stage and adds the first package-facing assembly helper. The `/framework` entrypoint now exports `createSceneInputBridgeBundle(scene, options)`, `SceneInputBridgeBundle`, `SceneInputBridgeBundleOptions`, `SceneInputBridgeHandle`, and `SceneInputBridgeKind` so downstream browser games can install keyboard, pointer button, and pointer position bridges from a scene-owned `InputSystem` with one small setup call. `BrowserKeyboardBridge` now also supports an optional injected event target, matching the pointer bridge testability pattern. `examples/collect-stars`, `examples/dialogue-choice`, `examples/pour-sort`, and `examples/dodge-blocks` consume the helper through package-style imports. This is scene boot convenience only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, account system, ads, monetization, analytics service, publishing workflow, game-specific rules engine, galgame script format, or content authoring workflow.
 
+`v0.32.1` adds the scene runtime preset baseline. The `/framework` entrypoint now exports `createSceneRuntimePreset(scene, options?)`, `SceneRuntimePreset`, and `SceneRuntimePresetOptions` so downstream scenes can install common scene-owned `InputSystem`, `CollisionSystem`, and `RuntimeServicesSystem` setup through one small helper. The helper reuses existing systems instead of adding duplicates, installs input plus runtime services when called without options, and only installs explicitly enabled systems when options are provided. The routed examples consume it for repeated system setup while keeping gameplay rules, input actions, HUD layout, audio cue choices, scene config, prompt routing, puzzle validation, scoring, timers, and snapshots example-owned. This is runtime/framework convenience only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, account system, ads, monetization, analytics service, publishing workflow, game-specific rules engine, galgame script format, UI builder, or content authoring workflow.
+
 ---
 
 ## Package Entrypoints
@@ -196,6 +198,7 @@ import {
   addRuntimeServices,
   bootstrapSceneFromConfig,
   createSceneInputBridgeBundle,
+  createSceneRuntimePreset,
   createLevelLayout,
   createTileMap,
   createTileMapLayerView,
@@ -254,6 +257,7 @@ import {
   addRuntimeServices,
   bootstrapSceneFromConfig,
   createSceneInputBridgeBundle,
+  createSceneRuntimePreset,
   createLevelLayout,
   createTileMap,
   createTileMapLayerView,

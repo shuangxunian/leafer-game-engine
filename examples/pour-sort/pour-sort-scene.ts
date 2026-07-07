@@ -8,6 +8,7 @@ import {
   blockSourceTargetAction,
   clearSourceTargetSelection,
   createHudText,
+  createSceneRuntimePreset,
   createSourceTargetActionFromSelection,
   createSourceTargetSelectionState,
   defineActorTemplate,
@@ -116,8 +117,8 @@ export class PourSortScene extends Scene {
   }
 
   protected onStart(): void {
-    const input = new InputSystem(this);
-    this.addSystem(input);
+    const { input } = createSceneRuntimePreset(this, { input: true });
+    if (!input) throw new Error("InputSystem was not initialized.");
 
     this.createBoard();
     this.createHud();
