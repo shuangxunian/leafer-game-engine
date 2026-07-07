@@ -79,7 +79,7 @@ npm run dev
   - 通过 `startSceneWithLifecycle(...)` 在 runtime start 前预加载 asset manifest
   - 通过 `addAudioPlayback(...)` 注入 `BrowserAudioPlaybackAdapter`，把 audio runtime intent 可选交给浏览器 media element 消费
   - 在启动日志里输出 tooling snapshot 和 `DodgeGameSystem.getGameplaySnapshot()` 的只读 gameplay state
-  - 挂载 keyboard bridge 和 pointer button bridge
+  - 通过 `createSceneInputBridgeBundle(...)` 挂载 keyboard bridge 和 pointer button bridge
   - 挂载 browser tooling panel
   - 分区显示 runtime debug、assets、game flow、sprite animations、audio runtime、input actions、collisions、entity inspector 和 component schema 信息
   - Runtime Debug section 展示 time / viewport / entity counts / system order / lifecycle 等只读状态
@@ -195,7 +195,7 @@ browser runtime
 - player movement、start/restart 和 pause/resume 使用 `InputActionMap`，而不是在 gameplay 代码里硬编码物理键
 - player movement 使用 framework `limitMovementVector(...)`，避免同时按两个方向时移动速度变成斜向超速
 - hazard spawn top-left 位置使用 framework `randomPositionInBounds(...)`，但 size、speed、spawn cadence 和 gameplay rules 仍由示例拥有
-- `confirm` 同时消费 keyboard 和 primary pointer button bindings，验证 browser pointer bridge 到 semantic action 的链路
+- `confirm` 同时消费 keyboard 和 primary pointer button bindings，验证 quick-start input bridge bundle 到 semantic action 的链路
 - gameplay phase 使用 framework `GameFlow`，而不是示例内的本地 phase state machine
 - gameplay state 通过 `DodgeGameSystem.getGameplaySnapshot()` 以只读数据暴露，方便确认 playable loop 已经闭环，不提供运行时修改入口
 - tooling panel 的 `Game Flow` section 可以显示当前 ready / running / paused / ended 状态

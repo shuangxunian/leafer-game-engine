@@ -1322,3 +1322,21 @@
 收口 `0.31.x` UI / dialogue / scene flow 阶段：
 
 - [v0.31.6](version/v0.31.6.md)
+
+### `0.32.x` Quick-Start Game Kit 阶段
+
+目标：
+
+- 减少搭建一个新 Web 小游戏时反复复制的 scene boot glue
+- 把 input、pointer、HUD、audio、runtime services 这类通用装配路径逐步收束成小而明确的 package-facing helper
+- 让示例继续像下游游戏，而不是像引擎内部测试夹具
+
+边界：
+
+- 只做 runtime/framework/package-facing convenience
+- 不做 project generator、CLI scaffold、visual editor、launcher、gallery、template marketplace、WeChat SDK wrapper、账号/广告/变现/发布流程
+- 不把具体玩法规则、水排序规则、match-3 规则、galgame story format 或内容生产流程放进引擎包
+
+第一批补 scene input bridge bundle baseline：
+
+- [v0.32.0](version/v0.32.0.md)

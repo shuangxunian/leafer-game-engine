@@ -154,6 +154,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.31.6` closes the UI / dialogue / scene flow stage without adding new public package API. The stage leaves dialogue data contracts, immutable choice state helpers, copied prompt and choice snapshots, screen-space prompt view creation and replacement, and the routed `examples/dialogue-choice` playable flow in place. A downstream game can now represent dialogue lines, present choices, resolve a selected choice, update a prompt view, and route that result through example-owned flow code. Visual novel scripting, branching story editing, story graph traversal engines, reusable story formats, choice effect systems, localization workflows, save/load frameworks, visual UI builders, launchers, galleries, marketplaces, SDK wrappers, monetization, analytics, mobile app shells, and publishing workflows remain outside the engine package.
 
+`v0.32.0` starts the quick-start game kit stage and adds the first package-facing assembly helper. The `/framework` entrypoint now exports `createSceneInputBridgeBundle(scene, options)`, `SceneInputBridgeBundle`, `SceneInputBridgeBundleOptions`, `SceneInputBridgeHandle`, and `SceneInputBridgeKind` so downstream browser games can install keyboard, pointer button, and pointer position bridges from a scene-owned `InputSystem` with one small setup call. `BrowserKeyboardBridge` now also supports an optional injected event target, matching the pointer bridge testability pattern. `examples/collect-stars`, `examples/dialogue-choice`, `examples/pour-sort`, and `examples/dodge-blocks` consume the helper through package-style imports. This is scene boot convenience only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, account system, ads, monetization, analytics service, publishing workflow, game-specific rules engine, galgame script format, or content authoring workflow.
+
 ---
 
 ## Package Entrypoints
@@ -180,6 +182,7 @@ These imports are expected to work in Node-side tests:
 import { Scene } from "@shuangxunian/leafer-game-engine/core";
 import { RENDER_SCENE_LAYER_ORDER, getRenderSceneLayerNames } from "@shuangxunian/leafer-game-engine/adapter/render-types";
 import {
+  BrowserKeyboardBridge,
   BrowserPointerButtonBridge,
   EventBus,
   GameFlow,
@@ -192,6 +195,7 @@ import {
   TileMap,
   addRuntimeServices,
   bootstrapSceneFromConfig,
+  createSceneInputBridgeBundle,
   createLevelLayout,
   createTileMap,
   createTileMapLayerView,
@@ -218,7 +222,7 @@ import {
 
 The smoke tests intentionally use the real package name so they exercise `package.json` exports.
 
-`BrowserPointerButtonBridge` can be imported from `/framework` in Node-side smoke tests, but its default target is browser `window`; Node tests should inject a small event target when constructing it.
+`BrowserKeyboardBridge` and `BrowserPointerButtonBridge` can be imported from `/framework` in Node-side smoke tests, but their default targets are browser `window`; Node tests should inject a small event target when constructing them.
 
 ---
 
@@ -236,6 +240,7 @@ Use subpath entrypoints for pure engine logic, framework primitives, and Node-si
 import { Scene } from "@shuangxunian/leafer-game-engine/core";
 import { RENDER_SCENE_LAYER_ORDER, getRenderSceneLayerNames } from "@shuangxunian/leafer-game-engine/adapter/render-types";
 import {
+  BrowserKeyboardBridge,
   BrowserPointerButtonBridge,
   EventBus,
   GameFlow,
@@ -248,6 +253,7 @@ import {
   TileMap,
   addRuntimeServices,
   bootstrapSceneFromConfig,
+  createSceneInputBridgeBundle,
   createLevelLayout,
   createTileMap,
   createTileMapLayerView,

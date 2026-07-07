@@ -9,6 +9,7 @@ import {
   AssetRegistry,
   allowSourceTargetAction,
   blockSourceTargetAction,
+  BrowserKeyboardBridge,
   BrowserPointerButtonBridge,
   BrowserPointerPositionBridge,
   CameraSystem,
@@ -39,6 +40,7 @@ import {
   createDialoguePromptView,
   createDialogueChoiceState,
   createEntityDragState,
+  createSceneInputBridgeBundle,
   attachActorSpriteView,
   createRuntimeServices,
   createSourceTargetSelectionState,
@@ -878,6 +880,34 @@ test("input system stores copied pointer position state", () => {
   );
 });
 
+test("browser keyboard bridge supports injected targets and cleanup", () => {
+  const scene = new Scene("KeyboardBridgeScene");
+  const input = new InputSystem(scene);
+  const target = createFakeEventTarget();
+  const bridge = new BrowserKeyboardBridge(input, target);
+
+  bridge.attach();
+  bridge.attach();
+  assert.equal(target.listenerCount("keydown"), 1);
+
+  target.dispatch("keydown", { key: "ArrowUp" });
+  assert.equal(input.isPressed("arrowup"), true);
+  assert.equal(input.wasPressed("arrowup"), true);
+
+  input.lateUpdate();
+  target.dispatch("keydown", { key: "ArrowUp" });
+  assert.equal(input.wasPressed("arrowup"), false);
+
+  target.dispatch("keyup", { key: "ArrowUp" });
+  assert.equal(input.isPressed("arrowup"), false);
+
+  target.dispatch("keydown", { key: "Enter" });
+  bridge.detach();
+  bridge.detach();
+  assert.equal(input.isPressed("enter"), false);
+  assert.equal(target.listenerCount("keydown"), 0);
+});
+
 test("browser pointer button bridge writes normalized button state into input system", () => {
   const input = new InputSystem();
   const target = createFakeEventTarget();
@@ -1014,6 +1044,49 @@ test("browser pointer button bridge handles secondary, auxiliary, cancel, blur a
 
   target.dispatch("pointerdown", { button: 0 });
   assert.equal(input.isPressed(getPointerButtonInputId("primary")), false);
+});
+
+test("quick-start scene input bridge bundle attaches and detaches configured browser bridges", () => {
+  const scene = new Scene("QuickStartInputScene");
+  const input = scene.addSystem(new InputSystem(scene));
+  const target = createFakeEventTarget();
+  target.getBoundingClientRect = () => ({ left: 5, top: 10 });
+
+  const bundle = createSceneInputBridgeBundle(scene, {
+    keyboard: { target },
+    pointerButtons: { target },
+    pointerPosition: { target, localTarget: target }
+  });
+
+  assert.equal(bundle.input, input);
+  assert.deepEqual(bundle.bridges.map((bridge) => bridge.kind), [
+    "keyboard",
+    "pointer-button",
+    "pointer-position"
+  ]);
+  assert.equal(bundle.detachOnSceneDestroy, true);
+  assert.equal(target.listenerCount("keydown"), 1);
+  assert.equal(target.listenerCount("pointerdown"), 2);
+
+  target.dispatch("keydown", { key: "Enter" });
+  target.dispatch("pointerdown", { button: 0, clientX: 25, clientY: 40 });
+  assert.equal(input.isPressed("enter"), true);
+  assert.equal(input.isPressed(getPointerButtonInputId("primary")), true);
+  assert.deepEqual(input.getPointerPosition(), { x: 20, y: 30 });
+
+  scene.destroy();
+  assert.equal(input.isPressed("enter"), false);
+  assert.equal(input.isPressed(getPointerButtonInputId("primary")), false);
+  assert.equal(input.getPointerPosition(), undefined);
+  assert.equal(target.listenerCount("keydown"), 0);
+  assert.equal(target.listenerCount("pointerdown"), 0);
+});
+
+test("quick-start scene input bridge bundle reports missing input system clearly", () => {
+  assert.throws(
+    () => createSceneInputBridgeBundle(new Scene("MissingInputScene"), { keyboard: false }),
+    /must install InputSystem/
+  );
 });
 
 test("point hit testing includes rect edges and reports invalid inputs", () => {

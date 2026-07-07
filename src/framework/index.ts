@@ -15,6 +15,7 @@ export * from "./level.js";
 export * from "./movement.js";
 export * from "./pointer.js";
 export * from "./picking.js";
+export * from "./quick-start.js";
 export * from "./runtime-services.js";
 export * from "./scene-config.js";
 export * from "./scheduler.js";

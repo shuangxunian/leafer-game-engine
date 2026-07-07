@@ -1,39 +1,52 @@
 import { InputSystem, normalizeKeyboardKey } from "./input.js";
 
+export type BrowserKeyboardBridgeTarget = {
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject): void;
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject): void;
+};
+
 export class BrowserKeyboardBridge {
   private readonly pressedKeys = new Set<string>();
   private attached = false;
 
-  constructor(private readonly input: InputSystem) {}
+  constructor(
+    private readonly input: InputSystem,
+    private readonly target: BrowserKeyboardBridgeTarget = window
+  ) {}
 
   attach(): void {
     if (this.attached) return;
 
     this.attached = true;
-    window.addEventListener("keydown", this.onKeyDown);
-    window.addEventListener("keyup", this.onKeyUp);
-    window.addEventListener("blur", this.onBlur);
+    this.target.addEventListener("keydown", this.onKeyDown);
+    this.target.addEventListener("keyup", this.onKeyUp);
+    this.target.addEventListener("blur", this.onBlur);
   }
 
   detach(): void {
     if (!this.attached) return;
 
     this.attached = false;
-    window.removeEventListener("keydown", this.onKeyDown);
-    window.removeEventListener("keyup", this.onKeyUp);
-    window.removeEventListener("blur", this.onBlur);
+    this.target.removeEventListener("keydown", this.onKeyDown);
+    this.target.removeEventListener("keyup", this.onKeyUp);
+    this.target.removeEventListener("blur", this.onBlur);
     this.onBlur();
   }
 
-  private onKeyDown = (event: KeyboardEvent): void => {
-    if (this.pressedKeys.has(event.key)) return;
-    this.pressedKeys.add(event.key);
-    this.input.press(normalizeKeyboardKey(event.key));
+  private onKeyDown = (event: Event): void => {
+    const key = getBrowserKeyboardKey(event);
+    if (!key || this.pressedKeys.has(key)) return;
+
+    this.pressedKeys.add(key);
+    this.input.press(normalizeKeyboardKey(key));
   };
 
-  private onKeyUp = (event: KeyboardEvent): void => {
-    this.pressedKeys.delete(event.key);
-    this.input.release(normalizeKeyboardKey(event.key));
+  private onKeyUp = (event: Event): void => {
+    const key = getBrowserKeyboardKey(event);
+    if (!key) return;
+
+    this.pressedKeys.delete(key);
+    this.input.release(normalizeKeyboardKey(key));
   };
 
   private onBlur = (): void => {
@@ -42,4 +55,9 @@ export class BrowserKeyboardBridge {
     }
     this.pressedKeys.clear();
   };
+}
+
+function getBrowserKeyboardKey(event: Event): string | undefined {
+  const key = (event as { key?: unknown }).key;
+  return typeof key === "string" ? key : undefined;
 }

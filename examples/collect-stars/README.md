@@ -10,7 +10,7 @@
 - 使用 `@shuangxunian/leafer-game-engine` package-style imports
 - 创建 `CollectStarsScene`
 - 安装 `InputSystem` 和 `CollisionSystem`
-- 从 boot path 挂载 `BrowserKeyboardBridge`
+- 从 boot path 通过 `createSceneInputBridgeBundle(...)` 挂载 keyboard bridge
 - 使用 `InputActionMap` 读取 movement / confirm 语义动作
 - 使用 `limitMovementVector(...)` 保持斜向移动速度一致
 - 将 input actions、player controller、actor templates 和 gameplay system 拆成示例本地模块

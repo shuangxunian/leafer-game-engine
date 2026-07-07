@@ -1,12 +1,11 @@
 import type { BrowserRuntime } from "@shuangxunian/leafer-game-engine/runtime";
 import { BrowserAudioPlaybackAdapter, startSceneWithLifecycle } from "@shuangxunian/leafer-game-engine/runtime";
 import {
-  BrowserKeyboardBridge,
-  BrowserPointerButtonBridge,
   InputSystem,
   addAudioPlayback,
   getAudioRuntime,
-  createDefaultComponentSchemaRegistry
+  createDefaultComponentSchemaRegistry,
+  createSceneInputBridgeBundle
 } from "@shuangxunian/leafer-game-engine/framework";
 import { DodgeBlocksScene } from "./dodge-blocks-scene.js";
 import { DodgeGameSystem } from "./dodge-game-system.js";
@@ -35,10 +34,11 @@ export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<v
     priority: 260
   });
 
-  const keyboard = new BrowserKeyboardBridge(input);
-  keyboard.attach();
-  const pointer = new BrowserPointerButtonBridge(input);
-  pointer.attach();
+  const inputBridges = createSceneInputBridgeBundle(scene, {
+    keyboard: true,
+    pointerButtons: true,
+    detachOnSceneDestroy: false
+  });
   const toolingPanel = new BrowserToolingPanel();
   const schemas = createDefaultComponentSchemaRegistry();
   const createSnapshot = () =>
@@ -64,8 +64,7 @@ export async function bootDodgeBlocksExample(runtime: BrowserRuntime): Promise<v
   scene.destroy = (): void => {
     window.clearInterval(toolingTimer);
     toolingPanel.detach();
-    keyboard.detach();
-    pointer.detach();
+    inputBridges.detach();
     destroyScene();
   };
 

@@ -1,11 +1,6 @@
 import type { BrowserRuntime } from "@shuangxunian/leafer-game-engine/runtime";
 import { startSceneWithLifecycle } from "@shuangxunian/leafer-game-engine/runtime";
-import {
-  BrowserPointerButtonBridge,
-  BrowserPointerPositionBridge,
-  InputSystem,
-  createBrowserPointerLocalPositionResolver
-} from "@shuangxunian/leafer-game-engine/framework";
+import { createSceneInputBridgeBundle } from "@shuangxunian/leafer-game-engine/framework";
 import { PourSortScene } from "./pour-sort-scene.js";
 
 export async function bootPourSortExample(runtime: BrowserRuntime): Promise<void> {
@@ -18,27 +13,13 @@ export async function bootPourSortExample(runtime: BrowserRuntime): Promise<void
     throw lifecycleResult.error;
   }
 
-  const input = scene.getSystem(InputSystem);
-  if (!input) throw new Error("InputSystem was not initialized.");
-
   const target = document.getElementById("game-root");
   if (!target) throw new Error("Pour-sort mount target was not found.");
 
-  const pointerPosition = new BrowserPointerPositionBridge(
-    input,
-    target,
-    createBrowserPointerLocalPositionResolver(target)
-  );
-  const pointerButton = new BrowserPointerButtonBridge(input, target);
-  pointerPosition.attach();
-  pointerButton.attach();
-
-  const destroyScene = scene.destroy.bind(scene);
-  scene.destroy = (): void => {
-    pointerPosition.detach();
-    pointerButton.detach();
-    destroyScene();
-  };
+  createSceneInputBridgeBundle(scene, {
+    pointerButtons: { target },
+    pointerPosition: { target, localTarget: target }
+  });
 
   console.log("Pour Sort shell bootstrapped:", {
     gameplay: scene.getGameplaySnapshot()
