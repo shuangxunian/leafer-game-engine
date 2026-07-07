@@ -1295,7 +1295,7 @@ test("dialogue prompt view baseline stays package-facing", async () => {
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.31.5");
+  assert.equal(packageJson.version, "0.31.6");
   assert.equal(roadmap.includes("version/v0.31.3.md"), true);
   assert.equal(roadmap.includes("screen-space prompt view baseline"), true);
   assert.equal(patch.includes("Screen-Space Prompt View Baseline"), true);
@@ -1334,7 +1334,7 @@ test("dialogue choice example shell stays routed and package-facing", async () =
   const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
   const inputActions = await readFile(new URL("input-actions.ts", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.31.5");
+  assert.equal(packageJson.version, "0.31.6");
   assert.equal(roadmap.includes("version/v0.31.4.md"), true);
   assert.equal(roadmap.includes("narrative example shell and route baseline"), true);
   assert.equal(patch.includes("Narrative Example Shell And Route Baseline"), true);
@@ -1382,7 +1382,7 @@ test("dialogue choice example provides an example-owned playable flow", async ()
   const exampleReadme = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
   const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.31.5");
+  assert.equal(packageJson.version, "0.31.6");
   assert.equal(roadmap.includes("version/v0.31.5.md"), true);
   assert.equal(roadmap.includes("narrative example playable flow"), true);
   assert.equal(patch.includes("Narrative Example Playable Flow"), true);
@@ -1397,7 +1397,6 @@ test("dialogue choice example provides an example-owned playable flow", async ()
   assert.equal(publicApi.includes("example-owned prompt route table"), true);
   assert.equal(publicApi.includes("visited prompt tracking"), true);
   assert.equal(publicApi.includes("while keeping prompt routing, choice effects, story content, ending conditions, and layout in the downstream example"), true);
-  assert.equal(readme.includes("当前项目已经推进到 `v0.31.5` Narrative Example Playable Flow"), true);
   assert.equal(readme.includes("在 `v0.31.5` 补齐 narrative example playable flow"), true);
   assert.equal(readme.includes("dialogue choice playable flow"), true);
   assert.equal(exampleReadme.includes("example-owned prompt routing"), true);
@@ -1414,6 +1413,35 @@ test("dialogue choice example provides an example-owned playable flow", async ()
   assert.equal(scene.includes("visual novel"), false);
   assert.equal(scene.includes("editor"), false);
   assert.equal(scene.includes("marketplace"), false);
+});
+
+test("ui dialogue scene flow stage closes without adding authoring scope", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const stage = await readFile(new URL("../docs/version/v0.31.0.md", import.meta.url), "utf8");
+  const closeout = await readFile(new URL("../docs/version/v0.31.6.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+
+  assert.equal(packageJson.version, "0.31.6");
+  assert.equal(roadmap.includes("version/v0.31.6.md"), true);
+  assert.equal(roadmap.includes("UI / dialogue / scene flow 阶段"), true);
+  assert.equal(stage.includes("The `0.31.x` stage is complete through `v0.31.6`"), true);
+  assert.equal(stage.includes("routed `examples/dialogue-choice` playable"), true);
+  assert.equal(closeout.includes("UI / Dialogue / Scene Flow Closeout"), true);
+  assert.equal(closeout.includes("The completed `0.31.x` stage leaves"), true);
+  assert.equal(closeout.includes("dialogue line / choice / prompt data contracts"), true);
+  assert.equal(closeout.includes("immutable dialogue choice state helpers"), true);
+  assert.equal(closeout.includes("screen-space dialogue prompt view creation"), true);
+  assert.equal(closeout.includes("example-owned prompt routing and playable dialogue flow"), true);
+  assert.equal(closeout.includes("no visual novel scripting language"), true);
+  assert.equal(closeout.includes("no story graph traversal engine"), true);
+  assert.equal(publicApi.includes("`v0.31.6` closes the UI / dialogue / scene flow stage"), true);
+  assert.equal(publicApi.includes("dialogue data contracts, immutable choice state helpers"), true);
+  assert.equal(publicApi.includes("represent dialogue lines, present choices, resolve a selected choice"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.31.6` UI / Dialogue / Scene Flow Closeout"), true);
+  assert.equal(readme.includes("`0.31.x` UI / dialogue / scene flow 阶段都已经收口"), true);
+  assert.equal(readme.includes("并在 `v0.31.6` 收口该阶段"), true);
+  assert.equal(readme.includes("UI/dialogue/scene flow closeout"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {

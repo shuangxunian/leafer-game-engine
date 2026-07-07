@@ -1318,3 +1318,7 @@
 第五批补 narrative example playable flow：
 
 - [v0.31.5](version/v0.31.5.md)
+
+收口 `0.31.x` UI / dialogue / scene flow 阶段：
+
+- [v0.31.6](version/v0.31.6.md)
