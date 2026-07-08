@@ -154,9 +154,11 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.31.6` closes the UI / dialogue / scene flow stage without adding new public package API. The stage leaves dialogue data contracts, immutable choice state helpers, copied prompt and choice snapshots, screen-space prompt view creation and replacement, and the routed `examples/dialogue-choice` playable flow in place. A downstream game can now represent dialogue lines, present choices, resolve a selected choice, update a prompt view, and route that result through example-owned flow code. Visual novel scripting, branching story editing, story graph traversal engines, reusable story formats, choice effect systems, localization workflows, save/load frameworks, visual UI builders, launchers, galleries, marketplaces, SDK wrappers, monetization, analytics, mobile app shells, and publishing workflows remain outside the engine package.
 
-`v0.32.0` starts the quick-start game kit stage and adds the first package-facing assembly helper. The `/framework` entrypoint now exports `createSceneInputBridgeBundle(scene, options)`, `SceneInputBridgeBundle`, `SceneInputBridgeBundleOptions`, `SceneInputBridgeHandle`, and `SceneInputBridgeKind` so downstream browser games can install keyboard, pointer button, and pointer position bridges from a scene-owned `InputSystem` with one small setup call. `BrowserKeyboardBridge` now also supports an optional injected event target, matching the pointer bridge testability pattern. `examples/collect-stars`, `examples/dialogue-choice`, `examples/pour-sort`, and `examples/dodge-blocks` consume the helper through package-style imports. This is scene boot convenience only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, account system, ads, monetization, analytics service, publishing workflow, game-specific rules engine, galgame script format, or content authoring workflow.
+`v0.32.0` starts the quick-start game kit stage and adds the first package-facing assembly helper. The `/framework` entrypoint now exports `createSceneInputBridgeBundle(scene, options)`, `SceneInputBridgeBundle`, `SceneInputBridgeBundleOptions`, `SceneInputBridgeHandle`, and `SceneInputBridgeKind` so downstream browser games can install keyboard, pointer button, and pointer position bridges from a scene-owned `InputSystem` with one small setup call. `BrowserKeyboardBridge` now also supports an optional injected event target, matching the pointer bridge testability pattern. The helper remains the bridge assembly primitive used by later quick-start helpers. This is scene boot convenience only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, account system, ads, monetization, analytics service, publishing workflow, game-specific rules engine, galgame script format, or content authoring workflow.
 
 `v0.32.1` adds the scene runtime preset baseline. The `/framework` entrypoint now exports `createSceneRuntimePreset(scene, options?)`, `SceneRuntimePreset`, and `SceneRuntimePresetOptions` so downstream scenes can install common scene-owned `InputSystem`, `CollisionSystem`, and `RuntimeServicesSystem` setup through one small helper. The helper reuses existing systems instead of adding duplicates, installs input plus runtime services when called without options, and only installs explicitly enabled systems when options are provided. The routed examples consume it for repeated system setup while keeping gameplay rules, input actions, HUD layout, audio cue choices, scene config, prompt routing, puzzle validation, scoring, timers, and snapshots example-owned. This is runtime/framework convenience only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, account system, ads, monetization, analytics service, publishing workflow, game-specific rules engine, galgame script format, UI builder, or content authoring workflow.
+
+`v0.32.2` adds the scene quick-start bundle baseline. The `/framework` entrypoint now exports `createSceneQuickStartBundle(scene, options?)`, `SceneQuickStartBundle`, and `SceneQuickStartBundleOptions` so downstream browser boot paths can sequence `createSceneRuntimePreset(...)` before optional `createSceneInputBridgeBundle(...)` setup through one helper. Called without options, it installs the default input plus runtime services preset; when `inputBridges` are provided, it creates the configured keyboard, pointer button, and pointer position bridges after runtime setup. The routed examples consume it from browser boot paths while keeping gameplay rules, input action maps, HUD layout, audio playback setup, audio cue choices, scene config, prompt routing, puzzle validation, scoring, timers, tooling snapshots, and gameplay snapshots example-owned. This is runtime/framework assembly only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, account system, ads, monetization, analytics service, publishing workflow, game-specific rules engine, galgame script format, UI builder, or content authoring workflow.
 
 ---
 
@@ -198,6 +200,7 @@ import {
   addRuntimeServices,
   bootstrapSceneFromConfig,
   createSceneInputBridgeBundle,
+  createSceneQuickStartBundle,
   createSceneRuntimePreset,
   createLevelLayout,
   createTileMap,
@@ -257,6 +260,7 @@ import {
   addRuntimeServices,
   bootstrapSceneFromConfig,
   createSceneInputBridgeBundle,
+  createSceneQuickStartBundle,
   createSceneRuntimePreset,
   createLevelLayout,
   createTileMap,

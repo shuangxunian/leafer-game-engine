@@ -1,6 +1,6 @@
 import type { BrowserRuntime } from "@shuangxunian/leafer-game-engine/runtime";
 import { startSceneWithLifecycle } from "@shuangxunian/leafer-game-engine/runtime";
-import { createSceneInputBridgeBundle } from "@shuangxunian/leafer-game-engine/framework";
+import { createSceneQuickStartBundle } from "@shuangxunian/leafer-game-engine/framework";
 import { CollectStarsScene } from "./collect-stars-scene.js";
 
 export async function bootCollectStarsExample(runtime: BrowserRuntime): Promise<void> {
@@ -13,7 +13,14 @@ export async function bootCollectStarsExample(runtime: BrowserRuntime): Promise<
     throw lifecycleResult.error;
   }
 
-  createSceneInputBridgeBundle(scene, { keyboard: true });
+  createSceneQuickStartBundle(scene, {
+    runtime: {
+      input: true,
+      collisions: true,
+      runtimeServices: true
+    },
+    inputBridges: { keyboard: true }
+  });
 
   console.log("Collect Stars gameplay bootstrapped:", {
     phase: scene.gameFlow.getPhase(),

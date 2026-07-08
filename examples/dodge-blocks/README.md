@@ -80,7 +80,7 @@ npm run dev
   - 通过 `createSceneRuntimePreset(...)` 安装 input 和 collisions
   - 通过 `addAudioPlayback(...)` 注入 `BrowserAudioPlaybackAdapter`，把 audio runtime intent 可选交给浏览器 media element 消费
   - 在启动日志里输出 tooling snapshot 和 `DodgeGameSystem.getGameplaySnapshot()` 的只读 gameplay state
-  - 通过 `createSceneInputBridgeBundle(...)` 挂载 keyboard bridge 和 pointer button bridge
+  - 通过 `createSceneQuickStartBundle(...)` 复用 runtime preset 并挂载 keyboard bridge 和 pointer button bridge
   - 挂载 browser tooling panel
   - 分区显示 runtime debug、assets、game flow、sprite animations、audio runtime、input actions、collisions、entity inspector 和 component schema 信息
   - Runtime Debug section 展示 time / viewport / entity counts / system order / lifecycle 等只读状态

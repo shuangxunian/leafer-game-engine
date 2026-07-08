@@ -41,6 +41,7 @@ import {
   createDialoguePromptView,
   createDialogueChoiceState,
   createEntityDragState,
+  createSceneQuickStartBundle,
   createSceneInputBridgeBundle,
   createSceneRuntimePreset,
   attachActorSpriteView,
@@ -1144,6 +1145,67 @@ test("quick-start scene runtime preset respects explicit opt-in options", () => 
   assert.equal(collisionPreset.runtimeServices, undefined);
   assert.equal(collisionPreset.collisions, scene.getSystem(CollisionSystem));
   assert.equal(scene.systems.length, 1);
+});
+
+test("quick-start scene bundle installs runtime before browser input bridges", () => {
+  const scene = new Scene("QuickStartBundleScene");
+  const target = createFakeEventTarget();
+  target.getBoundingClientRect = () => ({ left: 12, top: 18 });
+
+  const bundle = createSceneQuickStartBundle(scene, {
+    runtime: {
+      input: true,
+      collisions: true
+    },
+    inputBridges: {
+      keyboard: { target },
+      pointerButtons: { target },
+      pointerPosition: { target, localTarget: target }
+    }
+  });
+
+  assert.equal(bundle.runtime.input, scene.getSystem(InputSystem));
+  assert.equal(bundle.runtime.collisions, scene.getSystem(CollisionSystem));
+  assert.equal(bundle.runtime.runtimeServices, undefined);
+  assert.equal(bundle.inputBridges?.input, bundle.runtime.input);
+  assert.deepEqual(bundle.inputBridges?.bridges.map((bridge) => bridge.kind), [
+    "keyboard",
+    "pointer-button",
+    "pointer-position"
+  ]);
+  assert.equal(target.listenerCount("keydown"), 1);
+  assert.equal(target.listenerCount("pointerdown"), 2);
+
+  target.dispatch("keydown", { key: "Enter" });
+  target.dispatch("pointerdown", { button: 0, clientX: 22, clientY: 33 });
+  assert.equal(bundle.runtime.input?.isPressed("enter"), true);
+  assert.equal(bundle.runtime.input?.isPressed(getPointerButtonInputId("primary")), true);
+  assert.deepEqual(bundle.runtime.input?.getPointerPosition(), { x: 10, y: 15 });
+
+  bundle.detach();
+  assert.equal(bundle.runtime.input?.isPressed("enter"), false);
+  assert.equal(bundle.runtime.input?.isPressed(getPointerButtonInputId("primary")), false);
+  assert.equal(bundle.runtime.input?.getPointerPosition(), undefined);
+  assert.equal(target.listenerCount("keydown"), 0);
+  assert.equal(target.listenerCount("pointerdown"), 0);
+});
+
+test("quick-start scene bundle keeps runtime and bridge setup explicitly optional", () => {
+  const scene = new Scene("QuickStartBundleExplicitScene");
+
+  const emptyBundle = createSceneQuickStartBundle(scene, {
+    runtime: false,
+    inputBridges: false
+  });
+  const defaultBundle = createSceneQuickStartBundle(scene);
+
+  assert.equal(emptyBundle.runtime.input, undefined);
+  assert.equal(emptyBundle.runtime.runtimeServices, undefined);
+  assert.equal(emptyBundle.inputBridges, undefined);
+  assert.equal(defaultBundle.runtime.input, scene.getSystem(InputSystem));
+  assert.equal(defaultBundle.runtime.runtimeServices, scene.getSystem(RuntimeServicesSystem));
+  assert.equal(defaultBundle.inputBridges, undefined);
+  assert.equal(scene.systems.length, 2);
 });
 
 test("point hit testing includes rect edges and reports invalid inputs", () => {

@@ -30,6 +30,17 @@ export type SceneRuntimePreset<TEvents extends object = Record<string, unknown>>
   services?: RuntimeServices<TEvents>;
 }>;
 
+export type SceneQuickStartBundleOptions<TEvents extends object = Record<string, unknown>> = Readonly<{
+  runtime?: boolean | SceneRuntimePresetOptions<TEvents>;
+  inputBridges?: false | SceneInputBridgeBundleOptions;
+}>;
+
+export type SceneQuickStartBundle<TEvents extends object = Record<string, unknown>> = Readonly<{
+  runtime: SceneRuntimePreset<TEvents>;
+  inputBridges?: SceneInputBridgeBundle;
+  detach(): void;
+}>;
+
 export type SceneInputBridgeKind = "keyboard" | "pointer-button" | "pointer-position";
 
 export type SceneInputBridgeHandle = Readonly<{
@@ -176,6 +187,22 @@ export function createSceneRuntimePreset<TEvents extends object = Record<string,
   });
 }
 
+export function createSceneQuickStartBundle<TEvents extends object = Record<string, unknown>>(
+  scene: Scene,
+  options: SceneQuickStartBundleOptions<TEvents> = {}
+): SceneQuickStartBundle<TEvents> {
+  const runtime = createSceneRuntimePreset<TEvents>(scene, getRuntimePresetOptions(options.runtime));
+  const inputBridges = options.inputBridges
+    ? createSceneInputBridgeBundle(scene, options.inputBridges)
+    : undefined;
+
+  return Object.freeze({
+    runtime,
+    inputBridges,
+    detach: () => inputBridges?.detach()
+  });
+}
+
 function createBridgeHandle(
   kind: SceneInputBridgeKind,
   bridge: Pick<SceneInputBridgeHandle, "attach" | "detach">
@@ -205,6 +232,15 @@ function getBridgeOptions<TOptions extends object>(option: boolean | TOptions | 
   }
 
   return {} as TOptions;
+}
+
+function getRuntimePresetOptions<TEvents extends object>(
+  option: boolean | SceneRuntimePresetOptions<TEvents> | undefined
+): SceneRuntimePresetOptions<TEvents> | undefined {
+  if (option === false) return {};
+  if (option === true) return undefined;
+
+  return option;
 }
 
 function getOrAddInputSystem(scene: Scene): InputSystem {

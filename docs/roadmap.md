@@ -1344,3 +1344,7 @@
 第二批补 scene runtime preset baseline：
 
 - [v0.32.1](version/v0.32.1.md)
+
+第三批补 scene quick-start bundle baseline：
+
+- [v0.32.2](version/v0.32.2.md)
