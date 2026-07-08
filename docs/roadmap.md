@@ -1356,3 +1356,7 @@
 第五批补 scene audio runtime bundle baseline：
 
 - [v0.32.4](version/v0.32.4.md)
+
+第六批补 quick-start README example baseline：
+
+- [v0.32.5](version/v0.32.5.md)
