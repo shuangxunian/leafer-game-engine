@@ -4,7 +4,7 @@ import type { RenderAdapter, RenderScene } from "@shuangxunian/leafer-game-engin
 import {
   GameFlow,
   attachActorSpriteView,
-  createHudText,
+  createHudTextBundle,
   createSceneRuntimePreset,
   createTileMap,
   createTileMapLayerView,
@@ -54,24 +54,29 @@ export class CollectStarsScene extends Scene {
     const playfield = this.getPlayfieldBounds();
     const player = this.createPlayer(playfield);
 
-    createHudText(this.renderAdapter, this.renderScene, {
-      text: "Collect Stars",
-      x: 24,
-      y: 22,
-      fontSize: 30
-    });
-    const scoreNode = createHudText(this.renderAdapter, this.renderScene, {
-      text: "Score 0   Time 30",
-      x: 24,
-      y: 62,
-      fontSize: 18
-    });
-    const statusNode = createHudText(this.renderAdapter, this.renderScene, {
-      text: "Press Space or Enter to start. Move with WASD or arrow keys.",
-      x: 24,
-      y: 90,
-      fontSize: 18
-    });
+    const hud = createHudTextBundle(this.renderAdapter, this.renderScene, [
+      {
+        id: "title",
+        text: "Collect Stars",
+        x: 24,
+        y: 22,
+        fontSize: 30
+      },
+      {
+        id: "score",
+        text: "Score 0   Time 30",
+        x: 24,
+        y: 62,
+        fontSize: 18
+      },
+      {
+        id: "status",
+        text: "Press Space or Enter to start. Move with WASD or arrow keys.",
+        x: 24,
+        y: 90,
+        fontSize: 18
+      }
+    ]);
 
     this.gameSystem = new CollectStarsGameSystem(
       this,
@@ -82,8 +87,8 @@ export class CollectStarsScene extends Scene {
       this.inputActions,
       playfield,
       {
-        score: scoreNode,
-        status: statusNode
+        score: hud.get("score"),
+        status: hud.get("status")
       }
     );
     this.addSystem(this.gameSystem);

@@ -93,7 +93,7 @@ npm run dev
   - 注册 input、collision、gameplay system
   - 通过 `addAudioRuntime(...)` 安装示例级 audio runtime intent state，并在 manifest asset 上声明 placeholder runtime audio source
   - 创建并注入 dodge-blocks input action map
-  - 通过 framework `createHudText(...)` 创建 UI 和 overlay 文本节点
+  - 通过 framework `createHudTextBundle(...)` 批量创建 UI 和 overlay 文本节点
   - 通过 framework `createTileMapLayerView(...)` 把 playfield tile map 渲染为 world-space visual layer
   - 通过 `createDodgeBlocksSceneConfig(...)` 声明静态示例内容
   - 通过 scene config 的 assets section 声明 sprite assets、sprite frames 和 animation clips
@@ -176,7 +176,7 @@ browser runtime
 - scene config 的 `level.tileMap` 声明最小 playfield tile map，用来证明 tile map runtime data 可以被示例 bootstrap 和读取
 - scene config 的 `level.layout` 声明 `player-start` spawn、`playfield` region 和 `hazard-spawn` region
 - 示例通过 `loadManifestAsync(...)` 在 gameplay 启动前加载 scene config 里的资源
-- 示例通过 `createHudText(...)` 创建 score、status、title 和 overlay prompt，保持 HUD 节点在 screen-space layer
+- 示例通过 `createHudTextBundle(...)` 创建 score、status、title 和 overlay prompt，保持 HUD 节点在 screen-space layer
 - 示例通过 `createTileMapLayerView(...)` 消费 scene config 的 tile map，把非空 tile 渲染成 world-space playfield visual layer
 - 示例通过 `startSceneWithLifecycle(...)` 复用 runtime 层的 prepare / ready / running / failed 启动边界
 - tooling panel 的 `Assets` section 可以显示 player / hazard 的 loaded 状态

@@ -18,7 +18,7 @@ import {
   attachActorSpriteView,
   bootstrapSceneFromConfig,
   createBrowserImageSpriteLoader,
-  createHudText,
+  createHudTextBundle,
   createSceneRuntimePreset,
   createTileMapLayerView,
   defineActorTemplate
@@ -250,50 +250,53 @@ export class DodgeBlocksScene extends Scene {
       })
     });
 
-    const titleNode = createHudText(this.renderAdapter, this.renderScene, {
-      text: "Dodge Blocks",
-      x: 24,
-      y: 20,
-      fontSize: 28
-    });
-
-    const scoreNode = createHudText(this.renderAdapter, this.renderScene, {
-      text: "Score 0",
-      x: 24,
-      y: 58,
-      fontSize: 20
-    });
-
-    const statusNode = createHudText(this.renderAdapter, this.renderScene, {
-      text: "Move with WASD or arrow keys. Pause with P or Esc.",
-      x: 24,
-      y: 88,
-      fontSize: 18
-    });
-
-    const overlayTitleNode = createHudText(this.renderAdapter, this.renderScene, {
-      text: "Dodge Blocks",
-      x: 250,
-      y: 240,
-      fontSize: 42,
-      layer: "overlay"
-    });
-
-    const overlayBodyNode = createHudText(this.renderAdapter, this.renderScene, {
-      text: "Survive as long as you can while blocks rain from above.",
-      x: 190,
-      y: 300,
-      fontSize: 22,
-      layer: "overlay"
-    });
-
-    const overlayActionNode = createHudText(this.renderAdapter, this.renderScene, {
-      text: "Press Space or Enter to start",
-      x: 270,
-      y: 350,
-      fontSize: 24,
-      layer: "overlay"
-    });
+    const hud = createHudTextBundle(this.renderAdapter, this.renderScene, [
+      {
+        id: "title",
+        text: "Dodge Blocks",
+        x: 24,
+        y: 20,
+        fontSize: 28
+      },
+      {
+        id: "score",
+        text: "Score 0",
+        x: 24,
+        y: 58,
+        fontSize: 20
+      },
+      {
+        id: "status",
+        text: "Move with WASD or arrow keys. Pause with P or Esc.",
+        x: 24,
+        y: 88,
+        fontSize: 18
+      },
+      {
+        id: "overlayTitle",
+        text: "Dodge Blocks",
+        x: 250,
+        y: 240,
+        fontSize: 42,
+        layer: "overlay"
+      },
+      {
+        id: "overlayBody",
+        text: "Survive as long as you can while blocks rain from above.",
+        x: 190,
+        y: 300,
+        fontSize: 22,
+        layer: "overlay"
+      },
+      {
+        id: "overlayAction",
+        text: "Press Space or Enter to start",
+        x: 270,
+        y: 350,
+        fontSize: 24,
+        layer: "overlay"
+      }
+    ]);
 
     let dodgeSystem!: DodgeGameSystem;
     player.addComponent(
@@ -324,11 +327,11 @@ export class DodgeBlocksScene extends Scene {
         this.renderScene,
         player,
         {
-          score: scoreNode,
-          status: statusNode,
-          overlayTitle: overlayTitleNode,
-          overlayBody: overlayBodyNode,
-          overlayAction: overlayActionNode
+          score: hud.get("score"),
+          status: hud.get("status"),
+          overlayTitle: hud.get("overlayTitle"),
+          overlayBody: hud.get("overlayBody"),
+          overlayAction: hud.get("overlayAction")
         },
         this.inputActions,
         this.assets,

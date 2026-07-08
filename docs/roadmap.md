@@ -1348,3 +1348,7 @@
 第三批补 scene quick-start bundle baseline：
 
 - [v0.32.2](version/v0.32.2.md)
+
+第四批补 HUD text bundle baseline：
+
+- [v0.32.3](version/v0.32.3.md)

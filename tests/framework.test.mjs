@@ -41,6 +41,7 @@ import {
   createDialoguePromptView,
   createDialogueChoiceState,
   createEntityDragState,
+  createHudTextBundle,
   createSceneQuickStartBundle,
   createSceneInputBridgeBundle,
   createSceneRuntimePreset,
@@ -3316,6 +3317,82 @@ test("hud text helper can target the overlay layer and initial visibility", () =
   assert.deepEqual(overlayChildren, [node]);
 });
 
+test("hud text bundle helper creates keyed screen-space text nodes", () => {
+  const uiChildren = [];
+  const overlayChildren = [];
+  const renderAdapter = createFakeTextRenderAdapter();
+  const renderScene = createFakeLayeredRenderScene(uiChildren, overlayChildren);
+
+  const bundle = createHudTextBundle(renderAdapter, renderScene, [
+    {
+      id: "title",
+      text: "Game Title",
+      x: 24,
+      y: 20,
+      fontSize: 28
+    },
+    {
+      id: "prompt",
+      text: "Press Start",
+      x: 120,
+      y: 180,
+      fontSize: 24,
+      layer: "overlay",
+      visible: false
+    }
+  ]);
+
+  assert.equal(bundle.get("title"), bundle.nodes.title);
+  assert.equal(bundle.get("prompt"), bundle.nodes.prompt);
+  assert.equal(bundle.nodes.title.text, "Game Title");
+  assert.equal(bundle.nodes.title.x, 24);
+  assert.equal(bundle.nodes.prompt.text, "Press Start");
+  assert.equal(bundle.nodes.prompt.visible, false);
+  assert.deepEqual(uiChildren, [bundle.nodes.title]);
+  assert.deepEqual(overlayChildren, [bundle.nodes.prompt]);
+
+  bundle.nodes.title.setText("New Title");
+  assert.equal(bundle.get("title").text, "New Title");
+});
+
+test("hud text bundle helper can destroy created nodes", () => {
+  const renderAdapter = createFakeTextRenderAdapter();
+  const renderScene = createFakeLayeredRenderScene([], []);
+
+  const bundle = createHudTextBundle(renderAdapter, renderScene, [
+    { id: "score", text: "Score 0" },
+    { id: "status", text: "Ready" }
+  ]);
+
+  assert.equal(bundle.nodes.score.destroyed, false);
+  assert.equal(bundle.nodes.status.destroyed, false);
+  bundle.destroy();
+  assert.equal(bundle.nodes.score.destroyed, true);
+  assert.equal(bundle.nodes.status.destroyed, true);
+
+  const emptyBundle = createHudTextBundle(renderAdapter, renderScene, []);
+  assert.deepEqual(Object.keys(emptyBundle.nodes), []);
+  emptyBundle.destroy();
+});
+
+test("hud text bundle helper rejects duplicate ids before creating nodes", () => {
+  const uiChildren = [];
+  const overlayChildren = [];
+  const renderAdapter = createFakeTextRenderAdapter();
+  const renderScene = createFakeLayeredRenderScene(uiChildren, overlayChildren);
+
+  assert.throws(
+    () =>
+      createHudTextBundle(renderAdapter, renderScene, [
+        { id: "score", text: "Score 0" },
+        { id: "score", text: "Score 1", layer: "overlay" }
+      ]),
+    /Duplicate HUD text id "score"/
+  );
+  assert.deepEqual(uiChildren, []);
+  assert.deepEqual(overlayChildren, []);
+});
+
 test("dialogue prompt view creates screen-space line and choice text nodes", () => {
   const uiChildren = [];
   const overlayChildren = [];
@@ -3793,6 +3870,7 @@ function createFakeChildCollector(children) {
 
 function createFakeContainer() {
   return {
+    destroyed: false,
     x: 0,
     y: 0,
     width: undefined,
@@ -3802,6 +3880,8 @@ function createFakeContainer() {
     scaleY: 1,
     visible: true,
     addChild() {},
-    destroy() {}
+    destroy() {
+      this.destroyed = true;
+    }
   };
 }

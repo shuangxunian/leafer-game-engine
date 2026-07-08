@@ -1295,7 +1295,7 @@ test("dialogue prompt view baseline stays package-facing", async () => {
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.32.2");
+  assert.equal(packageJson.version, "0.32.3");
   assert.equal(roadmap.includes("version/v0.31.3.md"), true);
   assert.equal(roadmap.includes("screen-space prompt view baseline"), true);
   assert.equal(patch.includes("Screen-Space Prompt View Baseline"), true);
@@ -1334,7 +1334,7 @@ test("dialogue choice example shell stays routed and package-facing", async () =
   const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
   const inputActions = await readFile(new URL("input-actions.ts", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.2");
+  assert.equal(packageJson.version, "0.32.3");
   assert.equal(roadmap.includes("version/v0.31.4.md"), true);
   assert.equal(roadmap.includes("narrative example shell and route baseline"), true);
   assert.equal(patch.includes("Narrative Example Shell And Route Baseline"), true);
@@ -1382,7 +1382,7 @@ test("dialogue choice example provides an example-owned playable flow", async ()
   const exampleReadme = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
   const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.2");
+  assert.equal(packageJson.version, "0.32.3");
   assert.equal(roadmap.includes("version/v0.31.5.md"), true);
   assert.equal(roadmap.includes("narrative example playable flow"), true);
   assert.equal(patch.includes("Narrative Example Playable Flow"), true);
@@ -1422,7 +1422,7 @@ test("ui dialogue scene flow stage closes without adding authoring scope", async
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.32.2");
+  assert.equal(packageJson.version, "0.32.3");
   assert.equal(roadmap.includes("version/v0.31.6.md"), true);
   assert.equal(roadmap.includes("UI / dialogue / scene flow 阶段"), true);
   assert.equal(stage.includes("The `0.31.x` stage is complete through `v0.31.6`"), true);
@@ -1457,7 +1457,7 @@ test("quick-start game kit stage starts with scene input bridge bundle", async (
   const pourBoot = await readFile(new URL("boot.ts", pourSortExampleUrl), "utf8");
   const dodgeBoot = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.2");
+  assert.equal(packageJson.version, "0.32.3");
   assert.equal(roadmap.includes("version/v0.32.0.md"), true);
   assert.equal(roadmap.includes("Quick-Start Game Kit 阶段"), true);
   assert.equal(roadmap.includes("scene input bridge bundle baseline"), true);
@@ -1469,7 +1469,7 @@ test("quick-start game kit stage starts with scene input bridge bundle", async (
   assert.equal(publicApi.includes("createSceneInputBridgeBundle(scene, options)"), true);
   assert.equal(publicApi.includes("BrowserKeyboardBridge` now also supports an optional injected event target"), true);
   assert.equal(publicApi.includes("does not add a project generator, CLI scaffold, visual editor"), true);
-  assert.equal(readme.includes("当前项目已经推进到 `v0.32.2` Quick-Start Game Kit Sprint"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.32.3` Quick-Start Game Kit Sprint"), true);
   assert.equal(readme.includes("scene input bridge bundle baseline"), true);
   assert.equal(readme.includes("createSceneInputBridgeBundle(scene, options)"), true);
   assert.equal(quickStartSource.includes("export function createSceneInputBridgeBundle"), true);
@@ -1504,7 +1504,7 @@ test("quick-start game kit stage adds scene runtime preset baseline", async () =
   const pourDocs = await readFile(new URL("README.md", pourSortExampleUrl), "utf8");
   const dialogueDocs = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.2");
+  assert.equal(packageJson.version, "0.32.3");
   assert.equal(roadmap.includes("version/v0.32.1.md"), true);
   assert.equal(roadmap.includes("scene runtime preset baseline"), true);
   assert.equal(patch.includes("Scene Runtime Preset Baseline"), true);
@@ -1552,7 +1552,7 @@ test("quick-start game kit stage adds scene quick-start bundle baseline", async 
   const pourDocs = await readFile(new URL("README.md", pourSortExampleUrl), "utf8");
   const dialogueDocs = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.2");
+  assert.equal(packageJson.version, "0.32.3");
   assert.equal(roadmap.includes("version/v0.32.2.md"), true);
   assert.equal(roadmap.includes("scene quick-start bundle baseline"), true);
   assert.equal(patch.includes("Scene Quick-Start Bundle Baseline"), true);
@@ -1582,6 +1582,48 @@ test("quick-start game kit stage adds scene quick-start bundle baseline", async 
   assert.equal(dodgeDocs.includes("createSceneQuickStartBundle(...)"), true);
   assert.equal(pourDocs.includes("createSceneQuickStartBundle(...)"), true);
   assert.equal(dialogueDocs.includes("createSceneQuickStartBundle(...)"), true);
+});
+
+test("quick-start game kit stage adds HUD text bundle baseline", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.32.3.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const hudSource = await readFile(new URL("../src/framework/hud.ts", import.meta.url), "utf8");
+  const collectScene = await readFile(new URL("collect-stars-scene.ts", collectStarsExampleUrl), "utf8");
+  const dodgeScene = await readFile(new URL("dodge-blocks-scene.ts", dodgeBlocksExampleUrl), "utf8");
+  const pourScene = await readFile(new URL("pour-sort-scene.ts", pourSortExampleUrl), "utf8");
+  const dialogueScene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
+  const collectDocs = await readFile(new URL("README.md", collectStarsExampleUrl), "utf8");
+  const dodgeDocs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
+
+  assert.equal(packageJson.version, "0.32.3");
+  assert.equal(roadmap.includes("version/v0.32.3.md"), true);
+  assert.equal(roadmap.includes("HUD text bundle baseline"), true);
+  assert.equal(patch.includes("HUD Text Bundle Baseline"), true);
+  assert.equal(patch.includes("createHudTextBundle(renderAdapter, renderScene, items)"), true);
+  assert.equal(patch.includes("does not add a HUD layout engine"), true);
+  assert.equal(publicApi.includes("`v0.32.3` adds the HUD text bundle baseline"), true);
+  assert.equal(publicApi.includes("createHudTextBundle(renderAdapter, renderScene, items)"), true);
+  assert.equal(publicApi.includes("keeping item ids, text, coordinates, font sizes, visibility, target layers"), true);
+  assert.equal(readme.includes("在 `v0.32.3` 补齐 HUD text bundle baseline"), true);
+  assert.equal(readme.includes("createHudTextBundle(renderAdapter, renderScene, items)"), true);
+  assert.equal(hudSource.includes("export type HudTextBundleItem"), true);
+  assert.equal(hudSource.includes("export type HudTextBundle"), true);
+  assert.equal(hudSource.includes("export function createHudTextBundle"), true);
+  assert.equal(hudSource.includes("createHudText(renderAdapter, renderScene, item)"), true);
+  assert.equal(hudSource.includes("layout engine"), false);
+  assert.equal(collectScene.includes("createHudTextBundle"), true);
+  assert.equal(collectScene.includes('id: "score"'), true);
+  assert.equal(collectScene.includes('id: "status"'), true);
+  assert.equal(collectScene.includes('score: hud.get("score")'), true);
+  assert.equal(dodgeScene.includes("createHudTextBundle"), true);
+  assert.equal(dodgeScene.includes('id: "overlayAction"'), true);
+  assert.equal(dodgeScene.includes('overlayAction: hud.get("overlayAction")'), true);
+  assert.equal(pourScene.includes("createHudTextBundle"), false);
+  assert.equal(dialogueScene.includes("createHudTextBundle"), false);
+  assert.equal(collectDocs.includes("createHudTextBundle(...)"), true);
+  assert.equal(dodgeDocs.includes("createHudTextBundle(...)"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -1665,6 +1707,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "createSpriteAnimationPlayback",
     "createDefaultComponentSchemaRegistry",
     "createHudText",
+    "createHudTextBundle",
     "createRuntimeServices",
     "createSceneInputBridgeBundle",
     "createSceneQuickStartBundle",
@@ -1742,6 +1785,7 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.randomPositionInBounds, "function");
   assert.equal(typeof framework.defineActorTemplate, "function");
   assert.equal(typeof framework.createHudText, "function");
+  assert.equal(typeof framework.createHudTextBundle, "function");
   assert.equal(typeof framework.createTileMapLayerView, "function");
   assert.equal(typeof framework.addAudioPlayback, "function");
   assert.equal(typeof framework.addAudioRuntime, "function");
@@ -1873,7 +1917,7 @@ test("collect-stars example gameplay loop is routed and package-facing", async (
   assert.equal(gameSystemSource.includes("timeRemainingSeconds"), true);
   assert.equal(gameSystemSource.includes("hasActiveStar"), true);
   assert.equal(sceneSource.includes("getGameplaySnapshot()"), true);
-  assert.equal(sceneSource.includes("createHudText"), true);
+  assert.equal(sceneSource.includes("createHudTextBundle"), true);
   assert.equal(sceneSource.includes("createTileMapLayerView"), true);
   assert.equal(bootSource.includes("startSceneWithLifecycle"), true);
   assert.equal(bootSource.includes("createSceneQuickStartBundle"), true);

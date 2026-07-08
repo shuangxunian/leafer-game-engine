@@ -16,7 +16,7 @@
 - 将 input actions、player controller、actor templates 和 gameplay system 拆成示例本地模块
 - 使用 `defineActorTemplate(...)` 和 `instantiateEntityTemplate(...)` 创建 player/star ECS 数据
 - 使用 `GameFlow` 管理 ready / running / ended phase
-- 使用 `createHudText(...)` 创建 screen-space HUD
+- 使用 `createHudTextBundle(...)` 批量创建 keyed screen-space HUD text nodes
 - 使用 `createTileMap(...)` 和 `createTileMapLayerView(...)` 创建 world-space playfield visual layer
 - 使用 `attachActorSpriteView(...)` 装配 player/star 的 sprite-backed render view
 - 使用 `randomPositionInBounds(...)` 在 playfield 内生成 star top-left 位置
