@@ -42,6 +42,7 @@ import {
   createDialogueChoiceState,
   createEntityDragState,
   createHudTextBundle,
+  createSceneAudioRuntimeBundle,
   createSceneQuickStartBundle,
   createSceneInputBridgeBundle,
   createSceneRuntimePreset,
@@ -409,6 +410,59 @@ test("audio runtime system can use injected state and preserve operations", () =
 
   assert.equal(audio.listOperations().length, 1);
   assert.equal(getAudioRuntime(new Scene("NoAudioRuntimeScene")), undefined);
+});
+
+test("scene audio runtime bundle installs and exposes scene-owned audio", () => {
+  const scene = new Scene("SceneAudioRuntimeBundleScene");
+  const bundle = createSceneAudioRuntimeBundle(scene, {
+    priority: -123,
+    manifest: {
+      assets: [{ id: "hit" }],
+      channels: [{ id: "sfx", volume: 0.5 }],
+      cues: [{ id: "hit:play", assetId: "hit", channelId: "sfx" }]
+    }
+  });
+
+  assert.equal(bundle.system.priority, -123);
+  assert.equal(bundle.audio, bundle.system.audio);
+  assert.equal(getAudioRuntime(scene), bundle.audio);
+  assert.deepEqual(bundle.audio.getChannel("sfx"), {
+    id: "sfx",
+    volume: 0.5,
+    muted: false
+  });
+  assert.deepEqual(bundle.audio.playCue("hit:play"), {
+    sequence: 1,
+    type: "play",
+    cueId: "hit:play",
+    assetId: "hit",
+    channelId: "sfx",
+    volume: 1,
+    loop: false
+  });
+});
+
+test("scene audio runtime bundle reuses an existing audio runtime system", () => {
+  const scene = new Scene("ExistingSceneAudioRuntimeBundleScene");
+  const existing = addAudioRuntime(scene, {
+    manifest: {
+      assets: [{ id: "existing" }],
+      cues: [{ id: "existing:play", assetId: "existing" }]
+    }
+  });
+
+  const bundle = createSceneAudioRuntimeBundle(scene, {
+    manifest: {
+      assets: [{ id: "ignored" }],
+      cues: [{ id: "ignored:play", assetId: "ignored" }]
+    }
+  });
+
+  assert.equal(bundle.system, existing);
+  assert.equal(bundle.audio, existing.audio);
+  assert.equal(scene.systems.filter((system) => system instanceof AudioRuntimeSystem).length, 1);
+  assert.equal(bundle.audio.getCue("existing:play")?.assetId, "existing");
+  assert.equal(bundle.audio.getCue("ignored:play"), undefined);
 });
 
 test("audio playback adapter drains runtime operations in deterministic order", async () => {

@@ -130,6 +130,11 @@ export type AudioRuntimeSystemOptions = {
   priority?: number;
 };
 
+export type SceneAudioRuntimeBundle = Readonly<{
+  system: AudioRuntimeSystem;
+  audio: AudioRuntimeState;
+}>;
+
 export const DEFAULT_AUDIO_CHANNEL_ID = "master";
 export const DEFAULT_AUDIO_RUNTIME_SYSTEM_PRIORITY = -240;
 export const DEFAULT_AUDIO_PLAYBACK_SYSTEM_PRIORITY = -230;
@@ -477,6 +482,18 @@ export function addAudioRuntime(
   options: AudioRuntimeSystemOptions = {}
 ): AudioRuntimeSystem {
   return scene.addSystem(new AudioRuntimeSystem(scene, options));
+}
+
+export function createSceneAudioRuntimeBundle(
+  scene: Scene,
+  options: AudioRuntimeSystemOptions = {}
+): SceneAudioRuntimeBundle {
+  const system = scene.getSystem(AudioRuntimeSystem) ?? addAudioRuntime(scene, options);
+
+  return Object.freeze({
+    system,
+    audio: system.audio
+  });
 }
 
 export function addAudioPlayback(

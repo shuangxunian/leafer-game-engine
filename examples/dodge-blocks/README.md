@@ -91,7 +91,7 @@ npm run dev
 
 - `dodge-blocks-scene.ts`
   - 注册 input、collision、gameplay system
-  - 通过 `addAudioRuntime(...)` 安装示例级 audio runtime intent state，并在 manifest asset 上声明 placeholder runtime audio source
+  - 通过 `createSceneAudioRuntimeBundle(...)` 安装或复用示例级 audio runtime intent state，并在 manifest asset 上声明 placeholder runtime audio source
   - 创建并注入 dodge-blocks input action map
   - 通过 framework `createHudTextBundle(...)` 批量创建 UI 和 overlay 文本节点
   - 通过 framework `createTileMapLayerView(...)` 把 playfield tile map 渲染为 world-space visual layer
@@ -200,7 +200,7 @@ browser runtime
 - gameplay phase 使用 framework `GameFlow`，而不是示例内的本地 phase state machine
 - gameplay state 通过 `DodgeGameSystem.getGameplaySnapshot()` 以只读数据暴露，方便确认 playable loop 已经闭环，不提供运行时修改入口
 - tooling panel 的 `Game Flow` section 可以显示当前 ready / running / paused / ended 状态
-- audio runtime 使用 framework `AudioRuntimeSystem`，browser playback 使用 runtime `BrowserAudioPlaybackAdapter`，示例只证明 opt-in playback consumption，不引入 Web Audio graph、mixer、音频编辑器或音频内容生产能力
+- audio runtime 使用 framework `createSceneAudioRuntimeBundle(...)` / `AudioRuntimeSystem`，browser playback 使用 runtime `BrowserAudioPlaybackAdapter`，示例只证明 opt-in playback consumption，不引入 Web Audio graph、mixer、音频编辑器或音频内容生产能力
 - hazard 仍由 factory 生成，因为它依赖运行时随机尺寸、位置和速度，不适合放进静态 scene config；scene config 只声明 `hazard-spawn` region 作为运行时参考数据
 
 这个示例不会把 level/map 声明变成编辑器、地图编辑器、tileset 管理器或自动生成器；source-backed sprite asset consumption 也不是素材编辑器、素材市场或发布管线。它只是证明下游游戏可以显式读取引擎返回的 `TileMap` / `LevelLayout` helper，并用 framework 的 runtime helper 或自己的游戏代码决定如何使用这些运行时数据。

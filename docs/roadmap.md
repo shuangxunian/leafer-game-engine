@@ -1352,3 +1352,7 @@
 第四批补 HUD text bundle baseline：
 
 - [v0.32.3](version/v0.32.3.md)
+
+第五批补 scene audio runtime bundle baseline：
+
+- [v0.32.4](version/v0.32.4.md)

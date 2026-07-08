@@ -14,11 +14,11 @@ import {
   AssetRegistry,
   SpriteAnimationComponent,
   SpriteAnimationSystem,
-  addAudioRuntime,
   attachActorSpriteView,
   bootstrapSceneFromConfig,
   createBrowserImageSpriteLoader,
   createHudTextBundle,
+  createSceneAudioRuntimeBundle,
   createSceneRuntimePreset,
   createTileMapLayerView,
   defineActorTemplate
@@ -231,7 +231,7 @@ export class DodgeBlocksScene extends Scene {
       input: true,
       collisions: true
     });
-    addAudioRuntime(this, {
+    createSceneAudioRuntimeBundle(this, {
       manifest: DODGE_BLOCKS_AUDIO_MANIFEST
     });
     this.addSystem(new SpriteAnimationSystem(this, this.assets));

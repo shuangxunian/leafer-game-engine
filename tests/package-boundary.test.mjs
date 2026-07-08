@@ -1295,7 +1295,7 @@ test("dialogue prompt view baseline stays package-facing", async () => {
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.32.3");
+  assert.equal(packageJson.version, "0.32.4");
   assert.equal(roadmap.includes("version/v0.31.3.md"), true);
   assert.equal(roadmap.includes("screen-space prompt view baseline"), true);
   assert.equal(patch.includes("Screen-Space Prompt View Baseline"), true);
@@ -1334,7 +1334,7 @@ test("dialogue choice example shell stays routed and package-facing", async () =
   const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
   const inputActions = await readFile(new URL("input-actions.ts", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.3");
+  assert.equal(packageJson.version, "0.32.4");
   assert.equal(roadmap.includes("version/v0.31.4.md"), true);
   assert.equal(roadmap.includes("narrative example shell and route baseline"), true);
   assert.equal(patch.includes("Narrative Example Shell And Route Baseline"), true);
@@ -1382,7 +1382,7 @@ test("dialogue choice example provides an example-owned playable flow", async ()
   const exampleReadme = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
   const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.3");
+  assert.equal(packageJson.version, "0.32.4");
   assert.equal(roadmap.includes("version/v0.31.5.md"), true);
   assert.equal(roadmap.includes("narrative example playable flow"), true);
   assert.equal(patch.includes("Narrative Example Playable Flow"), true);
@@ -1422,7 +1422,7 @@ test("ui dialogue scene flow stage closes without adding authoring scope", async
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.32.3");
+  assert.equal(packageJson.version, "0.32.4");
   assert.equal(roadmap.includes("version/v0.31.6.md"), true);
   assert.equal(roadmap.includes("UI / dialogue / scene flow 阶段"), true);
   assert.equal(stage.includes("The `0.31.x` stage is complete through `v0.31.6`"), true);
@@ -1457,7 +1457,7 @@ test("quick-start game kit stage starts with scene input bridge bundle", async (
   const pourBoot = await readFile(new URL("boot.ts", pourSortExampleUrl), "utf8");
   const dodgeBoot = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.3");
+  assert.equal(packageJson.version, "0.32.4");
   assert.equal(roadmap.includes("version/v0.32.0.md"), true);
   assert.equal(roadmap.includes("Quick-Start Game Kit 阶段"), true);
   assert.equal(roadmap.includes("scene input bridge bundle baseline"), true);
@@ -1469,7 +1469,7 @@ test("quick-start game kit stage starts with scene input bridge bundle", async (
   assert.equal(publicApi.includes("createSceneInputBridgeBundle(scene, options)"), true);
   assert.equal(publicApi.includes("BrowserKeyboardBridge` now also supports an optional injected event target"), true);
   assert.equal(publicApi.includes("does not add a project generator, CLI scaffold, visual editor"), true);
-  assert.equal(readme.includes("当前项目已经推进到 `v0.32.3` Quick-Start Game Kit Sprint"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.32.4` Quick-Start Game Kit Sprint"), true);
   assert.equal(readme.includes("scene input bridge bundle baseline"), true);
   assert.equal(readme.includes("createSceneInputBridgeBundle(scene, options)"), true);
   assert.equal(quickStartSource.includes("export function createSceneInputBridgeBundle"), true);
@@ -1504,7 +1504,7 @@ test("quick-start game kit stage adds scene runtime preset baseline", async () =
   const pourDocs = await readFile(new URL("README.md", pourSortExampleUrl), "utf8");
   const dialogueDocs = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.3");
+  assert.equal(packageJson.version, "0.32.4");
   assert.equal(roadmap.includes("version/v0.32.1.md"), true);
   assert.equal(roadmap.includes("scene runtime preset baseline"), true);
   assert.equal(patch.includes("Scene Runtime Preset Baseline"), true);
@@ -1552,7 +1552,7 @@ test("quick-start game kit stage adds scene quick-start bundle baseline", async 
   const pourDocs = await readFile(new URL("README.md", pourSortExampleUrl), "utf8");
   const dialogueDocs = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.3");
+  assert.equal(packageJson.version, "0.32.4");
   assert.equal(roadmap.includes("version/v0.32.2.md"), true);
   assert.equal(roadmap.includes("scene quick-start bundle baseline"), true);
   assert.equal(patch.includes("Scene Quick-Start Bundle Baseline"), true);
@@ -1597,7 +1597,7 @@ test("quick-start game kit stage adds HUD text bundle baseline", async () => {
   const collectDocs = await readFile(new URL("README.md", collectStarsExampleUrl), "utf8");
   const dodgeDocs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.32.3");
+  assert.equal(packageJson.version, "0.32.4");
   assert.equal(roadmap.includes("version/v0.32.3.md"), true);
   assert.equal(roadmap.includes("HUD text bundle baseline"), true);
   assert.equal(patch.includes("HUD Text Bundle Baseline"), true);
@@ -1624,6 +1624,45 @@ test("quick-start game kit stage adds HUD text bundle baseline", async () => {
   assert.equal(dialogueScene.includes("createHudTextBundle"), false);
   assert.equal(collectDocs.includes("createHudTextBundle(...)"), true);
   assert.equal(dodgeDocs.includes("createHudTextBundle(...)"), true);
+});
+
+test("quick-start game kit stage adds scene audio runtime bundle baseline", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.32.4.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const audioSource = await readFile(new URL("../src/framework/audio.ts", import.meta.url), "utf8");
+  const dodgeScene = await readFile(new URL("dodge-blocks-scene.ts", dodgeBlocksExampleUrl), "utf8");
+  const dodgeBoot = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
+  const collectScene = await readFile(new URL("collect-stars-scene.ts", collectStarsExampleUrl), "utf8");
+  const pourScene = await readFile(new URL("pour-sort-scene.ts", pourSortExampleUrl), "utf8");
+  const dialogueScene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
+  const dodgeDocs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
+
+  assert.equal(packageJson.version, "0.32.4");
+  assert.equal(roadmap.includes("version/v0.32.4.md"), true);
+  assert.equal(roadmap.includes("scene audio runtime bundle baseline"), true);
+  assert.equal(patch.includes("Scene Audio Runtime Bundle Baseline"), true);
+  assert.equal(patch.includes("createSceneAudioRuntimeBundle(scene, options?)"), true);
+  assert.equal(patch.includes("does not add an audio mixer"), true);
+  assert.equal(publicApi.includes("`v0.32.4` adds the scene audio runtime bundle baseline"), true);
+  assert.equal(publicApi.includes("createSceneAudioRuntimeBundle(scene, options?)"), true);
+  assert.equal(publicApi.includes("does not add an audio mixer, audio editor"), true);
+  assert.equal(readme.includes("在 `v0.32.4` 补齐 scene audio runtime bundle baseline"), true);
+  assert.equal(readme.includes("createSceneAudioRuntimeBundle(scene, options?)"), true);
+  assert.equal(audioSource.includes("export type SceneAudioRuntimeBundle"), true);
+  assert.equal(audioSource.includes("export function createSceneAudioRuntimeBundle"), true);
+  assert.equal(audioSource.includes("scene.getSystem(AudioRuntimeSystem) ?? addAudioRuntime(scene, options)"), true);
+  assert.equal(dodgeScene.includes("createSceneAudioRuntimeBundle"), true);
+  assert.equal(dodgeScene.includes("DODGE_BLOCKS_AUDIO_MANIFEST"), true);
+  assert.equal(dodgeScene.includes("addAudioRuntime"), false);
+  assert.equal(dodgeBoot.includes("BrowserAudioPlaybackAdapter"), true);
+  assert.equal(dodgeBoot.includes("addAudioPlayback"), true);
+  assert.equal(collectScene.includes("createSceneAudioRuntimeBundle"), false);
+  assert.equal(pourScene.includes("createSceneAudioRuntimeBundle"), false);
+  assert.equal(dialogueScene.includes("createSceneAudioRuntimeBundle"), false);
+  assert.equal(dodgeDocs.includes("createSceneAudioRuntimeBundle(...)"), true);
+  assert.equal(dodgeDocs.includes("不引入 Web Audio graph、mixer、音频编辑器或音频内容生产能力"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {
@@ -1708,6 +1747,7 @@ test("framework package subpath can be imported by package name in Node", async 
     "createDefaultComponentSchemaRegistry",
     "createHudText",
     "createHudTextBundle",
+    "createSceneAudioRuntimeBundle",
     "createRuntimeServices",
     "createSceneInputBridgeBundle",
     "createSceneQuickStartBundle",
@@ -1786,6 +1826,7 @@ test("framework package subpath can be imported by package name in Node", async 
   assert.equal(typeof framework.defineActorTemplate, "function");
   assert.equal(typeof framework.createHudText, "function");
   assert.equal(typeof framework.createHudTextBundle, "function");
+  assert.equal(typeof framework.createSceneAudioRuntimeBundle, "function");
   assert.equal(typeof framework.createTileMapLayerView, "function");
   assert.equal(typeof framework.addAudioPlayback, "function");
   assert.equal(typeof framework.addAudioRuntime, "function");
@@ -2103,7 +2144,8 @@ test("dodge-blocks example consumes opt-in browser audio playback APIs without e
   const bootSource = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
   const docs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
 
-  assert.equal(sceneSource.includes("addAudioRuntime"), true);
+  assert.equal(sceneSource.includes("createSceneAudioRuntimeBundle"), true);
+  assert.equal(sceneSource.includes("addAudioRuntime"), false);
   assert.equal(sceneSource.includes("DODGE_BLOCKS_AUDIO_MANIFEST"), true);
   assert.equal(sceneSource.includes("source: createToneAudioDataUri"), true);
   assert.equal(sceneSource.includes('id: "ui-confirm"'), true);
