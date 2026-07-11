@@ -1360,3 +1360,21 @@
 第六批补 quick-start README example baseline：
 
 - [v0.32.5](version/v0.32.5.md)
+
+### `0.33.x` Stabilization And 1.0 RC 阶段
+
+目标：
+
+- 停止扩大功能范围，优先稳定 1.0 前的 package/API 边界
+- 审计 public entrypoints、Node-safe subpaths、browser-facing entrypoints 和 npm package files
+- 继续用示例和 package-boundary 测试验证当前能力，而不是继续堆新玩法系统
+
+边界：
+
+- 只做 API audit、package boundary audit、example cleanup、test hardening 和 1.0 release-candidate 文档
+- 不做 project generator、CLI scaffold、visual editor、launcher、gallery、template marketplace、WeChat SDK wrapper、账号/广告/变现/发布流程
+- 不把具体玩法规则、水排序规则、match-3 规则、galgame story format 或内容生产流程放进引擎包
+
+第一批先补 API stability audit baseline：
+
+- [v0.33.0](version/v0.33.0.md)

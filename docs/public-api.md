@@ -166,6 +166,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.32.5` adds the quick-start README example baseline without adding new public runtime API. `docs/quick-start-game-kit.md` now shows the intended downstream assembly path across `startSceneWithLifecycle(...)`, `createSceneQuickStartBundle(...)`, `createHudTextBundle(...)`, and `createSceneAudioRuntimeBundle(...)`, while explicitly keeping scoring, timers, puzzle validation, dialogue routes, HUD layout policy, audio cue trigger timing, asset manifests, and gameplay snapshots owned by downstream games. This is package-facing documentation only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, asset manager UI, HUD layout engine, audio mixer, galgame scripting language, game-specific rules engine, publishing workflow, or content authoring workflow.
 
+`v0.33.0` starts the stabilization and 1.0 release-candidate stage without adding new public runtime API. `docs/api-stability-audit.md` records the current package entrypoints as the 1.0 candidate shape, separates Node-safe subpaths from browser-facing opt-in entrypoints, and locks the package-facing docs that should ship in the npm package. The package file list now includes both `docs/quick-start-game-kit.md` and `docs/api-stability-audit.md`. This is API audit and package-boundary work only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, asset manager UI, HUD layout engine, audio mixer, galgame scripting language, game-specific rules engine, publishing workflow, or content authoring workflow.
+
 ---
 
 ## Package Entrypoints

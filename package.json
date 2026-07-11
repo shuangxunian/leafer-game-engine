@@ -1,6 +1,6 @@
 {
   "name": "@shuangxunian/leafer-game-engine",
-  "version": "0.32.5",
+  "version": "0.33.0",
   "license": "MIT",
   "type": "module",
   "main": "./lib/engine.js",
@@ -48,6 +48,8 @@
     "docs/render-view-contract.md",
     "docs/runtime-ownership.md",
     "docs/sprite-rendering.md",
+    "docs/quick-start-game-kit.md",
+    "docs/api-stability-audit.md",
     "README.md",
     "LICENSE"
   ],
