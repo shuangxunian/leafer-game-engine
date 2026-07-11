@@ -31,6 +31,21 @@ function collectExportTargets() {
   return targets;
 }
 
+function collectRequiredPackageFiles() {
+  const requiredFiles = new Set(["package.json"]);
+
+  for (const entry of packageJson.files) {
+    const path = normalizePackagePath(entry);
+    if (path === "lib") {
+      continue;
+    }
+
+    requiredFiles.add(path);
+  }
+
+  return [...requiredFiles];
+}
+
 function assertHasFile(files, path) {
   if (!files.has(path)) {
     fail(`missing expected file "${path}"`);
@@ -57,22 +72,7 @@ if (!Array.isArray(packResult) || packResult.length !== 1) {
 
 const packageFiles = new Set(packResult[0].files.map((file) => file.path));
 
-for (const requiredFile of [
-  "package.json",
-  "README.md",
-  "LICENSE",
-  "docs/public-api.md",
-  "docs/product-boundary.md",
-  "docs/animation-runtime.md",
-  "docs/runtime-services.md",
-  "docs/input-actions.md",
-  "docs/runtime-observability.md",
-  "docs/scene-config.md",
-  "docs/level-map.md",
-  "docs/render-view-contract.md",
-  "docs/runtime-ownership.md",
-  "docs/sprite-rendering.md"
-]) {
+for (const requiredFile of collectRequiredPackageFiles()) {
   assertHasFile(packageFiles, requiredFile);
 }
 
@@ -80,7 +80,7 @@ for (const target of collectExportTargets()) {
   assertHasFile(packageFiles, target);
 }
 
-for (const prefix of ["src", "tests", "examples", "dist", "scripts", "node_modules"]) {
+for (const prefix of ["src", "tests", "examples", "dist", "scripts", "node_modules", "docs/version"]) {
   assertMissingPrefix(packageFiles, prefix);
 }
 

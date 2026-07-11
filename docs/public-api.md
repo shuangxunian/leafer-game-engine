@@ -168,6 +168,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.33.0` starts the stabilization and 1.0 release-candidate stage without adding new public runtime API. `docs/api-stability-audit.md` records the current package entrypoints as the 1.0 candidate shape, separates Node-safe subpaths from browser-facing opt-in entrypoints, and locks the package-facing docs that should ship in the npm package. The package file list now includes both `docs/quick-start-game-kit.md` and `docs/api-stability-audit.md`. This is API audit and package-boundary work only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, asset manager UI, HUD layout engine, audio mixer, galgame scripting language, game-specific rules engine, publishing workflow, or content authoring workflow.
 
+`v0.33.1` hardens package artifact verification without adding new public runtime API. `scripts/verify-package.mjs` now derives required package-facing docs from `package.json.files`, keeps export-map JavaScript and declaration targets checked, and rejects `docs/version/` release-history files from the npm package. This is package verification and release-candidate hardening only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, asset manager UI, HUD layout engine, audio mixer, galgame scripting language, game-specific rules engine, publishing workflow, or content authoring workflow.
+
 ---
 
 ## Package Entrypoints
@@ -346,9 +348,8 @@ Before publishing, run:
 npm run verify:package
 ```
 
-This command builds the library through `npm pack --dry-run --json` and checks the package artifact includes:
+This command builds the library through `npm pack --dry-run --json` and checks the package artifact includes the package-facing files declared in `package.json.files`:
 
-- `package.json`
 - `README.md`
 - `LICENSE`
 - `docs/public-api.md`
@@ -362,6 +363,8 @@ This command builds the library through `npm pack --dry-run --json` and checks t
 - `docs/render-view-contract.md`
 - `docs/runtime-ownership.md`
 - `docs/sprite-rendering.md`
+- `docs/quick-start-game-kit.md`
+- `docs/api-stability-audit.md`
 - all JS and type declaration targets from `package.json` exports
 
-It also checks that development-only paths such as `src`, `tests`, `examples`, `dist`, `scripts`, and `node_modules` are not included.
+It also checks that development-only paths such as `src`, `tests`, `examples`, `dist`, `scripts`, `node_modules`, and `docs/version` are not included.

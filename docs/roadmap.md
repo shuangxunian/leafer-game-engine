@@ -1378,3 +1378,7 @@
 第一批先补 API stability audit baseline：
 
 - [v0.33.0](version/v0.33.0.md)
+
+第二批补 package artifact verification baseline：
+
+- [v0.33.1](version/v0.33.1.md)

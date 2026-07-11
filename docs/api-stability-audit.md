@@ -81,6 +81,11 @@ The `v0.33.0` package file baseline includes:
 Version notes under `docs/version/` remain repository history rather than npm
 package payload by default.
 
+`v0.33.1` hardens package artifact verification so `npm run verify:package`
+derives required package-facing docs from `package.json.files`, keeps export-map
+targets checked, and rejects `docs/version/` release-history files from the npm
+package.
+
 ---
 
 ## Change Policy Until 1.0.0
