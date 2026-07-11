@@ -17,6 +17,14 @@ function assertExports(moduleExports, names) {
   }
 }
 
+function getPackageEntrypoint(exportKey) {
+  if (exportKey === ".") {
+    return packageJson.name;
+  }
+
+  return `${packageJson.name}/${exportKey.slice(2)}`;
+}
+
 async function listFiles(directoryUrl) {
   const entries = await readdir(directoryUrl, { withFileTypes: true });
   const files = [];
@@ -50,6 +58,37 @@ test("package export map exposes the documented public entrypoints", () => {
     assert.equal(typeof config.types, "string", `${entrypoint} should define a types target`);
     assert.equal(config.import.startsWith("./lib/"), true, `${entrypoint} should import from lib`);
     assert.equal(config.types.startsWith("./lib/"), true, `${entrypoint} should expose lib types`);
+  }
+});
+
+test("public entrypoint docs track the package export map", async () => {
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const audit = await readFile(new URL("../docs/api-stability-audit.md", import.meta.url), "utf8");
+
+  for (const exportKey of Object.keys(packageJson.exports)) {
+    const entrypoint = getPackageEntrypoint(exportKey);
+
+    assert.equal(publicApi.includes(entrypoint), true, `public API docs should mention ${entrypoint}`);
+    assert.equal(audit.includes(entrypoint), true, `API audit should mention ${entrypoint}`);
+  }
+
+  for (const nodeSafeEntrypoint of [
+    `${packageJson.name}/core`,
+    `${packageJson.name}/framework`,
+    `${packageJson.name}/tooling`,
+    `${packageJson.name}/adapter/render-types`
+  ]) {
+    assert.equal(audit.includes(nodeSafeEntrypoint), true);
+    assert.equal(publicApi.includes(nodeSafeEntrypoint), true);
+  }
+
+  for (const browserFacingEntrypoint of [
+    packageJson.name,
+    `${packageJson.name}/adapter`,
+    `${packageJson.name}/runtime`
+  ]) {
+    assert.equal(audit.includes(browserFacingEntrypoint), true);
+    assert.equal(publicApi.includes(browserFacingEntrypoint), true);
   }
 });
 
@@ -1308,7 +1347,7 @@ test("dialogue prompt view baseline stays package-facing", async () => {
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.33.1");
+  assert.equal(packageJson.version, "0.33.2");
   assert.equal(roadmap.includes("version/v0.31.3.md"), true);
   assert.equal(roadmap.includes("screen-space prompt view baseline"), true);
   assert.equal(patch.includes("Screen-Space Prompt View Baseline"), true);
@@ -1347,7 +1386,7 @@ test("dialogue choice example shell stays routed and package-facing", async () =
   const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
   const inputActions = await readFile(new URL("input-actions.ts", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.33.1");
+  assert.equal(packageJson.version, "0.33.2");
   assert.equal(roadmap.includes("version/v0.31.4.md"), true);
   assert.equal(roadmap.includes("narrative example shell and route baseline"), true);
   assert.equal(patch.includes("Narrative Example Shell And Route Baseline"), true);
@@ -1395,7 +1434,7 @@ test("dialogue choice example provides an example-owned playable flow", async ()
   const exampleReadme = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
   const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.33.1");
+  assert.equal(packageJson.version, "0.33.2");
   assert.equal(roadmap.includes("version/v0.31.5.md"), true);
   assert.equal(roadmap.includes("narrative example playable flow"), true);
   assert.equal(patch.includes("Narrative Example Playable Flow"), true);
@@ -1435,7 +1474,7 @@ test("ui dialogue scene flow stage closes without adding authoring scope", async
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.33.1");
+  assert.equal(packageJson.version, "0.33.2");
   assert.equal(roadmap.includes("version/v0.31.6.md"), true);
   assert.equal(roadmap.includes("UI / dialogue / scene flow 阶段"), true);
   assert.equal(stage.includes("The `0.31.x` stage is complete through `v0.31.6`"), true);
@@ -1470,7 +1509,7 @@ test("quick-start game kit stage starts with scene input bridge bundle", async (
   const pourBoot = await readFile(new URL("boot.ts", pourSortExampleUrl), "utf8");
   const dodgeBoot = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.33.1");
+  assert.equal(packageJson.version, "0.33.2");
   assert.equal(roadmap.includes("version/v0.32.0.md"), true);
   assert.equal(roadmap.includes("Quick-Start Game Kit 阶段"), true);
   assert.equal(roadmap.includes("scene input bridge bundle baseline"), true);
@@ -1482,7 +1521,7 @@ test("quick-start game kit stage starts with scene input bridge bundle", async (
   assert.equal(publicApi.includes("createSceneInputBridgeBundle(scene, options)"), true);
   assert.equal(publicApi.includes("BrowserKeyboardBridge` now also supports an optional injected event target"), true);
   assert.equal(publicApi.includes("does not add a project generator, CLI scaffold, visual editor"), true);
-  assert.equal(readme.includes("当前项目已经推进到 `v0.33.1` Stabilization And 1.0 RC Sprint"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.33.2` Stabilization And 1.0 RC Sprint"), true);
   assert.equal(readme.includes("scene input bridge bundle baseline"), true);
   assert.equal(readme.includes("createSceneInputBridgeBundle(scene, options)"), true);
   assert.equal(quickStartSource.includes("export function createSceneInputBridgeBundle"), true);
@@ -1517,7 +1556,7 @@ test("quick-start game kit stage adds scene runtime preset baseline", async () =
   const pourDocs = await readFile(new URL("README.md", pourSortExampleUrl), "utf8");
   const dialogueDocs = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.33.1");
+  assert.equal(packageJson.version, "0.33.2");
   assert.equal(roadmap.includes("version/v0.32.1.md"), true);
   assert.equal(roadmap.includes("scene runtime preset baseline"), true);
   assert.equal(patch.includes("Scene Runtime Preset Baseline"), true);
@@ -1565,7 +1604,7 @@ test("quick-start game kit stage adds scene quick-start bundle baseline", async 
   const pourDocs = await readFile(new URL("README.md", pourSortExampleUrl), "utf8");
   const dialogueDocs = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.33.1");
+  assert.equal(packageJson.version, "0.33.2");
   assert.equal(roadmap.includes("version/v0.32.2.md"), true);
   assert.equal(roadmap.includes("scene quick-start bundle baseline"), true);
   assert.equal(patch.includes("Scene Quick-Start Bundle Baseline"), true);
@@ -1610,7 +1649,7 @@ test("quick-start game kit stage adds HUD text bundle baseline", async () => {
   const collectDocs = await readFile(new URL("README.md", collectStarsExampleUrl), "utf8");
   const dodgeDocs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.33.1");
+  assert.equal(packageJson.version, "0.33.2");
   assert.equal(roadmap.includes("version/v0.32.3.md"), true);
   assert.equal(roadmap.includes("HUD text bundle baseline"), true);
   assert.equal(patch.includes("HUD Text Bundle Baseline"), true);
@@ -1652,7 +1691,7 @@ test("quick-start game kit stage adds scene audio runtime bundle baseline", asyn
   const dialogueScene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
   const dodgeDocs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
 
-  assert.equal(packageJson.version, "0.33.1");
+  assert.equal(packageJson.version, "0.33.2");
   assert.equal(roadmap.includes("version/v0.32.4.md"), true);
   assert.equal(roadmap.includes("scene audio runtime bundle baseline"), true);
   assert.equal(patch.includes("Scene Audio Runtime Bundle Baseline"), true);
@@ -1685,7 +1724,7 @@ test("quick-start game kit stage adds package-facing README example guide", asyn
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const guide = await readFile(new URL("../docs/quick-start-game-kit.md", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.33.1");
+  assert.equal(packageJson.version, "0.33.2");
   assert.equal(roadmap.includes("version/v0.32.5.md"), true);
   assert.equal(roadmap.includes("quick-start README example baseline"), true);
   assert.equal(patch.includes("Quick-Start README Example Baseline"), true);
@@ -1715,7 +1754,7 @@ test("stabilization stage starts with API stability audit baseline", async () =>
   const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
   const audit = await readFile(new URL("../docs/api-stability-audit.md", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.33.1");
+  assert.equal(packageJson.version, "0.33.2");
   assert.equal(packageJson.files.includes("docs/quick-start-game-kit.md"), true);
   assert.equal(packageJson.files.includes("docs/api-stability-audit.md"), true);
   assert.equal(roadmap.includes("`0.33.x` Stabilization And 1.0 RC 阶段"), true);
@@ -1748,7 +1787,7 @@ test("stabilization stage hardens package artifact verification", async () => {
   const audit = await readFile(new URL("../docs/api-stability-audit.md", import.meta.url), "utf8");
   const verifyScript = await readFile(new URL("../scripts/verify-package.mjs", import.meta.url), "utf8");
 
-  assert.equal(packageJson.version, "0.33.1");
+  assert.equal(packageJson.version, "0.33.2");
   assert.equal(roadmap.includes("version/v0.33.1.md"), true);
   assert.equal(roadmap.includes("package artifact verification baseline"), true);
   assert.equal(patch.includes("Package Artifact Verification Baseline"), true);
@@ -1758,7 +1797,6 @@ test("stabilization stage hardens package artifact verification", async () => {
   assert.equal(publicApi.includes("`v0.33.1` hardens package artifact verification"), true);
   assert.equal(publicApi.includes("derives required package-facing docs from `package.json.files`"), true);
   assert.equal(publicApi.includes("rejects `docs/version/` release-history files from the npm package"), true);
-  assert.equal(readme.includes("当前项目已经推进到 `v0.33.1` Stabilization And 1.0 RC Sprint"), true);
   assert.equal(readme.includes("在 `v0.33.1` 补齐 package artifact verification baseline"), true);
   assert.equal(audit.includes("`v0.33.1` hardens package artifact verification"), true);
   assert.equal(audit.includes("package.json.files"), true);
@@ -1766,6 +1804,27 @@ test("stabilization stage hardens package artifact verification", async () => {
   assert.equal(verifyScript.includes("collectRequiredPackageFiles()"), true);
   assert.equal(verifyScript.includes("for (const entry of packageJson.files)"), true);
   assert.equal(verifyScript.includes('"docs/version"'), true);
+});
+
+test("stabilization stage locks public entrypoint documentation", async () => {
+  const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
+  const patch = await readFile(new URL("../docs/version/v0.33.2.md", import.meta.url), "utf8");
+  const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const audit = await readFile(new URL("../docs/api-stability-audit.md", import.meta.url), "utf8");
+
+  assert.equal(packageJson.version, "0.33.2");
+  assert.equal(roadmap.includes("version/v0.33.2.md"), true);
+  assert.equal(roadmap.includes("public entrypoint documentation audit baseline"), true);
+  assert.equal(patch.includes("Public Entrypoint Documentation Audit Baseline"), true);
+  assert.equal(patch.includes("package export map"), true);
+  assert.equal(patch.includes("does not add new runtime API"), true);
+  assert.equal(publicApi.includes("`v0.33.2` locks public entrypoint documentation"), true);
+  assert.equal(publicApi.includes("package export map"), true);
+  assert.equal(readme.includes("当前项目已经推进到 `v0.33.2` Stabilization And 1.0 RC Sprint"), true);
+  assert.equal(readme.includes("在 `v0.33.2` 补齐 public entrypoint documentation audit baseline"), true);
+  assert.equal(audit.includes("`v0.33.2` locks public entrypoint documentation"), true);
+  assert.equal(audit.includes("package export map"), true);
 });
 
 test("core package subpath can be imported by package name in Node", async () => {

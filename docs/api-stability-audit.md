@@ -86,6 +86,10 @@ derives required package-facing docs from `package.json.files`, keeps export-map
 targets checked, and rejects `docs/version/` release-history files from the npm
 package.
 
+`v0.33.2` locks public entrypoint documentation by deriving package entrypoint
+names from the package export map and requiring both this audit and
+`docs/public-api.md` to mention every public entrypoint.
+
 ---
 
 ## Change Policy Until 1.0.0

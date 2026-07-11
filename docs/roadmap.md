@@ -1382,3 +1382,7 @@
 第二批补 package artifact verification baseline：
 
 - [v0.33.1](version/v0.33.1.md)
+
+第三批补 public entrypoint documentation audit baseline：
+
+- [v0.33.2](version/v0.33.2.md)

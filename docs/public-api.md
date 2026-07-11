@@ -170,6 +170,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.33.1` hardens package artifact verification without adding new public runtime API. `scripts/verify-package.mjs` now derives required package-facing docs from `package.json.files`, keeps export-map JavaScript and declaration targets checked, and rejects `docs/version/` release-history files from the npm package. This is package verification and release-candidate hardening only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, asset manager UI, HUD layout engine, audio mixer, galgame scripting language, game-specific rules engine, publishing workflow, or content authoring workflow.
 
+`v0.33.2` locks public entrypoint documentation without adding new public runtime API. Package-boundary tests now derive public entrypoint names from the package export map and require both this document and `docs/api-stability-audit.md` to mention every public entrypoint, including Node-safe subpaths and browser-facing entrypoints. This is documentation audit and release-candidate hardening only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, asset manager UI, HUD layout engine, audio mixer, galgame scripting language, game-specific rules engine, publishing workflow, or content authoring workflow.
+
 ---
 
 ## Package Entrypoints
