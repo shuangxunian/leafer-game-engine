@@ -1390,3 +1390,21 @@
 第四批补 package metadata export alignment baseline：
 
 - [v0.33.3](version/v0.33.3.md)
+
+### `1.0.0` Release Baseline
+
+目标：
+
+- 将已经稳定的 Web 2D game engine package/API 边界提升为第一版 release baseline
+- 保持 public entrypoints、Node-safe subpaths、browser-facing entrypoints 和 npm package files 不再扩大
+- 用现有示例、package-boundary 测试和 package artifact verification 验证 1.0 可发布状态
+
+边界：
+
+- 不新增 runtime/framework/browser API
+- 不做 project generator、CLI scaffold、visual editor、launcher、gallery、template marketplace、WeChat SDK wrapper、账号/广告/变现/发布流程
+- 不把具体玩法规则、水排序规则、match-3 规则、galgame story format 或内容生产流程放进引擎包
+
+第一版 1.0 release baseline：
+
+- [v1.0.0](version/v1.0.0.md)

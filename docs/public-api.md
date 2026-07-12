@@ -174,6 +174,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.33.3` aligns package metadata with the public export map without adding new public runtime API. Package-boundary tests now require the package `main` and `types` fields to match the root export targets, require every export-map JavaScript and declaration target to exist in the built artifact surface, and `npm run verify:package` rejects package metadata that drifts away from the root export. This is package verification and release-candidate hardening only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, asset manager UI, HUD layout engine, audio mixer, galgame scripting language, game-specific rules engine, publishing workflow, or content authoring workflow.
 
+`v1.0.0` promotes the stabilized package/API boundary to the first release baseline without adding new public runtime API. The release keeps the existing public entrypoint shape, keeps Node-safe and browser-facing boundaries documented, keeps examples as downstream package consumers, and verifies the package artifact before publish. This is a lightweight Web 2D game engine package baseline for building browser mini-games and interactive content; it is not a mature commercial engine, visual editor, launcher, gallery, marketplace, WeChat SDK wrapper, account/ads/monetization layer, publishing platform, or content authoring workflow.
+
 ---
 
 ## Package Entrypoints

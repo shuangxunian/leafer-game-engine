@@ -1,12 +1,12 @@
 # API Stability Audit
 
-This document records the `v0.33.0` stabilization baseline for the public API
-surface of `@shuangxunian/leafer-game-engine`.
+This document records the stabilization baseline for the public API surface of
+`@shuangxunian/leafer-game-engine`.
 
-It is a 1.0 release-candidate preparation note. It does not introduce new
-runtime APIs.
+It started as a 1.0 release-candidate preparation note and now records the
+`v1.0.0` release baseline. It does not introduce new runtime APIs.
 
-It treats the current package entrypoints as the 1.0 candidate shape.
+It treats the current package entrypoints as the 1.0 release shape.
 
 ---
 
@@ -94,11 +94,14 @@ names from the package export map and requiring both this audit and
 package `main` / `types` metadata to match the root export targets and by
 checking built JavaScript and declaration targets for every public entrypoint.
 
+`v1.0.0` keeps the same public entrypoint shape and promotes the stabilized
+package/API boundary to the first release baseline.
+
 ---
 
-## Change Policy Until 1.0.0
+## Change Policy After 1.0.0
 
-Allowed before 1.0:
+Allowed after 1.0:
 
 - additive docs that clarify existing APIs
 - package-boundary tests that lock expected entrypoints and published files
@@ -106,7 +109,7 @@ Allowed before 1.0:
 - example cleanup that keeps examples as downstream package consumers
 - additive helper APIs only when repeated example friction proves a generic need
 
-Avoid before 1.0:
+Avoid after 1.0:
 
 - removing or renaming public exports
 - adding broad new entrypoints
@@ -116,9 +119,9 @@ Avoid before 1.0:
   SDK wrapper, account system, ads, monetization, analytics, publishing flow, or
   content authoring workflow
 
-If a breaking change becomes unavoidable, it should be documented in
-`docs/public-api.md`, covered by tests, and kept out of the final release
-candidate window.
+If a breaking change becomes unavoidable after `1.0.0`, it should be documented
+in `docs/public-api.md`, covered by tests, and handled as a major-version
+boundary.
 
 ---
 
