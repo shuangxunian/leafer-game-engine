@@ -70,6 +70,38 @@ small Web game development:
 
 ---
 
+## Project Advantages
+
+`leaferGame` is optimized for AI-assisted Web game development rather than for
+general-purpose app scaffolding or editor workflows.
+
+Main advantages:
+
+- small public surface: AI agents can reason from a compact set of package
+  entrypoints instead of reverse-engineering an application
+- Node-safe core and framework APIs: most gameplay logic can be tested without
+  browser globals, canvas, or DOM setup
+- data-oriented primitives: components, selection state, source-target actions,
+  dialogue prompts, assets, audio intents, and tooling snapshots are easy for AI
+  agents to inspect and compose
+- browser integration kept at the edge: render, resize, input bridges, and audio
+  playback stay in adapter/runtime layers
+- examples match target game shapes: action loops, collection games, water-sort
+  style interactions, and dialogue choices are represented as concrete usage
+  references
+- package-boundary tests guard drift: imports, artifacts, documentation, and
+  public exports are checked as part of release verification
+- downstream-friendly scope: the engine avoids hardcoding specific game rules,
+  publishing platforms, monetization, or authoring tools, so generated games can
+  own their own domain logic
+
+For AI coding agents, these constraints make the package useful as a stable
+foundation: generate game-specific code downstream, reuse engine primitives for
+shared behavior, and update public APIs only when repeated examples prove the
+need.
+
+---
+
 ## How AI Agents Should Treat This Repository
 
 When using this document as RAG context, treat the repository as a package-first
