@@ -174,6 +174,10 @@ runtime.start(scene);
 
 - [docs/public-api.md](docs/public-api.md)
 
+如果你想把项目交给其它 AI 继续开发，或者导入 RAG / 知识库作为上下文，可以参考：
+
+- [docs/ai-development-reference.md](docs/ai-development-reference.md)
+
 如果你想了解 1.0 前 public entrypoints、Node-safe subpaths、browser-facing entrypoints 和 npm package files 的稳定化审计，可以参考：
 
 - [docs/api-stability-audit.md](docs/api-stability-audit.md)

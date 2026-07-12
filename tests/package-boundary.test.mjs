@@ -131,6 +131,7 @@ test("package publish files include library output and docs", () => {
     "docs/sprite-rendering.md",
     "docs/quick-start-game-kit.md",
     "docs/api-stability-audit.md",
+    "docs/ai-development-reference.md",
     "README.md",
     "LICENSE"
   ]);
@@ -1781,6 +1782,7 @@ test("stabilization stage starts with API stability audit baseline", async () =>
   assert.equal(packageJson.version, "1.0.0");
   assert.equal(packageJson.files.includes("docs/quick-start-game-kit.md"), true);
   assert.equal(packageJson.files.includes("docs/api-stability-audit.md"), true);
+  assert.equal(packageJson.files.includes("docs/ai-development-reference.md"), true);
   assert.equal(roadmap.includes("`0.33.x` Stabilization And 1.0 RC 阶段"), true);
   assert.equal(roadmap.includes("version/v0.33.0.md"), true);
   assert.equal(roadmap.includes("API stability audit baseline"), true);
@@ -1793,11 +1795,13 @@ test("stabilization stage starts with API stability audit baseline", async () =>
   assert.equal(publicApi.includes("package file list now includes both `docs/quick-start-game-kit.md` and `docs/api-stability-audit.md`"), true);
   assert.equal(readme.includes("在 `v0.33.0` 补齐 API stability audit baseline"), true);
   assert.equal(readme.includes("docs/api-stability-audit.md"), true);
+  assert.equal(readme.includes("docs/ai-development-reference.md"), true);
   assert.equal(audit.includes("API Stability Audit"), true);
   assert.equal(audit.includes("current package entrypoints as the 1.0 release shape"), true);
   assert.equal(audit.includes("Node-safe entrypoints must not require DOM globals at import time"), true);
   assert.equal(audit.includes("docs/quick-start-game-kit.md"), true);
   assert.equal(audit.includes("docs/api-stability-audit.md"), true);
+  assert.equal(audit.includes("docs/ai-development-reference.md"), true);
   assert.equal(audit.includes("Version notes under `docs/version/` remain repository history"), true);
   assert.equal(audit.includes("removing or renaming public exports"), true);
   assert.equal(audit.includes("project generator, visual editor, launcher, gallery"), true);
