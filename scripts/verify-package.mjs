@@ -31,6 +31,21 @@ function collectExportTargets() {
   return targets;
 }
 
+function assertRootMetadataMatchesExport() {
+  const rootExport = packageJson.exports["."];
+  if (!rootExport) {
+    fail('missing root "." export');
+  }
+
+  if (packageJson.main !== rootExport.import) {
+    fail(`package main "${packageJson.main}" does not match root export import "${rootExport.import}"`);
+  }
+
+  if (packageJson.types !== rootExport.types) {
+    fail(`package types "${packageJson.types}" does not match root export types "${rootExport.types}"`);
+  }
+}
+
 function collectRequiredPackageFiles() {
   const requiredFiles = new Set(["package.json"]);
 
@@ -69,6 +84,8 @@ const packResult = parsePackJson(output);
 if (!Array.isArray(packResult) || packResult.length !== 1) {
   fail("expected exactly one package result from npm pack");
 }
+
+assertRootMetadataMatchesExport();
 
 const packageFiles = new Set(packResult[0].files.map((file) => file.path));
 

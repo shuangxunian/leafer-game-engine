@@ -1386,3 +1386,7 @@
 第三批补 public entrypoint documentation audit baseline：
 
 - [v0.33.2](version/v0.33.2.md)
+
+第四批补 package metadata export alignment baseline：
+
+- [v0.33.3](version/v0.33.3.md)

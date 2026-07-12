@@ -172,6 +172,8 @@ For the level/map boundary across tile data, coordinate helpers, spawn/region me
 
 `v0.33.2` locks public entrypoint documentation without adding new public runtime API. Package-boundary tests now derive public entrypoint names from the package export map and require both this document and `docs/api-stability-audit.md` to mention every public entrypoint, including Node-safe subpaths and browser-facing entrypoints. This is documentation audit and release-candidate hardening only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, asset manager UI, HUD layout engine, audio mixer, galgame scripting language, game-specific rules engine, publishing workflow, or content authoring workflow.
 
+`v0.33.3` aligns package metadata with the public export map without adding new public runtime API. Package-boundary tests now require the package `main` and `types` fields to match the root export targets, require every export-map JavaScript and declaration target to exist in the built artifact surface, and `npm run verify:package` rejects package metadata that drifts away from the root export. This is package verification and release-candidate hardening only; it does not add a project generator, CLI scaffold, visual editor, launcher, gallery, template marketplace, SDK wrapper, asset manager UI, HUD layout engine, audio mixer, galgame scripting language, game-specific rules engine, publishing workflow, or content authoring workflow.
+
 ---
 
 ## Package Entrypoints

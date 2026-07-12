@@ -90,6 +90,10 @@ package.
 names from the package export map and requiring both this audit and
 `docs/public-api.md` to mention every public entrypoint.
 
+`v0.33.3` aligns package metadata with the public export map by requiring
+package `main` / `types` metadata to match the root export targets and by
+checking built JavaScript and declaration targets for every public entrypoint.
+
 ---
 
 ## Change Policy Until 1.0.0
