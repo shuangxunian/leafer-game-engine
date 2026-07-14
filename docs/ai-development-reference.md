@@ -3,6 +3,7 @@
 ## RAG Metadata
 
 - Project: `@shuangxunian/leafer-game-engine`
+- Current package version: `1.0.1`
 - Current release baseline: `1.0.0`
 - Product type: frontend Web 2D game engine package
 - Primary audience: frontend developers and AI coding agents building lightweight browser games
@@ -622,7 +623,7 @@ Use this when asking another AI agent to implement a game or feature with this
 package:
 
 ```text
-You are working with @shuangxunian/leafer-game-engine 1.0.0.
+You are working with @shuangxunian/leafer-game-engine 1.0.1.
 
 Use public package entrypoints only:
 - @shuangxunian/leafer-game-engine/core for ECS/runtime logic

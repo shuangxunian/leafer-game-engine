@@ -1408,3 +1408,7 @@
 第一版 1.0 release baseline：
 
 - [v1.0.0](version/v1.0.0.md)
+
+1.0 文档发布补丁：
+
+- [v1.0.1](version/v1.0.1.md)
