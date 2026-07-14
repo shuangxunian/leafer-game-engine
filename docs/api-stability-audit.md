@@ -78,6 +78,7 @@ The `v0.33.0` package file baseline includes:
 - `docs/quick-start-game-kit.md`
 - `docs/api-stability-audit.md`
 - `docs/ai-development-reference.md`
+- `docs/project-history.md`
 
 Version notes under `docs/version/` remain repository history rather than npm
 package payload by default.

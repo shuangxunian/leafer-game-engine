@@ -372,6 +372,7 @@ This command builds the library through `npm pack --dry-run --json` and checks t
 - `docs/quick-start-game-kit.md`
 - `docs/api-stability-audit.md`
 - `docs/ai-development-reference.md`
+- `docs/project-history.md`
 - all JS and type declaration targets from `package.json` exports
 
 It also checks that development-only paths such as `src`, `tests`, `examples`, `dist`, `scripts`, `node_modules`, and `docs/version` are not included.

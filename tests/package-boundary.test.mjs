@@ -50,6 +50,15 @@ async function listFiles(directoryUrl) {
   return files;
 }
 
+async function readPackageDocs() {
+  const [readme, projectHistory] = await Promise.all([
+    readFile(new URL("../README.md", import.meta.url), "utf8"),
+    readFile(new URL("../docs/project-history.md", import.meta.url), "utf8")
+  ]);
+
+  return `${readme}\n${projectHistory}`;
+}
+
 test("package export map exposes the documented public entrypoints", () => {
   assert.deepEqual(Object.keys(packageJson.exports), [
     ".",
@@ -132,9 +141,26 @@ test("package publish files include library output and docs", () => {
     "docs/quick-start-game-kit.md",
     "docs/api-stability-audit.md",
     "docs/ai-development-reference.md",
+    "docs/project-history.md",
     "README.md",
     "LICENSE"
   ]);
+});
+
+test("README stays concise and points users to package docs", async () => {
+  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const lineCount = readme.split("\n").length;
+
+  assert.equal(lineCount < 260, true, "README should stay focused on first-use guidance");
+  assert.equal(readme.includes("轻量 Web 2D 游戏引擎依赖包"), true);
+  assert.equal(readme.includes("4399 常见小游戏"), true);
+  assert.equal(readme.includes("AI 或 RAG"), true);
+  assert.equal(readme.includes("docs/ai-development-reference.md"), true);
+  assert.equal(readme.includes("docs/public-api.md"), true);
+  assert.equal(readme.includes("docs/quick-start-game-kit.md"), true);
+  assert.equal(readme.includes("docs/project-history.md"), true);
+  assert.equal(readme.includes("npm install @shuangxunian/leafer-game-engine"), true);
+  assert.equal(readme.includes("## 导入入口"), true);
 });
 
 test("package verification script derives required docs from package files", async () => {
@@ -152,7 +178,7 @@ test("package verification script derives required docs from package files", asy
 test("product docs preserve engine-package instead of editor direction", async () => {
   const boundary = await readFile(new URL("../docs/product-boundary.md", import.meta.url), "utf8");
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   assert.equal(boundary.includes("轻量 2D 游戏引擎依赖包"), true);
   assert.equal(boundary.includes("不在本仓库里实现编辑器本体"), true);
@@ -180,7 +206,7 @@ test("product docs preserve engine-package instead of editor direction", async (
 test("level map docs ship as package-facing non-editor guidance", async () => {
   const source = await readFile(new URL("../docs/level-map.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   assert.equal(source.includes("frontend 2D game engine package"), true);
   assert.equal(source.includes("TileMap"), true);
@@ -208,7 +234,7 @@ test("runtime hardening stage docs are discoverable from roadmap and package doc
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.17.0.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   for (const version of ["v0.17.1", "v0.17.2", "v0.17.3", "v0.17.4"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
@@ -226,7 +252,7 @@ test("level map stage docs are discoverable from roadmap and package docs", asyn
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.18.0.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   for (const version of ["v0.18.1", "v0.18.2", "v0.18.3", "v0.18.4", "v0.18.5"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
@@ -249,7 +275,7 @@ test("pointer input stage docs are discoverable from roadmap and package docs", 
   const closeoutPatch = await readFile(new URL("../docs/version/v0.19.4.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
   const inputDocs = await readFile(new URL("../docs/input-actions.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   for (const version of ["v0.19.0", "v0.19.1", "v0.19.2", "v0.19.3", "v0.19.4"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
@@ -281,7 +307,7 @@ test("collision query stage docs are discoverable from roadmap and package docs"
   const toolingPatch = await readFile(new URL("../docs/version/v0.20.2.md", import.meta.url), "utf8");
   const closeoutPatch = await readFile(new URL("../docs/version/v0.20.3.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   for (const version of ["v0.20.0", "v0.20.1", "v0.20.2", "v0.20.3"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
@@ -313,7 +339,7 @@ test("audio runtime stage docs are discoverable from roadmap", async () => {
   const toolingPatch = await readFile(new URL("../docs/version/v0.21.3.md", import.meta.url), "utf8");
   const examplePatch = await readFile(new URL("../docs/version/v0.21.4.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   for (const version of ["v0.21.0", "v0.21.1", "v0.21.2", "v0.21.3", "v0.21.4"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
@@ -354,7 +380,7 @@ test("audio playback adapter stage docs are discoverable from roadmap", async ()
   const runtimeIndex = await readFile(new URL("../src/runtime/index.ts", import.meta.url), "utf8");
   const browserAudio = await readFile(new URL("../src/runtime/browser-audio.ts", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   for (const version of ["v0.22.0", "v0.22.1", "v0.22.2", "v0.22.3", "v0.22.4"]) {
     assert.equal(roadmap.includes(`version/${version}.md`), true, `roadmap should link ${version}`);
@@ -395,7 +421,7 @@ test("camera runtime contract stage docs are discoverable from roadmap", async (
   const toolingPatch = await readFile(new URL("../docs/version/v0.23.3.md", import.meta.url), "utf8");
   const cameraSource = await readFile(new URL("../src/framework/camera.ts", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   assert.equal(roadmap.includes("version/v0.23.0.md"), true);
   assert.equal(roadmap.includes("version/v0.23.1.md"), true);
@@ -462,7 +488,7 @@ test("playable game kit stage docs are discoverable from roadmap and README", as
   const tileViewPatch = await readFile(new URL("../docs/version/v0.24.4.md", import.meta.url), "utf8");
   const closeoutPatch = await readFile(new URL("../docs/version/v0.24.5.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   assert.equal(roadmap.includes("version/v0.24.0.md"), true);
   assert.equal(roadmap.includes("version/v0.24.1.md"), true);
@@ -527,7 +553,7 @@ test("second playable example stage docs are discoverable from roadmap and READM
   const hardeningPatch = await readFile(new URL("../docs/version/v0.25.3.md", import.meta.url), "utf8");
   const closeoutPatch = await readFile(new URL("../docs/version/v0.25.4.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   assert.equal(roadmap.includes("version/v0.25.0.md"), true);
   assert.equal(roadmap.includes("version/v0.25.1.md"), true);
@@ -588,7 +614,7 @@ test("framework extraction planning docs start from two examples without editor 
   const randomPlacementPatch = await readFile(new URL("../docs/version/v0.26.4.md", import.meta.url), "utf8");
   const closeoutPatch = await readFile(new URL("../docs/version/v0.26.5.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   assert.equal(roadmap.includes("version/v0.26.0.md"), true);
   assert.equal(roadmap.includes("version/v0.26.1.md"), true);
@@ -677,7 +703,7 @@ test("pointer-first puzzle stage closes without swallowing puzzle rules", async 
   const stage = await readFile(new URL("../docs/version/v0.27.0.md", import.meta.url), "utf8");
   const closeoutPatch = await readFile(new URL("../docs/version/v0.27.6.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const frameworkSource = await readFile(new URL("../src/framework/index.ts", import.meta.url), "utf8");
   const pourSortScene = await readFile(new URL("pour-sort-scene.ts", pourSortExampleUrl), "utf8");
 
@@ -710,7 +736,7 @@ test("real sprite image rendering stage starts without asset authoring scope", a
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.28.0.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   assert.equal(roadmap.includes("version/v0.28.0.md"), true);
   assert.equal(stage.includes("Real Sprite / Image Rendering Sprint"), true);
@@ -734,7 +760,7 @@ test("image-backed leafer sprite adapter baseline keeps asset authoring out of s
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.28.1.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const leaferAdapter = await readFile(new URL("../src/adapter/leafer/runtime.ts", import.meta.url), "utf8");
 
   assert.equal(roadmap.includes("version/v0.28.1.md"), true);
@@ -758,7 +784,7 @@ test("asset loading to render asset handoff keeps asset tooling out of scope", a
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.28.2.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const assetsSource = await readFile(new URL("../src/framework/assets.ts", import.meta.url), "utf8");
   const animationSource = await readFile(new URL("../src/framework/animation.ts", import.meta.url), "utf8");
   const factorySource = await readFile(new URL("../src/framework/factory.ts", import.meta.url), "utf8");
@@ -786,7 +812,7 @@ test("dodge-blocks consumes source-backed sprites through render handoff", async
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.28.3.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const sceneSource = await readFile(new URL("dodge-blocks-scene.ts", dodgeBlocksExampleUrl), "utf8");
   const factorySource = await readFile(new URL("factories.ts", dodgeBlocksExampleUrl), "utf8");
   const docs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
@@ -818,7 +844,7 @@ test("sprite rendering package boundary ships without asset authoring scope", as
   const stage = await readFile(new URL("../docs/version/v0.28.4.md", import.meta.url), "utf8");
   const docs = await readFile(new URL("../docs/sprite-rendering.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   assert.equal(roadmap.includes("version/v0.28.4.md"), true);
   assert.equal(stage.includes("Sprite Rendering Package Boundary"), true);
@@ -851,7 +877,7 @@ test("real sprite image rendering stage closes at package boundary", async () =>
   const stage = await readFile(new URL("../docs/version/v0.28.0.md", import.meta.url), "utf8");
   const closeoutPatch = await readFile(new URL("../docs/version/v0.28.5.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const frameworkSource = await readFile(new URL("../src/framework/index.ts", import.meta.url), "utf8");
 
   assert.equal(roadmap.includes("version/v0.28.5.md"), true);
@@ -895,7 +921,7 @@ test("responsive web runtime stage starts without platform wrapper scope", async
   const exampleStyles = await readFile(new URL("styles.css", examplesRootUrl), "utf8");
   const dodgeDocs = await readFile(new URL("README.md", dodgeBlocksExampleUrl), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   assert.equal(roadmap.includes("version/v0.29.0.md"), true);
   assert.equal(roadmap.includes("version/v0.29.2.md"), true);
@@ -982,7 +1008,7 @@ test("drag drop and selection stage starts without puzzle rules or editor scope"
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.30.0.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   assert.equal(roadmap.includes("version/v0.30.0.md"), true);
   assert.equal(roadmap.includes("drag/drop and selection hardening"), true);
@@ -1025,7 +1051,7 @@ test("selection state helper hardening stays generic and package-facing", async 
   const stage = await readFile(new URL("../docs/version/v0.30.0.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.30.1.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const selectionSource = await readFile(new URL("../src/framework/selection.ts", import.meta.url), "utf8");
 
   assert.equal(roadmap.includes("version/v0.30.1.md"), true);
@@ -1063,7 +1089,7 @@ test("entity drag state baseline stays generic and package-facing", async () => 
   const stage = await readFile(new URL("../docs/version/v0.30.0.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.30.2.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const dragSource = await readFile(new URL("../src/framework/drag.ts", import.meta.url), "utf8");
 
   assert.equal(roadmap.includes("version/v0.30.2.md"), true);
@@ -1109,7 +1135,7 @@ test("source-target action baseline stays generic and package-facing", async () 
   const stage = await readFile(new URL("../docs/version/v0.30.0.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.30.3.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const actionSource = await readFile(new URL("../src/framework/source-target-action.ts", import.meta.url), "utf8");
 
   assert.equal(roadmap.includes("version/v0.30.3.md"), true);
@@ -1151,7 +1177,7 @@ test("pour sort consumes generic source-target actions while keeping rules examp
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.30.4.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const exampleDocs = await readFile(new URL("README.md", pourSortExampleUrl), "utf8");
   const pourSortScene = await readFile(new URL("pour-sort-scene.ts", pourSortExampleUrl), "utf8");
   const actionSource = await readFile(new URL("../src/framework/source-target-action.ts", import.meta.url), "utf8");
@@ -1199,7 +1225,7 @@ test("drag drop and selection stage closes without adding scope", async () => {
   const stage = await readFile(new URL("../docs/version/v0.30.0.md", import.meta.url), "utf8");
   const closeoutPatch = await readFile(new URL("../docs/version/v0.30.5.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const actionSource = await readFile(new URL("../src/framework/source-target-action.ts", import.meta.url), "utf8");
   const selectionSource = await readFile(new URL("../src/framework/selection.ts", import.meta.url), "utf8");
   const dragSource = await readFile(new URL("../src/framework/drag.ts", import.meta.url), "utf8");
@@ -1242,7 +1268,7 @@ test("ui dialogue scene flow stage starts without editor or scripting scope", as
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const stage = await readFile(new URL("../docs/version/v0.31.0.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   assert.equal(roadmap.includes("version/v0.31.0.md"), true);
   assert.equal(roadmap.includes("UI / dialogue / scene flow"), true);
@@ -1281,7 +1307,7 @@ test("dialogue choice data contract baseline stays package-facing", async () => 
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.31.1.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
   const frameworkIndex = await readFile(new URL("../src/framework/index.ts", import.meta.url), "utf8");
 
@@ -1323,7 +1349,7 @@ test("dialogue choice state helper baseline stays package-facing", async () => {
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.31.2.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
 
   assert.equal(roadmap.includes("version/v0.31.2.md"), true);
@@ -1369,7 +1395,7 @@ test("dialogue prompt view baseline stays package-facing", async () => {
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.31.3.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const dialogueSource = await readFile(new URL("../src/framework/dialogue.ts", import.meta.url), "utf8");
 
   assert.equal(packageJson.version, "1.0.0");
@@ -1403,7 +1429,7 @@ test("dialogue choice example shell stays routed and package-facing", async () =
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.31.4.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const exampleMain = await readFile(new URL("../examples/main.ts", import.meta.url), "utf8");
   const indexHtml = await readFile(new URL("../index.html", import.meta.url), "utf8");
   const exampleReadme = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
@@ -1455,7 +1481,7 @@ test("dialogue choice example provides an example-owned playable flow", async ()
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.31.5.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const exampleReadme = await readFile(new URL("README.md", dialogueChoiceExampleUrl), "utf8");
   const scene = await readFile(new URL("dialogue-choice-scene.ts", dialogueChoiceExampleUrl), "utf8");
 
@@ -1497,7 +1523,7 @@ test("ui dialogue scene flow stage closes without adding authoring scope", async
   const stage = await readFile(new URL("../docs/version/v0.31.0.md", import.meta.url), "utf8");
   const closeout = await readFile(new URL("../docs/version/v0.31.6.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
 
   assert.equal(packageJson.version, "1.0.0");
   assert.equal(roadmap.includes("version/v0.31.6.md"), true);
@@ -1525,7 +1551,7 @@ test("quick-start game kit stage starts with scene input bridge bundle", async (
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.32.0.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const quickStartSource = await readFile(new URL("../src/framework/quick-start.ts", import.meta.url), "utf8");
   const keyboardSource = await readFile(new URL("../src/framework/keyboard.ts", import.meta.url), "utf8");
   const frameworkIndex = await readFile(new URL("../src/framework/index.ts", import.meta.url), "utf8");
@@ -1570,7 +1596,7 @@ test("quick-start game kit stage adds scene runtime preset baseline", async () =
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.32.1.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const quickStartSource = await readFile(new URL("../src/framework/quick-start.ts", import.meta.url), "utf8");
   const collectScene = await readFile(new URL("collect-stars-scene.ts", collectStarsExampleUrl), "utf8");
   const dodgeScene = await readFile(new URL("dodge-blocks-scene.ts", dodgeBlocksExampleUrl), "utf8");
@@ -1618,7 +1644,7 @@ test("quick-start game kit stage adds scene quick-start bundle baseline", async 
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.32.2.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const quickStartSource = await readFile(new URL("../src/framework/quick-start.ts", import.meta.url), "utf8");
   const collectBoot = await readFile(new URL("boot.ts", collectStarsExampleUrl), "utf8");
   const dodgeBoot = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
@@ -1665,7 +1691,7 @@ test("quick-start game kit stage adds HUD text bundle baseline", async () => {
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.32.3.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const hudSource = await readFile(new URL("../src/framework/hud.ts", import.meta.url), "utf8");
   const collectScene = await readFile(new URL("collect-stars-scene.ts", collectStarsExampleUrl), "utf8");
   const dodgeScene = await readFile(new URL("dodge-blocks-scene.ts", dodgeBlocksExampleUrl), "utf8");
@@ -1707,7 +1733,7 @@ test("quick-start game kit stage adds scene audio runtime bundle baseline", asyn
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.32.4.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const audioSource = await readFile(new URL("../src/framework/audio.ts", import.meta.url), "utf8");
   const dodgeScene = await readFile(new URL("dodge-blocks-scene.ts", dodgeBlocksExampleUrl), "utf8");
   const dodgeBoot = await readFile(new URL("boot.ts", dodgeBlocksExampleUrl), "utf8");
@@ -1746,7 +1772,7 @@ test("quick-start game kit stage adds package-facing README example guide", asyn
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.32.5.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const guide = await readFile(new URL("../docs/quick-start-game-kit.md", import.meta.url), "utf8");
 
   assert.equal(packageJson.version, "1.0.0");
@@ -1776,7 +1802,7 @@ test("stabilization stage starts with API stability audit baseline", async () =>
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.33.0.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const audit = await readFile(new URL("../docs/api-stability-audit.md", import.meta.url), "utf8");
 
   assert.equal(packageJson.version, "1.0.0");
@@ -1811,7 +1837,7 @@ test("stabilization stage hardens package artifact verification", async () => {
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.33.1.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const audit = await readFile(new URL("../docs/api-stability-audit.md", import.meta.url), "utf8");
   const verifyScript = await readFile(new URL("../scripts/verify-package.mjs", import.meta.url), "utf8");
 
@@ -1838,7 +1864,7 @@ test("stabilization stage locks public entrypoint documentation", async () => {
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.33.2.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const audit = await readFile(new URL("../docs/api-stability-audit.md", import.meta.url), "utf8");
 
   assert.equal(packageJson.version, "1.0.0");
@@ -1859,7 +1885,7 @@ test("stabilization stage aligns package metadata with public exports", async ()
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v0.33.3.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const audit = await readFile(new URL("../docs/api-stability-audit.md", import.meta.url), "utf8");
   const verifyScript = await readFile(new URL("../scripts/verify-package.mjs", import.meta.url), "utf8");
 
@@ -1882,7 +1908,7 @@ test("one point zero release baseline stays package-facing", async () => {
   const roadmap = await readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8");
   const patch = await readFile(new URL("../docs/version/v1.0.0.md", import.meta.url), "utf8");
   const publicApi = await readFile(new URL("../docs/public-api.md", import.meta.url), "utf8");
-  const readme = await readFile(new URL("../README.md", import.meta.url), "utf8");
+  const readme = await readPackageDocs();
   const audit = await readFile(new URL("../docs/api-stability-audit.md", import.meta.url), "utf8");
 
   assert.equal(packageJson.version, "1.0.0");
